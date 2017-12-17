@@ -1,0 +1,6 @@
+[submodule "lib/wlib"]
+	path = lib/wlib
+	url = https://github.com/teamwaterloop/waterloop-wlib
+[submodule "platform/cosa"]
+	path = platform/cosa
+	url = https://github.com/mikaelpatel/Cosa
