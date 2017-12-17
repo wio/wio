@@ -1,14 +1,22 @@
 #!/bin/bash -e
 #!/usr/bin/env bash
 
-export COSA_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)/platform/cosa
+CUR_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
+BOARDS_TXT_LOC=$COSA_DIR/build/boards.txt
+WMAKE_LOCK=$CUR_DIR/wmake.lock
+
+OS_TYPE=undefined
+GCC_AVR_STATUS=undefined
+
+export COSA_DIR=$CUR_DIR/platform/cosa
 export GCC_AVR_VER=gcc-avr-4.2
-export BOARDS_TXT_LOC=$COSA_DIR/build/boards.txt
 
 set -o nounset
 set -o errexit
 
 trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+
+
 
 set -o errtrace
 set -o pipefail
@@ -33,6 +41,7 @@ Usage:
 Options:
   help               Show this screen.
   boards             Show available boards.
+  build              Build the project
 HEREDOC
 }
 
@@ -48,6 +57,45 @@ _pre() {
     echo "Generating standard boards.txt"
     cat $COSA_DIR/boards.txt > $BOARDS_TXT_LOC
   fi
+  if [ ! -f $WMAKE_LOCK ] ; then
+    touch $WMAKE_LOCK
+  fi
+  while IFS= read -r line
+  do
+    while IFS='=' read -ra ADDR; do
+      if [ ${ADDR[0]} == "ostype" ] ; then
+        OS_TYPE=${ADDR[1]}
+      elif [ ${ADDR[0]} == "gccavrstatus" ] ; then
+        GCC_AVR_STATUS=${ADDR[1]}
+      fi
+    done <<< "$line"
+  done < "$WMAKE_LOCK"
+  if [ $OS_TYPE == "undefined" ] ; then
+    echo "Identifying OS Type"
+    if [[ "$OSTYPE" == "linux-gnu" ]] ; then
+      OS_TYPE="linux"
+    elif [[ "$OS_TYPE" == "darwin" ]] ; then
+      OS_TYPE="macos"
+    else
+      echo "Supported OS: Linux, MacOS"
+      exit 1
+    fi
+  fi
+  if [ ! $OS_TYPE == "undefined" ] ; then
+    echo "ostype=$OS_TYPE" >> $WMAKE_LOCK
+  fi
+  if [ $GCC_AVR_STATUS == "undefined" ] ; then
+    echo "Checking for dependencies"
+    if [[ $OS_TYPE == 'linux' ]] ; then
+      sudo apt-get install gcc-avr avr-libc avrdude
+    elif [[ $OS_TYPE == 'macos' ]] ; then
+      xcode-select --install
+      brew tap osx-cross/avr
+      brew install avr-gcc
+    fi
+    GCC_AVR_STATUS=ready
+    echo "gccavrstatus=$GCC_AVR_STATUS" >> $WMAKE_LOCK
+  fi
 }
 
 _simple() {
@@ -56,17 +104,19 @@ _simple() {
     cd "$root_dir"
 
     if [ "$1" == 'boards' ] ; then
-        (cd $COSA_DIR/build && ./cosa boards)
+      (cd $COSA_DIR/build && ./cosa boards)
+    #elif [ "$1" == 'build' ] ; then
+
     else
-        _print_help
+      _print_help
     fi
 }
 
 _main() {
     if [[ "${1:-}" =~ ^h|help$  ]] || [ $# -lt "1" ] ; then
-        _print_help
+      _print_help
     else
-        _simple "$@"
+      _simple "$@"
     fi
 }
 
