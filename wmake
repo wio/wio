@@ -1,7 +1,9 @@
 #!/bin/bash
 #!/usr/bin/env bash
 
-export COSA_DIR=./platform/cosa
+export COSA_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)/platform/cosa
+export GCC_AVR_VER=gcc-avr-4.2
+export PATH=$PATH:$COSA_DIR/build/cosa
 
 set -o nounset
 set -o errexit
@@ -21,16 +23,16 @@ _print_help() {
   cat <<HEREDOC
                  __               .__
 __  _  _______ _/  |_  ___________|  |   ____   ____ ______
-\ \/ \/ /\__  \\   __\/ __ \_  __ \  |  /  _ \ /  _ \\____ \
+\ \/ \/ /\__  \\   __\/ __ \_  __ \  |  /  _ \ /  _ \ \____ \
  \     /  / __ \|  | \  ___/|  | \/  |_(  <_> |  <_> )  |_> >
   \/\_/  (____  /__|  \___  >__|  |____/\____/ \____/|   __/
               \/          \/                         |__|
 The Embedded C++ code base builder
 Usage:
-  ${_ME} [--help] [build] [coverage] [clean] [reset] [run] [test]
-  ${_ME} -h | --help
+  ${_ME} [help] [boards]
 Options:
-  -h --help          Show this screen.
+  help               Show this screen.
+  boards             Show available boards.
 HEREDOC
 }
 
@@ -39,16 +41,16 @@ _simple() {
     root_dir_name=$(basename "$root_dir")
     cd "$root_dir"
 
-    if [ "$1" == 'build' ] ; then
-        
+    if [ "$1" == 'boards' ] ; then
+        $COSA_DIR/build/cosa boards
+
     else
         _print_help
     fi
 }
 
 _main() {
-    if [[ "${1:-}" =~ ^-h|--help$  ]] || [ $# -lt "1" ]
-    then
+    if [[ "${1:-}" =~ ^h|help$  ]] || [ $# -lt "1" ] ; then
         _print_help
     else
         _simple "$@"
@@ -56,4 +58,3 @@ _main() {
 }
 
 _main "$@"
-
