@@ -2,14 +2,15 @@
 #!/usr/bin/env bash
 
 CUR_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
-BOARDS_TXT_LOC=$COSA_DIR/build/boards.txt
-WMAKE_LOCK=$CUR_DIR/wmake.lock
 
 OS_TYPE=undefined
 GCC_AVR_STATUS=undefined
 
 export COSA_DIR=$CUR_DIR/platform/cosa
 export GCC_AVR_VER=gcc-avr-4.2
+
+BOARDS_TXT_LOC=$COSA_DIR/build/boards.txt
+WMAKE_LOCK=$CUR_DIR/wmake.lock
 
 set -o nounset
 set -o errexit
@@ -50,16 +51,12 @@ HEREDOC
 # 1. Checks that `boards.txt` exists and is not empty
 # 2. Verifies installation of `gcc-avr`
 _pre() {
-  if [ ! -f $BOARDS_TXT_LOC ] ; then
-    touch $BOARDS_TXT_LOC
-  fi
-  if [ ! -s $BOARDS_TXT_LOC ] ; then
-    echo "Generating standard boards.txt"
-    cat $COSA_DIR/boards.txt > $BOARDS_TXT_LOC
-  fi
+  # Create wmake.lock
   if [ ! -f $WMAKE_LOCK ] ; then
     touch $WMAKE_LOCK
   fi
+
+  # Read lock file and store variables
   while IFS= read -r line
   do
     while IFS='=' read -ra ADDR; do
@@ -70,6 +67,8 @@ _pre() {
       fi
     done <<< "$line"
   done < "$WMAKE_LOCK"
+
+  # Check OS identification
   if [ $OS_TYPE == "undefined" ] ; then
     echo "Identifying OS Type"
     if [[ "$OSTYPE" == "linux-gnu" ]] ; then
@@ -80,10 +79,12 @@ _pre() {
       echo "Supported OS: Linux, MacOS"
       exit 1
     fi
+    if [ ! $OS_TYPE == "undefined" ] ; then
+      echo "ostype=$OS_TYPE" >> $WMAKE_LOCK
+    fi
   fi
-  if [ ! $OS_TYPE == "undefined" ] ; then
-    echo "ostype=$OS_TYPE" >> $WMAKE_LOCK
-  fi
+
+  # Check dependency status
   if [ $GCC_AVR_STATUS == "undefined" ] ; then
     echo "Checking for dependencies"
     if [[ $OS_TYPE == 'linux' ]] ; then
@@ -95,6 +96,15 @@ _pre() {
     fi
     GCC_AVR_STATUS=ready
     echo "gccavrstatus=$GCC_AVR_STATUS" >> $WMAKE_LOCK
+  fi
+
+  # Create boards.txt
+  if [ ! -f $BOARDS_TXT_LOC ] ; then
+    touch $BOARDS_TXT_LOC
+  fi
+  if [ ! -s $BOARDS_TXT_LOC ] ; then
+    echo "Generating standard boards.txt"
+    cat $COSA_DIR/boards.txt > $BOARDS_TXT_LOC
   fi
 }
 
