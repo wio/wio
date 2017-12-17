@@ -73,7 +73,7 @@ _pre() {
     echo "Identifying OS Type"
     if [[ "$OSTYPE" == "linux-gnu" ]] ; then
       OS_TYPE="linux"
-    elif [[ "$OS_TYPE" == "darwin" ]] ; then
+    elif [[ "$OSTYPE" == "darwin"* ]] ; then
       OS_TYPE="macos"
     else
       echo "Supported OS: Linux, MacOS"
@@ -88,13 +88,16 @@ _pre() {
   if [ $GCC_AVR_STATUS == "undefined" ] ; then
     echo "Checking for dependencies"
     if [[ $OS_TYPE == 'linux' ]] ; then
+      echo "Checking apt-get for gcc-avr, avr-libc, avrdude"
       sudo apt-get install gcc-avr avr-libc avrdude
     elif [[ $OS_TYPE == 'macos' ]] ; then
-      xcode-select --install
+      xcode-select --install || :
+      echo "Checking HomeBrew for avr-gcc"
       brew tap osx-cross/avr
       brew install avr-gcc
     fi
-    GCC_AVR_STATUS=ready
+    GCC_AVR_STATUS=
+    echo "Dependencies all set!"
     echo "gccavrstatus=$GCC_AVR_STATUS" >> $WMAKE_LOCK
   fi
 
