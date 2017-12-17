@@ -14,3 +14,11 @@ The template project ships with `wmake`, a generic build script.
 sudo apt-get install gcc-avr avr-libc avrdude
 ```
 
+### MacOS
+Installation may take a while because MacOS has to build `gcc-avr`.
+```bash
+xcode-select --install
+brew tap osx-cross/avr
+brew install avr-gcc
+```
+

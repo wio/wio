@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 export COSA_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)/platform/cosa
 export GCC_AVR_VER=gcc-avr-4.2
-export PATH=$PATH:$COSA_DIR/build/cosa
+export BOARDS_TXT_LOC=$COSA_DIR/build/boards.txt
 
 set -o nounset
 set -o errexit
@@ -23,7 +23,7 @@ _print_help() {
   cat <<HEREDOC
                  __               .__
 __  _  _______ _/  |_  ___________|  |   ____   ____ ______
-\ \/ \/ /\__  \\   __\/ __ \_  __ \  |  /  _ \ /  _ \ \____ \
+\ \/ \/ /\__  \\   __\/ __ \_  __  \\  |  /  _ \ /  _ \\\____ \\
  \     /  / __ \|  | \  ___/|  | \/  |_(  <_> |  <_> )  |_> >
   \/\_/  (____  /__|  \___  >__|  |____/\____/ \____/|   __/
               \/          \/                         |__|
@@ -36,14 +36,27 @@ Options:
 HEREDOC
 }
 
+# Function runs to ensure the environment is correctly
+# setup for Cosa builds.
+# 1. Checks that `boards.txt` exists and is not empty
+# 2. Verifies installation of `gcc-avr`
+_pre() {
+  if [ ! -f $BOARDS_TXT_LOC ] ; then
+    touch $BOARDS_TXT_LOC
+  fi
+  if [ ! -s $BOARDS_TXT_LOC ] ; then
+    echo "Generating standard boards.txt"
+    cat $COSA_DIR/boards.txt > $BOARDS_TXT_LOC
+  fi
+}
+
 _simple() {
     root_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
     root_dir_name=$(basename "$root_dir")
     cd "$root_dir"
 
     if [ "$1" == 'boards' ] ; then
-        $COSA_DIR/build/cosa boards
-
+        (cd $COSA_DIR/build && ./cosa boards)
     else
         _print_help
     fi
@@ -57,4 +70,5 @@ _main() {
     fi
 }
 
+_pre
 _main "$@"
