@@ -12,6 +12,8 @@ export GCC_AVR_VER=gcc-avr-4.2
 BOARDS_TXT_LOC=$COSA_DIR/build/boards.txt
 WMAKE_LOCK=$CUR_DIR/wmake.lock
 WMAKE_CONF=$CUR_DIR/wmake.ini
+SRC_DIR=$CUR_DIR/src
+MAIN_CPP=$SRC_DIR/main.cpp
 
 set -o nounset
 set -o errexit
@@ -144,6 +146,17 @@ _config() {
   fi
 }
 
+_check_src_main() {
+  if [ ! -d "$SRC_DIR" ] ; then
+    echo "Unable to find source directory \"src\""
+    exit 1
+  fi
+  if [ ! -f "$MAIN_CPP" ] ; then
+    echo "Unable to find main file \"src/main.cpp\""
+    exit 1
+  fi
+}
+
 _simple() {
   root_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
   root_dir_name=$(basename "$root_dir")
@@ -153,6 +166,7 @@ _simple() {
     (cd $COSA_DIR/build && ./cosa boards)
   elif [ "$1" == 'build' ] ; then
     _config
+    _check_src_main
   else
     _print_help
   fi
