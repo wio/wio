@@ -157,6 +157,28 @@ _check_src_main() {
   fi
 }
 
+_build_compile() {
+  _config
+  _check_src_main
+  (cd $SRC_DIR && $COSA_DIR/build/cosa $WMAKE_BOARD)
+}
+
+_build_upload() {
+  _config
+  _check_src_main
+  (cd $SRC_DIR && $COSA_DIR/build/cosa $WMAKE_BOARD upload)
+}
+
+_build_clean() {
+  _config
+  (cd $SRC_DIR && $COSA_DIR/build/cosa $WMAKE_BOARD clean)
+}
+
+_monitor() {
+  _config
+  (cd $SRC_DIR && $COSA_DIR/build/cosa $WMAKE_BOARD monitor)
+}
+
 _simple() {
   root_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
   root_dir_name=$(basename "$root_dir")
@@ -165,8 +187,13 @@ _simple() {
   if [ "$1" == 'boards' ] ; then
     (cd $COSA_DIR/build && ./cosa boards)
   elif [ "$1" == 'build' ] ; then
-    _config
-    _check_src_main
+    _build_compile
+  elif [ "$1" == 'upload' ] ; then
+    _build_upload
+  elif [ "$1" == 'clean' ] ; then
+    _build_clean
+  elif [ "$1" == 'monitor' ] ; then
+    _monitor
   else
     _print_help
   fi
