@@ -11,13 +11,12 @@ export GCC_AVR_VER=gcc-avr-4.2
 
 BOARDS_TXT_LOC=$COSA_DIR/build/boards.txt
 WMAKE_LOCK=$CUR_DIR/wmake.lock
+WMAKE_CONF=$CUR_DIR/wmake.ini
 
 set -o nounset
 set -o errexit
 
 trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
-
-
 
 set -o errtrace
 set -o pipefail
@@ -48,9 +47,13 @@ HEREDOC
 
 # Function runs to ensure the environment is correctly
 # setup for Cosa builds.
-# 1. Checks that `boards.txt` exists and is not empty
-# 2. Verifies installation of `gcc-avr`
+# 1. Initializes submodules
+# 2. Checks that `boards.txt` exists and is not empty
+# 3. Verifies installation of `gcc-avr`
 _pre() {
+  # Check out submodules
+  git submodule update --init
+
   # Create wmake.lock
   if [ ! -f $WMAKE_LOCK ] ; then
     touch $WMAKE_LOCK
@@ -96,7 +99,7 @@ _pre() {
       brew tap osx-cross/avr
       brew install avr-gcc
     fi
-    GCC_AVR_STATUS=
+    GCC_AVR_STATUS=ready
     echo "Dependencies all set!"
     echo "gccavrstatus=$GCC_AVR_STATUS" >> $WMAKE_LOCK
   fi
@@ -111,26 +114,56 @@ _pre() {
   fi
 }
 
+WMAKE_BOARD=undefined
+BUILD_FLAGS=undefined
+_config() {
+  if [ ! -f $WMAKE_CONF ] ; then
+    echo "Unable to find config file wmake.ini"
+    exit 1
+  fi
+  while IFS= read -r line
+  do
+    while IFS='=' read -ra ADDR; do
+      if [ ${ADDR[0]} == "board" ] ; then
+        WMAKE_BOARD=${ADDR[1]}
+      elif [ ${ADDR[0]} == "buildflags" ] ; then
+        BUILD_FLAGS=${ADDR[1]}
+      fi
+    done <<< "$line"
+  done < "$WMAKE_CONF"
+  if [ $WMAKE_BOARD == "undefined" ] ; then
+    echo "Undefined board for build"
+    exit 1
+  else
+    echo "Configuring build for board [$WMAKE_BOARD]"
+  fi
+  if [ $BUILD_FLAGS == "undefined" ] ; then
+    BUILD_FLAGS=
+  else
+    echo "Using build flags [$BUILD_FLAGS]"
+  fi
+}
+
 _simple() {
-    root_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
-    root_dir_name=$(basename "$root_dir")
-    cd "$root_dir"
+  root_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
+  root_dir_name=$(basename "$root_dir")
+  cd "$root_dir"
 
-    if [ "$1" == 'boards' ] ; then
-      (cd $COSA_DIR/build && ./cosa boards)
-    #elif [ "$1" == 'build' ] ; then
-
-    else
-      _print_help
-    fi
+  if [ "$1" == 'boards' ] ; then
+    (cd $COSA_DIR/build && ./cosa boards)
+  elif [ "$1" == 'build' ] ; then
+    _config
+  else
+    _print_help
+  fi
 }
 
 _main() {
-    if [[ "${1:-}" =~ ^h|help$  ]] || [ $# -lt "1" ] ; then
-      _print_help
-    else
-      _simple "$@"
-    fi
+  if [[ "${1:-}" =~ ^h|help$  ]] || [ $# -lt "1" ] ; then
+    _print_help
+  else
+    _simple "$@"
+  fi
 }
 
 _pre
