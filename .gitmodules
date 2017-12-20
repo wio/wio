@@ -1,3 +1,6 @@
+[submodule "build/arduino-cmake"]
+	path = build/arduino-cmake
+	url = git@github.com:arduino-cmake/arduino-cmake.git
 [submodule "libraries/wlib"]
 	path = libraries/wlib
 	url = git@github.com:teamwaterloop/waterloop-wlib.git
@@ -5,6 +8,3 @@
 [submodule "platforms/cosa"]
 	path = platforms/cosa
 	url = git@github.com:teamwaterloop/Cosa.git
-[submodule "build/arduino-cmake"]
-	path = build/arduino-cmake
-	url = https://github.com/arduino-cmake/arduino-cmake.git
