@@ -1,0 +1,13 @@
+dist: trusty
+language: cpp
+before_install:
+  - sudo apt-get update -qq
+install:
+  - sudo apt-get install -qq gcc-avr binutils-avr avr-libc avrdude -y
+script:
+  - cd toolchain
+  - mkdir cmake-build-debug
+  - cd cmake-build-debug
+  - cmake ../
+  - make
+
