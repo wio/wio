@@ -1,10 +1,6 @@
-[submodule "build/arduino-cmake"]
-	path = build/arduino-cmake
-	url = git@github.com:arduino-cmake/arduino-cmake.git
-[submodule "libraries/wlib"]
-	path = libraries/wlib
-	url = git@github.com:teamwaterloop/waterloop-wlib.git
-	branch = library
-[submodule "platforms/cosa"]
-	path = platforms/cosa
-	url = git@github.com:teamwaterloop/Cosa.git
+[submodule "toolchain/arduino-cmake"]
+	path = toolchain/arduino-cmake
+	url = https://github.com/Mogball/arduino-cmake
+[submodule "toolchain/cosa"]
+	path = toolchain/cosa
+	url = https://github.com/Mogball/Cosa
