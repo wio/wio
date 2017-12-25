@@ -1,3 +1,4 @@
 .idea/
 .DS_Store
 cmake-build-debug/
+__pycache__/
