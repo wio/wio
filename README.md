@@ -30,7 +30,7 @@ the `lib` directory. Build files are contained in `wcosa` and needs to be genera
 that is running the WCosa project.
 
 ## Installation
-WCosa requires either `gcc-avr` or the Arduino SDK to be installed.i
+WCosa requires either `gcc-avr` or the Arduino SDK to be installed.
 
 ### Windows
 We recommend installing the Arduino SDK.
