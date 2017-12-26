@@ -4,10 +4,11 @@ Parses and completes the cmake templates
 
 import os
 
-import core.scripts.others.helper as helper
+import wcosa.others.helper as helper
 
 def_search_tag = "% def-search"
 lib_search_tag = "% lib-search"
+cosa_search_tag = "% cosa-search"
 firmware_gen_tag = "% firmware-gen"
 end_tag = "% end"
 fill_block_start = "{{"
@@ -51,6 +52,7 @@ def lib_search(content, project_data):
 
         # go through all files and generate cmake tags
         data = {'lib-path': [lib_paths], 'name': os.path.basename(lib),
+                'wcosa-core': [helper.get_cosa_path()],
                 'srcs': ["\" \"".join(src_files)],
                 'hdrs': [" ".join(hdr_files)], 'board': project_data['board']}
 
@@ -58,8 +60,21 @@ def lib_search(content, project_data):
             line = line[2:len(line) - 3]
             str_to_return += helper.fill_template(line, data) + "\n"
 
-        # convert to relative paths
-        str_to_return = str_to_return.replace(helper.linux_path(project_data["current-path"] + "/lib"), "lib")
+    return str_to_return.strip(" ").strip("\n") + "\n"
+
+
+def cosa_search(content, project_data):
+    """searches for cosa library search paths"""
+
+    str_to_return = ""
+
+    # go through all files and generate cmake tags
+    data = {'wcosa-core': [helper.get_cosa_path() + "/cores/cosa"],
+            'wcosa-board': [helper.get_cosa_path() + "/variants/arduino/" + project_data["board"]]}
+
+    for line in content:
+        line = line[2:len(line) - 3]
+        str_to_return += helper.fill_template(line, data) + "\n"
 
     return str_to_return.strip(" ").strip("\n") + "\n"
 
@@ -82,9 +97,6 @@ def firmware_gen(content, project_data):
 
     if project_data["cosa-libraries"] == "":
         str_to_return = str_to_return.replace("\tARDLIBS \n", "")
-
-    # convert to relative paths
-    str_to_return = str_to_return.replace(helper.linux_path(project_data["current-path"] + "/src"), "src")
 
     return str_to_return.strip(" ").strip("\n") + "\n"
 
@@ -131,7 +143,7 @@ def get_elements(tpl_str, curr_index):
 def parse_update(tpl_path, project_data):
     """reads the cmake template file and completes it using project data"""
 
-    tpl_path = os.path.abspath(tpl_path)
+    tpl_path = helper.linux_path(tpl_path)
     tpl_file = open(tpl_path)
     tpl_str = tpl_file.readlines()
     tpl_file.close()
@@ -147,6 +159,11 @@ def parse_update(tpl_path, project_data):
             result = get_elements(tpl_str, index)
 
             new_str += lib_search(result[0], project_data)
+            index = result[1]
+        elif compare_tag == cosa_search_tag:
+            result = get_elements(tpl_str, index)
+
+            new_str += cosa_search(result[0], project_data)
             index = result[1]
         elif compare_tag == firmware_gen_tag:
             result = get_elements(tpl_str, index)

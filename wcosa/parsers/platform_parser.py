@@ -2,10 +2,9 @@
 Parses the platform.txt file and gathers information about the current platform
 """
 
-import os
 import json
 
-from core.scripts.others import helper
+from wcosa.others import helper
 
 
 def get_raw_flags(lines, identifier, include_extra):
@@ -21,12 +20,11 @@ def get_raw_flags(lines, identifier, include_extra):
 
 
 def get_c_compiler_flags(board_properties, platform_path, include_extra=True):
-    platform_file = open(helper.linux_path(platform_path))
-    raw_flags = get_raw_flags(platform_file.readlines(), "c", include_extra)
+    with open(helper.linux_path(platform_path)) as f:
+        raw_flags = get_raw_flags(f.readlines(), "c", include_extra)
 
-    settings_file = open(helper.linux_path(os.path.dirname(__file__) + "/../../settings.json"))
-    settings_data = json.load(settings_file)
-    settings_file.close()
+    with open(helper.get_settings_path()) as f:
+        settings_data = json.load(f)
 
     processed_flags = ""
 
@@ -39,12 +37,11 @@ def get_c_compiler_flags(board_properties, platform_path, include_extra=True):
 
 
 def get_cxx_compiler_flags(board_properties, platform_path, include_extra=True):
-    platform_file = open(helper.linux_path(platform_path))
-    raw_flags = get_raw_flags(platform_file.readlines(), "cpp", include_extra)
+    with open(helper.linux_path(platform_path)) as f:
+        raw_flags = get_raw_flags(f.readlines(), "cpp", include_extra)
 
-    settings_file = open(helper.linux_path(os.path.dirname(__file__) + "/../../settings.json"))
-    settings_data = json.load(settings_file)
-    settings_file.close()
+    with open(helper.get_settings_path()) as f:
+        settings_data = json.load(f)
 
     processed_flags = ""
 

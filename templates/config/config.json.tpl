@@ -1,5 +1,6 @@
 {
     "board":"",
+    "ide":"",
     "framework":"",
     "port":"",
     "cosa-libraries":"",
