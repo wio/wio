@@ -1,7 +1,8 @@
 {
   "arduino-version" : "1.0",
+  "framework" : "cosa",
   "cmake-version" : "3.0",
   "cmake-cxx-standard" : "11",
   "include-extra-flags": true,
-  "json-indent": "4"
+  "json-indent": 4
 }

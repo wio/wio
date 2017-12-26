@@ -2,17 +2,16 @@
 Parses the boards.txt file and gathers information about the current board
 """
 
-import os
 import json
 
-from core.scripts.others import helper
+from wcosa.others import helper
 
 
 def create_boards_tree(board_file_path, new_board_path):
     """Create a json version of boards file from cosa"""
 
-    board_file = open(helper.linux_path(board_file_path))
-    board_str = board_file.readlines()
+    with open(helper.linux_path(board_file_path)) as f:
+        board_str = f.readlines()
 
     tree = {}
     curr_board = ""
@@ -28,17 +27,15 @@ def create_boards_tree(board_file_path, new_board_path):
         elif "board=" in line:
             tree[curr_board]["id"] = line[line.find('='):].strip("=").strip("\n").strip(" ")
 
-    file = open(new_board_path, "w")
-    json.dump(tree, file, indent=4)
-    file.close()
+    with open(helper.linux_path(new_board_path)) as f:
+        json.dump(tree, f, indent=4)
 
 
 def get_board_properties(board, board_path):
     """parses the board file returns the properties of the board specified"""
 
-    board_file = open(helper.linux_path(os.path.abspath(board_path)))
-    board_data = json.load(board_file)
-    board_file.close()
+    with open(helper.linux_path(board_path)) as f:
+        board_data = json.load(f)
 
     return board_data[board]
 
@@ -46,9 +43,8 @@ def get_board_properties(board, board_path):
 def get_all_board(board_path):
     """parses the board file returns the properties of the board specified"""
 
-    board_file = open(helper.linux_path(os.path.abspath(board_path)))
-    board_data = json.load(board_file)
-    board_file.close()
+    with open(helper.linux_path(board_path)) as f:
+        board_data = json.load(f)
 
     keys = []
 

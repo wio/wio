@@ -15,7 +15,7 @@ project(${NAME} C CXX ASM)
 {{generate_arduino_library({{name}}\n\tSRCS {{srcs}}\n\tHDRS {{hdrs}}\n\tBOARD {{board}})\n}}
 % end
 
-file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.cc" "src/*.c")
+file(GLOB_RECURSE SRC_FILES "../src/*.cpp" "../src/*.cc" "../src/*.c")
 
 # create the firmware
 % firmware-gen
