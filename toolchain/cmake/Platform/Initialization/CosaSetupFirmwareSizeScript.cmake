@@ -18,8 +18,8 @@ set(COSA_FIRMWARE_SCRIPT_PATH ${CMAKE_BINARY_DIR}/CMakeFiles/FirmwareSize.cmake)
 file(WRITE ${COSA_FIRMWARE_SCRIPT_PATH} "${firmware_size_script}")
 
 write_sep()
-info("Template script: ${firmware_size_script_path}")
-info("Cached script:   ${COSA_FIRMWARE_SCRIPT_PATH}")
+info("Template: ${firmware_size_script_path}")
+info("Cached:   ${COSA_FIRMWARE_SCRIPT_PATH}")
 
 unset(firmware_size_script_path)
 unset(firmware_size_script_template)
