@@ -4,7 +4,7 @@ Parses and completes the cmake templates
 
 import os
 
-import wcosa.others.helper as helper
+from utils import helper
 
 def_search_tag = "% def-search"
 lib_search_tag = "% lib-search"
@@ -60,6 +60,9 @@ def lib_search(content, project_data):
             line = line[2:len(line) - 3]
             str_to_return += helper.fill_template(line, data) + "\n"
 
+    if str_to_return == "":
+        str_to_return = "# no libraries to include at the moment"
+
     return str_to_return.strip(" ").strip("\n") + "\n"
 
 
@@ -108,7 +111,7 @@ def def_search(content, project_data):
     str_to_return = ""
 
     if definitions[0] == '':
-        return ""
+        return "# no user definitions\n"
 
     for definition in definitions:
         for line in content:

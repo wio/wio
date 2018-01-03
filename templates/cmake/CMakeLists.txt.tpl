@@ -9,6 +9,10 @@ cmake_minimum_required(VERSION ${VER})
 
 project(${NAME} C CXX ASM)
 
+% def-search
+{{add_definitions({{user-definition}})}}
+% end
+
 # add search paths for all the user libraries and build them
 % lib-search
 {{include_directories({{lib-path}})}}
