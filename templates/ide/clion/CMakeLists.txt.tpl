@@ -9,19 +9,19 @@ include("CMakeListsPrivate.txt")
 
 add_custom_target(
     WCOSA_BUILD ALL
-    COMMAND ${WCOSA_CMD} build --ide clion
+    COMMAND ${WCOSA_CMD} build
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(
     WCOSA_CLEAN ALL
-    COMMAND ${WCOSA_CMD} clean --ide clion
+    COMMAND ${WCOSA_CMD} clean
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(
     WCOSA_UPDATE_ALL ALL
-    COMMAND ${WCOSA_CMD} update --ide clion
+    COMMAND ${WCOSA_CMD} update
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

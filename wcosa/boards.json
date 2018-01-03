@@ -1,102 +1,122 @@
 {
-    "diecimila": {
-        "mcu": "atmega168",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_DIECIMILA"
-    },
-    "duemilanove": {
-        "mcu": "atmega328p",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_DUEMILANOVE"
-    },
-    "leonardo": {
-        "mcu": "atmega32u4",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_LEONARDO"
-    },
-    "mega1280": {
-        "mcu": "atmega1280",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_MEGA1280"
-    },
-    "mega2560": {
-        "mcu": "atmega2560",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_MEGA2560"
-    },
-    "micro": {
-        "mcu": "atmega32u4",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_MICRO"
-    },
-    "nano": {
-        "mcu": "atmega328p",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_NANO"
-    },
-    "pro-micro": {
-        "mcu": "atmega32u4",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_PRO_MICRO"
-    },
-    "pro-micro-8": {
-        "mcu": "atmega32u4",
-        "f_cpu": "8000000L",
-        "id": "ARDUINO_PRO_MICRO"
-    },
-    "pro-mini": {
-        "mcu": "atmega328p",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_PRO_MINI"
-    },
-    "pro-mini-8": {
-        "mcu": "atmega328p",
-        "f_cpu": "8000000L",
-        "id": "ARDUINO_PRO_MINI"
-    },
-    "uno": {
-        "mcu": "atmega328p",
-        "f_cpu": "16000000L",
-        "id": "ARDUINO_UNO"
-    },
-    "attiny84-8": {
-        "mcu": "attiny84",
-        "f_cpu": "8000000L",
-        "id": "BREADBOARD_ATTINYX4"
-    },
-    "attiny85-8": {
-        "mcu": "attiny85",
-        "f_cpu": "8000000L",
-        "id": "BREADBOARD_ATTINYX5"
-    },
-    "attiny861-8": {
-        "mcu": "attiny861",
-        "f_cpu": "8000000L",
-        "id": "BREADBOARD_ATTINYX61"
-    },
-    "atmega328-8": {
-        "mcu": "atmega328p",
-        "f_cpu": "8000000L",
-        "id": "BREADBOARD_ATMEGA328P"
-    },
-    "mighty": {
-        "mcu": "atmega1284p",
-        "f_cpu": "16000000L",
-        "id": "BREADBOARD_ATMEGA1284P"
-    },
-    "mighty-opt": {
-        "mcu": "atmega1284p",
-        "f_cpu": "16000000L",
-        "id": "BREADBOARD_ATMEGA1284P"
-    },
-    "lilypad": {
-        "mcu": "atmega328p",
-        "f_cpu": "8000000L",
-        "id": "LILYPAD_ARDUINO"
-    },
-    "lilypad-usb": {
-        "mcu": "atmega32u4",
-        "f_cpu": "8000000L",
-        "id": "LILYPAD_ARDUINO_USB"
-    }
+  "diecimila": {
+    "name": "Cosa Arduino Diecimila (ATmega168/BOOT_168)",
+    "mcu": "atmega168",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_DIECIMILA"
+  },
+  "duemilanove": {
+    "name": "Cosa Arduino Duemilanove (ATmega328/BOOT_168)",
+    "mcu": "atmega328p",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_DUEMILANOVE"
+  },
+  "leonardo": {
+    "name": "Cosa Arduino Leonardo (ATmega32U4/Caterina)",
+    "mcu": "atmega32u4",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_LEONARDO"
+  },
+  "mega1280": {
+    "name": "Cosa Arduino Mega (ATmega1280/BOOT_168)",
+    "mcu": "atmega1280",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_MEGA1280"
+  },
+  "mega2560": {
+    "name": "Cosa Arduino Mega (ATmega2560/STK500v2)",
+    "mcu": "atmega2560",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_MEGA2560"
+  },
+  "micro": {
+    "name": "Cosa Arduino Micro (ATmega32U4/Caterina)",
+    "mcu": "atmega32u4",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_MICRO"
+  },
+  "nano": {
+    "name": "Cosa Arduino Nano (ATmega328/BOOT_168)",
+    "mcu": "atmega328p",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_NANO"
+  },
+  "pro-micro": {
+    "name": "Cosa Arduino Pro Micro (ATmega32U4/Caterina)",
+    "mcu": "atmega32u4",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_PRO_MICRO"
+  },
+  "pro-micro-8": {
+    "name": "Cosa Arduino Pro Micro (ATmega32U4/Caterina, 3.3V, 8 MHz)",
+    "mcu": "atmega32u4",
+    "f_cpu": "8000000L",
+    "id": "ARDUINO_PRO_MICRO"
+  },
+  "pro-mini": {
+    "name": "Cosa Arduino Pro Mini (ATmega328/BOOT_168)",
+    "mcu": "atmega328p",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_PRO_MINI"
+  },
+  "pro-mini-8": {
+    "name": "Cosa Arduino Pro Mini (ATmega328/BOOT_168, 3.3V, 8 MHz)",
+    "mcu": "atmega328p",
+    "f_cpu": "8000000L",
+    "id": "ARDUINO_PRO_MINI"
+  },
+  "uno": {
+    "name": "Cosa Arduino Uno (ATmega328/Optiboot)",
+    "mcu": "atmega328p",
+    "f_cpu": "16000000L",
+    "id": "ARDUINO_UNO"
+  },
+  "attiny84-8": {
+    "name": "Cosa Breadboard (ATtiny84, 8 MHz internal clock)",
+    "mcu": "attiny84",
+    "f_cpu": "8000000L",
+    "id": "BREADBOARD_ATTINYX4"
+  },
+  "attiny85-8": {
+    "name": "Cosa Breadboard (ATtiny85, 8 MHz internal clock)",
+    "mcu": "attiny85",
+    "f_cpu": "8000000L",
+    "id": "BREADBOARD_ATTINYX5"
+  },
+  "attiny861-8": {
+    "name": "Cosa Breadboard (ATtiny861, 8 MHz internal clock)",
+    "mcu": "attiny861",
+    "f_cpu": "8000000L",
+    "id": "BREADBOARD_ATTINYX61"
+  },
+  "atmega328-8": {
+    "name": "Cosa Breadboard (ATmega328, 8 MHz internal clock)",
+    "mcu": "atmega328p",
+    "f_cpu": "8000000L",
+    "id": "BREADBOARD_ATMEGA328P"
+  },
+  "mighty": {
+    "name": "Cosa Breadboard (ATmega1284P/BOOT_1284P)",
+    "mcu": "atmega1284p",
+    "f_cpu": "16000000L",
+    "id": "BREADBOARD_ATMEGA1284P"
+  },
+  "mighty-opt": {
+    "name": "Cosa Breadboard (ATmega1284P/Optiboot)",
+    "mcu": "atmega1284p",
+    "f_cpu": "16000000L",
+    "id": "BREADBOARD_ATMEGA1284P"
+  },
+  "lilypad": {
+    "name": "Cosa LilyPad Arduino (ATmega328/BOOT_168, 8 MHz)",
+    "mcu": "atmega328p",
+    "f_cpu": "8000000L",
+    "id": "LILYPAD_ARDUINO"
+  },
+  "lilypad-usb": {
+    "name": "Cosa LilyPad Arduino USB (ATmega32U4/Caterina, 8 MHz)",
+    "mcu": "atmega32u4",
+    "f_cpu": "8000000L",
+    "id": "LILYPAD_ARDUINO_USB"
+  }
 }

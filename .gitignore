@@ -2,4 +2,5 @@
 .DS_Store
 cmake-build-debug/
 __pycache__/
+WCosa.egg-info/
 *.pyc

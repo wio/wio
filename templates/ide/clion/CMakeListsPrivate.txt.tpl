@@ -1,4 +1,4 @@
-set(WCOSA_CMD "python {{wcosa-path}}/wcosa/wcosa.py")
+set(WCOSA_CMD python "{{wcosa-path}}/wcosa/wcosa.py")
 
 SET(CMAKE_C_COMPILER avr-gcc)
 SET(CMAKE_CXX_COMPILER avr-g++)
