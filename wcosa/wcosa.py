@@ -2,11 +2,13 @@
 Main Script that calls other scripts to make wcosa work
 """
 
+from __future__ import absolute_import
+
 import argparse
 
-import handle
-import use
-from objects.objects import *
+from wcosa.command import handle
+from wcosa.command import use
+from wcosa.objects.objects import *
 
 
 def parse():
@@ -72,7 +74,7 @@ def provided(*args):
         return True
 
 
-if __name__ == "__main__":
+def main():
     options = parse()
 
     board = Board(options.board)
@@ -114,3 +116,6 @@ if __name__ == "__main__":
             output.writeln("Clean only requires path, other flags are ignored", Fore.YELLOW)
 
         use.clean_wcosa(path)
+
+if __name__ == "__main__":
+    main()

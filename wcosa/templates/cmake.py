@@ -4,7 +4,7 @@ Parses and completes the cmake templates
 
 import os
 
-from utils import helper
+from wcosa.utils import helper
 
 def_search_tag = "% def-search"
 lib_search_tag = "% lib-search"
