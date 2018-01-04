@@ -4,7 +4,7 @@ Gives access to the settings file data. This contains settings for project that 
 
 import json
 
-from utils import helper
+from wcosa.utils import helper
 
 
 class Settings:

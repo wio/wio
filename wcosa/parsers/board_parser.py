@@ -5,7 +5,7 @@ Parses the boards.txt file and gathers information about the current board
 import json
 from collections import OrderedDict
 
-from utils import helper
+from wcosa.utils import helper
 
 
 def create_boards_tree(board_file_path, new_board_path):

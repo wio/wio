@@ -4,8 +4,8 @@ Wrappers around various flags, these handles default cases and whether to use th
 
 import serial.tools.list_ports
 from colorama import Fore
-from parsers import board_parser
-from utils import output, helper
+from wcosa.parsers import board_parser
+from wcosa.utils import output, helper
 
 
 class Board:

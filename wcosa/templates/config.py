@@ -6,9 +6,9 @@ import json
 import os
 from collections import OrderedDict
 
-from objects import settings
-from parsers import platform_parser, board_parser
-from utils import helper
+from wcosa.objects import settings
+from wcosa.parsers import platform_parser, board_parser
+from wcosa.utils import helper
 
 
 def fill_internal_config(path, curr_path, user_config_data):

@@ -5,10 +5,10 @@ Handle handles creating and updating WCosa projects
 import os
 from shutil import copyfile
 
-from objects.objects import *
-from templates import cmake
-from templates import config
-from utils.output import write, writeln
+from wcosa.objects.objects import *
+from wcosa.templates import cmake
+from wcosa.templates import config
+from wcosa.utils.output import write, writeln
 
 
 def create_folders(project_path, override=False):
@@ -127,3 +127,4 @@ def update_wcosa(path, board, ide):
         copyfile(templates_path + "/gitignore-files/.gitignore-general", path + "/.gitignore")
 
     writeln("done")
+
