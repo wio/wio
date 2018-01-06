@@ -2,8 +2,8 @@
 Parses the boards.txt file and gathers information about the current board
 """
 
-import json
 from collections import OrderedDict
+import json
 
 from wcosa.utils import helper
 
@@ -15,21 +15,21 @@ def create_boards_tree(board_file_path, new_board_path):
         board_str = f.readlines()
 
     tree = {}
-    curr_board = ""
+    curr_board = ''
 
     for line in board_str:
-        if "name=" in line:
-            curr_board = line[:line.find(".")]
+        if 'name=' in line:
+            curr_board = line[:line.find('.')]
             tree[curr_board] = {}
-            tree[curr_board]["name"] = line[line.find('='):].strip("=").strip("\n").strip(" ")
-        elif "mcu=" in line:
-            tree[curr_board]["mcu"] = line[line.find('='):].strip("=").strip("\n").strip(" ")
-        elif "f_cpu=" in line:
-            tree[curr_board]["f_cpu"] = line[line.find('='):].strip("=").strip("\n").strip(" ")
-        elif "board=" in line:
-            tree[curr_board]["id"] = line[line.find('='):].strip("=").strip("\n").strip(" ")
+            tree[curr_board]['name'] = line[line.find('='):].strip('=').strip('\n').strip(' ')
+        elif 'mcu=' in line:
+            tree[curr_board]['mcu'] = line[line.find('='):].strip('=').strip('\n').strip(' ')
+        elif 'f_cpu=' in line:
+            tree[curr_board]['f_cpu'] = line[line.find('='):].strip('=').strip('\n').strip(' ')
+        elif 'board=' in line:
+            tree[curr_board]['id'] = line[line.find('='):].strip('=').strip('\n').strip(' ')
 
-    with open(helper.linux_path(new_board_path), "w") as f:
+    with open(helper.linux_path(new_board_path), 'w') as f:
         json.dump(tree, f, indent=4)
 
 

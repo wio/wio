@@ -1,5 +1,6 @@
 import functools
 
+
 # @memoized decorator taken from
 # https://github.com/apache/incubator-superset/
 class _memoized(object):  # noqa

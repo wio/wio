@@ -2,10 +2,14 @@
 Wrappers around various flags, these handles default cases and whether to use them or not
 """
 
-import serial.tools.list_ports
 from colorama import Fore
+import serial.tools.list_ports
+
 from wcosa.parsers import board_parser
-from wcosa.utils import output, helper
+from wcosa.utils import (
+    helper,
+    output,
+)
 
 
 class Board:
@@ -19,10 +23,10 @@ class Board:
             self.name = name
 
             # verify the board
-            boards = board_parser.get_all_board(helper.get_wcosa_path() + "/wcosa/boards.json")
+            boards = board_parser.get_all_board(helper.get_wcosa_path() + '/wcosa/boards.json')
 
             if name not in boards:
-                output.writeln("Board Invalid. Run wcosa script with boards option to see all the valid boards",
+                output.writeln('Board Invalid. Run wcosa script with boards option to see all the valid boards',
                                Fore.RED)
                 quit(2)
 
@@ -34,7 +38,7 @@ class Board:
         return self.same
 
     def __str__(self):
-        return self.name or ""
+        return self.name or ''
 
 
 class IDE:
@@ -49,7 +53,7 @@ class IDE:
             self.same = False
 
     def __str__(self):
-        return self.name or ""
+        return self.name or ''
 
     def use_same(self):
         """Returns true if the value of ide stayed same (None is provided)"""
@@ -77,11 +81,11 @@ class Port:
             devices.append(p.device)
 
         if self.name not in devices:
-            output.writeln("There is no device connected to this port", Fore.RED)
+            output.writeln('There is no device connected to this port', Fore.RED)
             quit(2)
 
     def __str__(self):
-        return self.name or ""
+        return self.name or ''
 
     def use_same(self):
         """Returns true if the value of port stayed same (None is provided)"""
@@ -114,7 +118,7 @@ class Generator:
             self.same = False
 
     def __str__(self):
-        return self.name or ""
+        return self.name or ''
 
     def use_same(self):
         """Returns true if the value of generator stayed same (None is provided)"""

@@ -7,8 +7,10 @@ from __future__ import print_function
 import os
 import sys
 
-from colorama import Style
-from colorama import init
+from colorama import (
+    init,
+    Style,
+)
 
 
 class Scope:
@@ -46,20 +48,20 @@ def verbose(string, newline, color=Style.RESET_ALL):
         write(string, color)
 
         if newline is True:
-            write("\n", color)
+            write('\n', color)
 
 
-def write(string="", color=Style.RESET_ALL):
+def write(string='', color=Style.RESET_ALL):
     """write a string with color specified. No new line"""
 
-    print(color, end="")
-    print(string, end="")
-    print(Style.RESET_ALL, end="")
+    print(color, end='')
+    print(string, end='')
+    print(Style.RESET_ALL, end='')
 
 
-def writeln(string="", color=Style.RESET_ALL):
+def writeln(string='', color=Style.RESET_ALL):
     """write a string with color specified. New line"""
 
-    print(color, end="")
-    print(string, end="")
+    print(color, end='')
+    print(string, end='')
     print(Style.RESET_ALL)

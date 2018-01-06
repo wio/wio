@@ -8,20 +8,22 @@ import argparse
 
 from wcosa.command import handle
 from wcosa.command import use
-from wcosa.objects.objects import *
+from wcosa.objects.objects import Board, Fore, Generator, IDE, Path, Port
+from wcosa.parsers import board_parser
+from wcosa.utils import helper, output
 
 
 def parse():
     """Adds command line arguments and returns the options"""
 
-    parser = argparse.ArgumentParser(description="WCosa create, build and upload Cosa AVR projects")
+    parser = argparse.ArgumentParser(description='WCosa create, build and upload Cosa AVR projects')
 
     parser.add_argument(
         'action',
         help='action to perform (create, update, build, upload, serial and boards')
     parser.add_argument(
         '--board',
-         help='board to use for wcosa project',
+        help='board to use for wcosa project',
         type=str)
     parser.add_argument(
         '--port',
@@ -58,12 +60,12 @@ def parse():
 def print_boards():
     """Print all the available boards and their name"""
 
-    boards = board_parser.get_all_board(helper.get_wcosa_path() + "/wcosa/boards.json")
+    boards = board_parser.get_all_board(helper.get_wcosa_path() + '/wcosa/boards.json')
 
-    output.writeln("Boards compatible with this project are: ", Fore.CYAN)
+    output.writeln('Boards compatible with this project are: ', Fore.CYAN)
 
     for curr_board in boards:
-        name = board_parser.get_board_properties(curr_board, helper.get_wcosa_path() + "/wcosa/boards.json")["name"]
+        name = board_parser.get_board_properties(curr_board, helper.get_wcosa_path() + '/wcosa/boards.json')['name']
         output.writeln('{:15s} --->\t{}'.format(curr_board, name))
 
 
@@ -86,36 +88,37 @@ def main():
     make = options.make
 
     # based on the action call scripts
-    if options.action == "boards":
+    if options.action == 'boards':
         print_boards()
-    elif options.action == "create":
+    elif options.action == 'create':
         if provided(options.port, options.generator, options.baud):
-            output.writeln("Create only requires path, board and ide, other flags are ignored", Fore.YELLOW)
+            output.writeln('Create only requires path, board and ide, other flags are ignored', Fore.YELLOW)
 
         if options.board is not None:
             handle.create_wcosa(path, board, ide)
         else:
-            output.writeln("Board is needed for creating wcosa project", Fore.RED)
-    elif options.action == "update":
+            output.writeln('Board is needed for creating wcosa project', Fore.RED)
+    elif options.action == 'update':
         if provided(options.port, options.generator, options.baud):
-            output.writeln("Update only requires path, board and ide, other flags are ignored", Fore.YELLOW)
+            output.writeln('Update only requires path, board and ide, other flags are ignored', Fore.YELLOW)
 
         handle.update_wcosa(path, board, ide)
-    elif options.action == "build":
+    elif options.action == 'build':
         if provided(options.port, options.ide, options.board, options.baud):
-            output.writeln("Build only requires path and generator, other flags are ignored", Fore.YELLOW)
+            output.writeln('Build only requires path and generator, other flags are ignored', Fore.YELLOW)
 
         use.build_wcosa(path, generator, make, cmake)
-    elif options.action == "upload":
+    elif options.action == 'upload':
         if provided(options.ide, options.board, options.generator, options.baud):
-            output.writeln("Upload only requires path and port, other flags are ignored", Fore.YELLOW)
+            output.writeln('Upload only requires path and port, other flags are ignored', Fore.YELLOW)
 
         use.upload_wcosa(path, port)
-    elif options.action == "clean":
+    elif options.action == 'clean':
         if provided(options.ide, options.board, options.generator, options.port, options.baud):
-            output.writeln("Clean only requires path, other flags are ignored", Fore.YELLOW)
+            output.writeln('Clean only requires path, other flags are ignored', Fore.YELLOW)
 
         use.clean_wcosa(path)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     main()

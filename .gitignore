@@ -4,3 +4,8 @@ cmake-build-debug/
 __pycache__/
 WCosa.egg-info/
 *.pyc
+.tox/
+build/
+dist/
+.eggs/
+
