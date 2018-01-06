@@ -20,7 +20,7 @@ def package_files(directory):
 
 setup(
     name='WCosa',
-    version='0.1.0',
+    version='1.0.0',
     description='Create, Build, Upload and Monitor AVR Cosa Projects',
     author='Deep Dhillon, Jeff Niu, Ambareesh Balaji',
     author_email='deep.dhill6@gmail.com, jeffniu22@gmail.com, ambareeshbalaji@gmail.com',
