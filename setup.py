@@ -39,7 +39,6 @@ setup(
     },
     classifiers=[
         'Development Status :: 4 - Beta',
-        'License :: MIT license',
     ],
     keywords=[
         'iot', 'embedded', 'arduino', 'avr', 'fpga', 'firmware',
