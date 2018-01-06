@@ -30,7 +30,7 @@ the `lib` directory. Build files are contained in `wcosa` and needs to be genera
 that is running the WCosa project.
 
 ## Installation
-WCosa requires either `gcc-avr` or the Arduino SDK to be installed.
+WCosa requires either `gcc-avr` or the Arduino SDK to be installed. CMake is also required to build projects.
 
 ### Windows
 We recommend installing the Arduino SDK.
@@ -68,4 +68,8 @@ xcode-select --install
 brew tap osx-cross/avr
 brew install avr-gcc
 ```
+
+## Committers
+Deep Dhillon (@dhillondeep)
+Jeff Niu (@mogball)
 
