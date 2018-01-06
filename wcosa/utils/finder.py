@@ -3,15 +3,15 @@ import os
 from .memoize import memoized
 
 make_programs = [
-    "make",
-    "make.exe",
-    "mingw32-make",
-    "mingw32-make.exe",
+    'make',
+    'make.exe',
+    'mingw32-make',
+    'mingw32-make.exe',
 ]
 
 cmake_programs = [
-    "cmake",
-    "cmake.exe",
+    'cmake',
+    'cmake.exe',
 ]
 
 
@@ -21,7 +21,7 @@ def cmd_exists(cmd):
 
     return any(
         os.access(os.path.join(path, cmd), os.X_OK)
-        for path in os.environ["PATH"].split(os.pathsep)
+        for path in os.environ['PATH'].split(os.pathsep)
     )
 
 
@@ -34,9 +34,9 @@ def get_program(programs):
 
 @memoized
 def get_generator_for(make_program):
-    if "mingw" in make_program:
-        return "MinGW Makefiles"
-    return "Unix Makefiles"
+    if 'mingw' in make_program:
+        return 'MinGW Makefiles'
+    return 'Unix Makefiles'
 
 
 @memoized

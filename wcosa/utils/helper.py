@@ -3,17 +3,15 @@ Helper functions to be used through the tool
 """
 
 import os
+from os.path import abspath, dirname
 import re
 import shutil
-import sys
-
-from os.path import dirname, abspath
 
 
 def linux_path(path):
     """Converts Windows style path to linux style path"""
 
-    return os.path.abspath(path).replace("\\", "/")
+    return os.path.abspath(path).replace('\\', '/')
 
 
 def get_wcosa_path():
@@ -26,13 +24,13 @@ def get_wcosa_path():
 def get_cosa_path():
     """returns the absolute path of cosa"""
 
-    return linux_path(get_wcosa_path() + "/toolchain/cosa")
+    return linux_path(get_wcosa_path() + '/toolchain/cosa')
 
 
 def get_settings_path():
     """returns the absolute path of settings file"""
 
-    return linux_path(get_wcosa_path() + "/wcosa/settings.json")
+    return linux_path(get_wcosa_path() + '/wcosa/settings.json')
 
 
 def get_working_directory():
@@ -44,14 +42,14 @@ def get_working_directory():
 def fill_template(string, data):
     """Fills the template based on the data provided"""
 
-    string = string.replace("\\n", "\n").replace("\\t", "\t")
+    string = string.replace('\\n', '\n').replace('\\t', '\t')
     for key in data:
         if type(data[key]) == list:
-            value = "\"" + data[key][0] + "\""
+            value = '\'' + data[key][0] + '\''
         else:
             value = data[key]
 
-        string = re.sub("{.*" + key + ".*}", value, string)
+        string = re.sub('{.*' + key + '.*}', value, string)
 
     return string
 
@@ -77,9 +75,9 @@ def get_files_recursively(directory, extensions=None):
             ext = os.path.splitext(file)[1]
 
             if extensions is not None and ext in extensions:
-                arr.append(linux_path("/".join(path) + "/" + file))
+                arr.append(linux_path('/'.join(path) + '/' + file))
             elif extensions is None:
-                arr.append(linux_path("/".join(path) + "/" + file))
+                arr.append(linux_path('/'.join(path) + '/' + file))
 
     return arr
 
@@ -91,10 +89,10 @@ def get_files(path, extensions=None):
     all_files = os.listdir(path)
 
     for file in all_files:
-        if not os.path.isdir(path + "/" + file) and extensions is not None and os.path.splitext(file)[1] in extensions:
-            arr.append(linux_path(path + "/" + file))
-        elif not os.path.isdir(path + "/" + file) and extensions is None:
-            arr.append(linux_path(path + "/" + file))
+        if not os.path.isdir(path + '/' + file) and extensions is not None and os.path.splitext(file)[1] in extensions:
+            arr.append(linux_path(path + '/' + file))
+        elif not os.path.isdir(path + '/' + file) and extensions is None:
+            arr.append(linux_path(path + '/' + file))
 
     return arr
 
@@ -104,7 +102,7 @@ def get_dirs_recursively(path):
 
     arr = []
     for root, dirs, files in os.walk(path):
-        curr_path = "/".join(root.split(os.sep))
+        curr_path = '/'.join(root.split(os.sep))
 
         if curr_path != os.path.basename(path):
             arr.append(linux_path(curr_path))
@@ -117,8 +115,8 @@ def get_dirs(path):
 
     arr = []
     for file in os.listdir(path):
-        if os.path.isdir(path + "/" + file):
-            arr.append(linux_path(path + "/" + file))
+        if os.path.isdir(path + '/' + file):
+            arr.append(linux_path(path + '/' + file))
 
     return arr
 
@@ -128,7 +126,7 @@ def get_dirnames(path):
 
     arr = []
     for file in os.listdir(path):
-        if os.path.isdir(path + "/" + file):
-            arr.append(os.path.basename(linux_path(path + "/" + file)))
+        if os.path.isdir(path + '/' + file):
+            arr.append(os.path.basename(linux_path(path + '/' + file)))
 
     return arr
