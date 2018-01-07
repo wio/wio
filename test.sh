@@ -5,3 +5,7 @@ rm -rf test-wcosa
 mkdir test-wcosa
 wcosa create --board mega2560
 wcosa build
+wcosa clean
+wcosa update --board nano
+wcosa build
+
