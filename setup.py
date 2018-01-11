@@ -7,6 +7,7 @@ from setuptools import find_packages, setup
 install_requires = [
     'colorama',
     'pyserial>=3,<4',
+    'six',
 ]
 
 

@@ -42,6 +42,7 @@ def fill_internal_config(path, curr_path, user_config_data):
         settings.get_settings_value('include-extra-flags'))
     internal_config_data['cmake-cxx-standard'] = settings.get_settings_value('cmake-cxx-standard')
     internal_config_data['custom-definitions'] = user_config_data['build-flags']
+    internal_config_data['module-definitions'] = user_config_data['module-flags']
     internal_config_data['cosa-libraries'] = user_config_data['cosa-libraries']
 
     with open(helper.linux_path(path), 'w') as f:

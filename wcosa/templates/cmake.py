@@ -58,10 +58,19 @@ def lib_search(content, project_data):
             hdr_files += get_files_recursively(lib, HDR_FILE_EXTS)
 
         # go through all files and generate cmake tags
-        data = {'lib-path': [lib_paths], 'name': os.path.basename(lib),
-                'wcosa-core': [helper.get_cosa_path()],
-                'srcs': [quote_join(src_files)],
-                'hdrs': [quote_join(hdr_files)], 'board': project_data['board']}
+        lib_name = os.path.basename(lib)
+        lib_defs = ''
+        if lib_name in project_data['module-definitions']:
+            lib_defs = project_data['module-definitions'][lib_name]
+        data = {
+            'lib-path': [lib_paths],
+            'name': lib_name,
+            'wcosa-core': [helper.get_cosa_path()],
+            'srcs': [quote_join(src_files)],
+            'hdrs': [quote_join(hdr_files)],
+            'board': project_data['board'],
+            'custom-definitions': lib_defs,
+        }
 
         for line in content:
             line = line[2:len(line) - 3]
@@ -97,9 +106,14 @@ def firmware_gen(content, project_data):
 
     lib_files = ' '.join(get_dirnames(curr_lib_path))
 
-    data = {'name': project_data['project-name'], 'libs': lib_files,
-            'cosa-libraries': project_data['cosa-libraries'], 'port': project_data['port'],
-            'board': project_data['board']}
+    data = {
+        'name': project_data['project-name'],
+        'libs': lib_files,
+        'cosa-libraries': project_data['cosa-libraries'],
+        'port': project_data['port'],
+        'board': project_data['board'],
+        'custom-definitions': project_data['custom-definitions'],
+    }
 
     for line in content:
         line = line[2:len(line) - 3]
