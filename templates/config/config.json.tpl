@@ -1,9 +1,10 @@
 {
-    "board":"",
-    "ide":"",
-    "framework":"",
-    "generator":"",
-    "port":"",
-    "cosa-libraries":"",
-    "build-flags":""
+    "board": "",
+    "ide": "",
+    "framework": "",
+    "generator": "",
+    "port": "",
+    "cosa-libraries": "",
+    "build-flags": "",
+    "module-flags": {}
 }

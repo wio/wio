@@ -7,6 +7,8 @@ from os.path import abspath, dirname
 import re
 import shutil
 
+from six import string_types
+
 
 def quote_join(values):
     """Join a set of strings, presumed to be file paths, surrounded by quotes, for CMake"""
@@ -52,12 +54,13 @@ def fill_template(string, data):
 
     string = string.replace('\\n', '\n').replace('\\t', '\t')
     for key in data:
+        value = ''
         if isinstance(data[key], list):
-            value = data[key][0]
-        else:
+            value = ' '.join(data[key])
+        elif isinstance(data[key], string_types):
             value = data[key]
 
-        string = re.sub('{.*' + key + '.*}', value, string)
+        string = re.sub('{{' + key + '}}', value, string)
 
     return string
 
