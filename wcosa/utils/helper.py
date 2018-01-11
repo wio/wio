@@ -8,6 +8,14 @@ import re
 import shutil
 
 
+def quote_join(values):
+    """Join a set of strings, presumed to be file paths, surrounded by quotes, for CMake"""
+    surrounded = []
+    for value in values:
+        surrounded.append('\"' + value + '\"')
+    return ' '.join(surrounded)
+
+
 def linux_path(path):
     """Converts Windows style path to linux style path"""
 
@@ -44,8 +52,8 @@ def fill_template(string, data):
 
     string = string.replace('\\n', '\n').replace('\\t', '\t')
     for key in data:
-        if type(data[key]) == list:
-            value = '\'' + data[key][0] + '\''
+        if isinstance(data[key], list):
+            value = data[key][0]
         else:
             value = data[key]
 
