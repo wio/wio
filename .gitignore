@@ -8,4 +8,5 @@ WCosa.egg-info/
 build/
 dist/
 .eggs/
+.vscode
 

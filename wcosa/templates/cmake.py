@@ -5,24 +5,31 @@ Parses and completes the cmake templates
 import os
 
 from wcosa.utils import helper
+from wcosa.utils.helper import (
+    get_dirnames,
+    get_dirs,
+    get_files_recursively,
+    quote_join,
+)
 
-def_search_tag = '% def-search'
-lib_search_tag = '% lib-search'
-cosa_search_tag = '% cosa-search'
-firmware_gen_tag = '% firmware-gen'
-end_tag = '% end'
-fill_block_start = '{{'
-fill_block_end = '}}'
+DEF_SEARCH_TAG = '% def-search'
+LIB_SEARCH_TAG = '% lib-search'
+COSA_SEARCH_TAG = '% cosa-search'
+FIRMWARE_GEN_TAG = '% firmware-gen'
+END_TAG = '% end'
+FILL_BLOCK_START = '{{'
+FILL_BLOCK_END = '}}'
 
-src_file_exts = ('.cpp', '.c', '.cc')
-hdr_file_exts = ('.hh', '.h')
+
+SRC_FILE_EXTS = ('.cpp', '.c', '.cc')
+HDR_FILE_EXTS = ('.hh', '.h')
 
 
 def lib_search(content, project_data):
     """searches for library paths and then completes the templates to include search paths and build library"""
 
     str_to_return = ''
-    for lib in helper.get_dirs(project_data['current-path'] + '/lib'):
+    for lib in get_dirs(project_data['current-path'] + '/lib'):
         src_files = []
         hdr_files = []
         lib_paths = lib
@@ -31,30 +38,30 @@ def lib_search(content, project_data):
         src_found = False
 
         # handle src folder
-        for sub_dir in helper.get_dirs(lib):
+        for sub_dir in get_dirs(lib):
             if os.path.basename(sub_dir) == 'src':
                 lib_paths += '/src'
 
                 # add all the src extensions in src folder
-                src_files += helper.get_files_recursively(sub_dir, src_file_exts)
+                src_files += get_files_recursively(sub_dir, SRC_FILE_EXTS)
 
                 # add all the header extensions in src folder
-                hdr_files += helper.get_files_recursively(sub_dir, hdr_file_exts)
+                hdr_files += get_files_recursively(sub_dir, HDR_FILE_EXTS)
                 src_found = True
                 break
 
         if src_found is not True:
             # add all the src extensions
-            src_files += helper.get_files_recursively(lib, src_file_exts)
+            src_files += get_files_recursively(lib, SRC_FILE_EXTS)
 
             # add all the header extensions
-            hdr_files += helper.get_files_recursively(lib, hdr_file_exts)
+            hdr_files += get_files_recursively(lib, HDR_FILE_EXTS)
 
         # go through all files and generate cmake tags
         data = {'lib-path': [lib_paths], 'name': os.path.basename(lib),
                 'wcosa-core': [helper.get_cosa_path()],
-                'srcs': ['\' \''.join(src_files)],
-                'hdrs': [' '.join(hdr_files)], 'board': project_data['board']}
+                'srcs': [quote_join(src_files)],
+                'hdrs': [quote_join(hdr_files)], 'board': project_data['board']}
 
         for line in content:
             line = line[2:len(line) - 3]
@@ -88,7 +95,7 @@ def firmware_gen(content, project_data):
     curr_lib_path = project_data['current-path'] + '/lib'
     str_to_return = ''
 
-    lib_files = ' '.join(helper.get_dirnames(curr_lib_path))
+    lib_files = ' '.join(get_dirnames(curr_lib_path))
 
     data = {'name': project_data['project-name'], 'libs': lib_files,
             'cosa-libraries': project_data['cosa-libraries'], 'port': project_data['port'],
@@ -133,7 +140,7 @@ def get_elements(tpl_str, curr_index):
         line = tpl_str[content_index]
         compare_tag = line.strip('\n').strip(' ')
 
-        if compare_tag == end_tag:
+        if compare_tag == END_TAG:
             break
         else:
             content.append(line)
@@ -158,22 +165,22 @@ def parse_update(tpl_path, project_data):
         compare_tag = curr_line.strip('\n').strip(' ')
 
         # handle loop statements
-        if compare_tag == lib_search_tag:
+        if compare_tag == LIB_SEARCH_TAG:
             result = get_elements(tpl_str, index)
 
             new_str += lib_search(result[0], project_data)
             index = result[1]
-        elif compare_tag == cosa_search_tag:
+        elif compare_tag == COSA_SEARCH_TAG:
             result = get_elements(tpl_str, index)
 
             new_str += cosa_search(result[0], project_data)
             index = result[1]
-        elif compare_tag == firmware_gen_tag:
+        elif compare_tag == FIRMWARE_GEN_TAG:
             result = get_elements(tpl_str, index)
 
             new_str += firmware_gen(result[0], project_data)
             index = result[1]
-        elif compare_tag == def_search_tag:
+        elif compare_tag == DEF_SEARCH_TAG:
             result = get_elements(tpl_str, index)
 
             new_str += def_search(result[0], project_data)

@@ -12,14 +12,14 @@ set(CMAKE_CXX_STANDARD {{cmake-cxx-standard}})
 
 # add search paths for cosa core
 % cosa-search
-{{include_directories({{wcosa-core}})}}
-{{include_directories({{wcosa-board}})}}
+{{include_directories("{{wcosa-core}}")}}
+{{include_directories("{{wcosa-board}}")}}
 % end
 
 # add search paths for all the user libraries
 % lib-search
 
-{{include_directories({{lib-path}})}}
+{{include_directories("{{lib-path}}")}}
 % end
 
 file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.cc" "src/*.c")

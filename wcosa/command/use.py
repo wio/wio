@@ -22,9 +22,9 @@ from wcosa.objects.objects import (
 )
 from wcosa.utils import helper, output
 from wcosa.utils.finder import (
-     get_cmake_program,
-     get_generator_for,
-     get_make_program,
+    get_cmake_program,
+    get_generator_for,
+    get_make_program,
 )
 
 
