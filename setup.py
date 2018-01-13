@@ -21,7 +21,7 @@ def package_files(directory):
 
 setup(
     name='WCosa',
-    version='1.0.3',
+    version='1.0.4',
     description='Create, Build, Upload and Monitor AVR Cosa Projects',
     author='Deep Dhillon, Jeff Niu',
     author_email='deep.dhill6@gmail.com, jeffniu22@gmail.com, ambareeshbalaji@gmail.com',
