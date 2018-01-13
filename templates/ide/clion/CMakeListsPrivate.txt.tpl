@@ -22,4 +22,18 @@ set(CMAKE_CXX_STANDARD {{cmake-cxx-standard}})
 {{include_directories("{{lib-path}}")}}
 % end
 
-file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.cc" "src/*.c")
+
+file(GLOB_RECURSE SRC_FILES
+    "src/*.cpp"
+    "src/*.cc"
+    "src/*.c"
+    "src/**/*.cpp"
+    "src/**/*.cc"
+    "src/**/*.c"
+    "src/*.h"
+    "src/*.hh"
+    "src/*.hpp"
+    "src/**/*.h"
+    "src/**/*.hh"
+    "src/**/*.hpp")
+
