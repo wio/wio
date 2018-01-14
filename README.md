@@ -30,7 +30,11 @@ the `lib` directory. Build files are contained in `wcosa` and needs to be genera
 that is running the WCosa project.
 
 ## Installation
-WCosa requires either `gcc-avr` or the Arduino SDK to be installed. CMake is also required to build projects.
+```bash
+pip install wcosa
+```
+
+WCosa requires either `gcc-avr` or the Arduino SDK to be installed. __CMake__ is also required to build projects.
 
 ### Windows
 We recommend installing the Arduino SDK.
