@@ -196,7 +196,7 @@ def upload_wcosa(path, port):
 
     # save the port in the config file so that update can update the project based on that
     temp_data = copy.copy(data)
-    temp_data['port'] = port
+    temp_data['port'] = str(port)
     with open(path + '/config.json', 'w') as f:
         json.dump(temp_data, f, indent=settings.get_settings_value('json-indent'))
 
