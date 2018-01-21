@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # install wcosa
-python setup.py install
+python setup.py -q install
 
 # Test Case 1
 rm -rf test-wcosa
