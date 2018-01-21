@@ -6,8 +6,7 @@ from __future__ import absolute_import
 
 import argparse
 
-from wcosa.command import handle
-from wcosa.command import use
+from wcosa.command import handle, monitor, use
 from wcosa.objects.objects import Board, Fore, Generator, IDE, Path, Port
 from wcosa.parsers import board_parser
 from wcosa.utils import helper, output
@@ -86,6 +85,7 @@ def main():
     generator = Generator(options.generator)
     cmake = options.cmake
     make = options.make
+    baud = options.baud
 
     # based on the action call scripts
     if options.action == 'boards':
@@ -118,6 +118,8 @@ def main():
             output.writeln('Clean only requires path, other flags are ignored', Fore.YELLOW)
 
         use.clean_wcosa(path)
+    elif options.action == 'monitor':
+        monitor.serial_monitor(options.port, options.baud)
 
 
 if __name__ == '__main__':
