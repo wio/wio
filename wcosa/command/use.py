@@ -128,7 +128,7 @@ def serial_ports():
 
     ports = list(serial.tools.list_ports.comports())
 
-    if len(ports) == 0:
+    if not ports:
         output.writeln('No device is connected at the moment', Fore.RED)
         quit(2)
 
