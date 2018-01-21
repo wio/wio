@@ -12,6 +12,7 @@ from wcosa.command.use import serial_ports
 from wcosa.objects.objects import Fore
 from wcosa.utils.output import write, writeln
 
+
 def serial_monitor(port, baud):
     """
     Open serial monitor to the specified port with the given baud rate.
