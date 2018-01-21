@@ -85,7 +85,6 @@ def main():
     generator = Generator(options.generator)
     cmake = options.cmake
     make = options.make
-    baud = options.baud
 
     # based on the action call scripts
     if options.action == 'boards':
