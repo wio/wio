@@ -22,12 +22,59 @@ project/
         bin/
         CMakeLists.txt
     .gitignore
+    config.json
     CMakeLists.txt
+    CMakeListsPrivate.txt
 ```
 
 Sources files should be placed in the `src` directory, and libraries should be placed in folders inside
 the `lib` directory. Build files are contained in `wcosa` and needs to be generated for each environment
 that is running the WCosa project.
+
+## Commands and Usage
+Using commands has the format `wcosa [action]` where `[action]` is one of `create`, `update`, `build`, `clean`, `upload`.
+
+Here is an example of creating a project:
+```bash
+mkdir wcosa-project
+cd wcosa-project
+wcosa create --board uno --ide clion
+```
+The `--board` flag specifies the desired target board for project build, and `--ide clion` tells WCosa to generate files to enable 
+project import into `CLion` for code suggestion and completion. Use `wcosa boards` to see the list of available boards, supported Cosa.
+This command will generate environment-specific files such as `CMakeListsPrivate.txt` and the `wcosa` folder.
+
+To build the project, creating uploadable binaries, use `wcosa build`, and to clean the project, run `wcosa clean`. If a microcontroller
+is plugged into your PC, running `wcosa upload` will attempt to autodetect the port and upload the program.
+If you have multiple microcontrollers or if WCosa cannot detect the port, use `wcosa upload --port [port_name]` to specify
+the desired upload port.
+
+The command `wcosa update` can be used to update the target board with `wcosa update --board [new_board]` or if `config.json` is 
+modified. To add build definitions to the main project or to submodules, modify `build-flags` to something as
+```json
+{
+    "build-flags": "MAX_ALLOCATORS=4u STATIC_MEMORY"
+}
+```
+
+To specify definitions for modules added under `lib`, 
+```json
+{
+    "build-flags": "...",
+    "module-flags": {
+        "wlib": "BLOCK_SIZE=64u NUM_BLOCKS=400u"
+    }
+}
+```
+Then run `wcosa update` to update the internal config.
+
+The command `wcosa update` should also be called when checking out a project from source control to create the environment
+files. For example,
+```bash
+git clone --recursive https://github.com/teamwaterloop/goose-sensors.git
+cd goose-sensors
+wcosa update
+```
 
 ## Installation
 ```bash
