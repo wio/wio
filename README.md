@@ -118,6 +118,7 @@ building `avr-gcc` may take some time.
 xcode-select --install
 brew tap osx-cross/avr
 brew install avr-gcc
+brew install avrdude
 ```
 
 ## Committers
