@@ -25,7 +25,7 @@ setup(
     description='Create, Build, Upload and Monitor AVR Cosa Projects',
     author='Deep Dhillon, Jeff Niu',
     author_email='deep@deepdhillon.com, jeffniu22@gmail.com, ambareeshbalaji@gmail.com',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     license='MIT',
     packages=find_packages(),
     install_requires=install_requires,
