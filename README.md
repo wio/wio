@@ -125,3 +125,6 @@ brew install avrdude
 Deep Dhillon (@dhillondeep)
 Jeff Niu (@mogball)
 
+## Contributors
+Dmytro Shynkevych (@hermord)
+
