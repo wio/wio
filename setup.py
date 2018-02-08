@@ -8,6 +8,7 @@ install_requires = [
     'colorama',
     'pyserial>=3,<4',
     'six',
+    'gitpython',
 ]
 
 
