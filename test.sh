@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xe # Be verbose and exit immediately if any command fails
 
 # install wcosa
 python setup.py -q install
@@ -26,7 +27,20 @@ mkdir src/module
 cp ../test/main.cpp src/main.cpp
 cp ../test/config.json config.json
 cp ../test/module/* src/module/
-git submodule add https://github.com/teamwaterloop/wlib.git lib/wlib
+wcosa package install waterloop/wlib
 wcosa update
 wcosa build
 
+# Test Case 3
+rm -rf test-wcosa
+mkdir test-wcosa
+cd test-wcosa
+wcosa package install waterloop/wlib
+test -d .pkg/wlib && test -d lib/wlib # Exists and linked at lib/wlib
+wcosa package install waterloop/wlib at wlib-alt
+test -d wlib-alt # Now also linked at wlib-alt
+test $(readlink wlib-alt) = $(readlink lib/wlib) # Point to same location
+wcosa package remove waterloop/wlib at wlib-alt
+test -d .pkg/wlib && test ! -d wlib-alt # Still exists, but not at wlib-alt
+wcosa package remove waterloop/wlib
+test ! -d .pkg/wlib && test ! -L lib/wlib # Does not exist and no dangling link

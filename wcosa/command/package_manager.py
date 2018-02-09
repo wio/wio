@@ -21,8 +21,8 @@ class Package:
         self.version = version
         self.path = path
         self.name = (self.unqualified_name +
-                     ('-' + self.branch if self.branch != 'master' else '') +
-                     ('-' + self.version if self.version != 'master' else ''))
+                     ('-' + self.branch if self.branch else '') +
+                     ('-' + self.version if self.version else ''))
 
     def __repr__(self):
         return ('name: %s, url: %s, branch: %s, version: %s, path: %s' %
@@ -40,13 +40,11 @@ class PackageFormatError(Exception):
 class GitFetchException(Exception):
     def __init__(self, package):
         self.url = (package.url +
-                    (':' + package.branch if package.branch != 'master'
-                     else '')
-                    ('@' + package.version if package.version != 'master'
-                     else ''))
+                    (':' + package.branch if package.branch else '') +
+                    ('@' + package.version if package.version else ''))
 
     def __str__(self):
-        return 'Could not fetch submodule from %s' + self.url
+        return 'Could not fetch submodule from %s' % self.url
 
 
 class AlreadyInstalledException(Exception):
@@ -75,8 +73,8 @@ def package_string_parse_many(package_strings):
     where:
         URL is a valid URL pointing to a git repository
         GITHUB is of the form 'username/reponame'
-        BRANCH [default master] is the branch to track
-        VERSION [default master] is a tag on the given branch
+        BRANCH [optional] is the branch to track
+        VERSION [optional] is a tag on the given branch to check out
         PATH [default 'lib/NAME'] is the relative path to install location
     """
     packages = []
@@ -93,8 +91,8 @@ def package_string_parse_many(package_strings):
         else:
             url = groups['url']
         name = groups['name']
-        branch = 'master' if not groups['branch'] else groups['branch']
-        version = 'master' if not groups['version'] else groups['version']
+        branch = '' if not groups['branch'] else groups['branch']
+        version = '' if not groups['version'] else groups['version']
         path = 'lib/' + name if not groups['path'] else groups['path']
         packages.append(Package(name, url, branch, version, path))
     return packages
@@ -240,8 +238,12 @@ def _package_install_unsafe(path, package, pkgrepo, pkglist, pkgnames):
             raise AlreadyInstalledException(link_updated=True)
     # If the above did not return, we need to actually install the package
     try:
-        pkgrepo.create_submodule(package.name, package.name,
-                                 url=package.url, branch=package.branch)
+        if package.branch:
+            pkgrepo.create_submodule(package.name, package.name,
+                                     url=package.url, branch=package.branch)
+        else:
+            pkgrepo.create_submodule(package.name, package.name,
+                                     url=package.url)
     except Exception:  # Default message is cryptic
         raise GitFetchException(package)
     package_link(path, package)
