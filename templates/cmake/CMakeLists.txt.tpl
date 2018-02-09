@@ -1,4 +1,4 @@
-set(WCOSA_PATH "{{wcosa-path}}")
+set(WCOSA_PATH wcosa)
 set(VER {{cmake-version}})
 set(NAME {{project-name}})
 
