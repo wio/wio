@@ -303,7 +303,8 @@ def package_update_all(path):
     repo = package_repo_open(package_dir_path(path))
     for sm in repo.submodules:
         write('Updating %s... ' % sm.name)
-        sm.update()
+        remote = sm.module().remotes[0]
+        remote.pull('-f')  # sm.update is defective; use this instead.
         writeln('Done.')
         if repo.is_dirty():  # Something has changed
             repo.index.commit('Updated ' + sm.name)

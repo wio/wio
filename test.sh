@@ -27,7 +27,7 @@ mkdir src/module
 cp ../test/main.cpp src/main.cpp
 cp ../test/config.json config.json
 cp ../test/module/* src/module/
-wcosa package install waterloop/wlib
+wcosa package install waterloop/wlib@1.0.0
 wcosa update
 wcosa build
 
