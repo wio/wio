@@ -10,4 +10,5 @@ dist/
 .eggs/
 .vscode
 test-wcosa/
+*.swp
 

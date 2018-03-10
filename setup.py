@@ -4,6 +4,8 @@ import os
 
 from setuptools import find_packages, setup
 
+from wcosa.info import __version__
+
 install_requires = [
     'colorama',
     'pyserial>=3,<4',
@@ -22,7 +24,7 @@ def package_files(directory):
 
 setup(
     name='WCosa',
-    version='1.1.0',
+    version=__version__,
     description='Create, Build, Upload and Monitor AVR Cosa Projects',
     author='Deep Dhillon, Jeff Niu',
     author_email='deep@deepdhillon.com, jeffniu22@gmail.com, ambareeshbalaji@gmail.com',
