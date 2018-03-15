@@ -11,7 +11,7 @@ project(${NAME} C CXX ASM)
 
 # add search paths for all the user libraries and build them
 % lib-search
-{{include_directories({{lib-path}})}}
+{{include_directories("{{lib-path}}")}}
 {{generate_arduino_library({{name}}\n\tSRCS {{srcs}}\n\tHDRS {{hdrs}}\n\tBOARD {{board}})}}
 {{target_compile_definitions({{name}} PRIVATE __AVR_Cosa__ {{custom-definitions}})}}
 % end

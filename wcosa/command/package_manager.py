@@ -28,6 +28,17 @@ class Package:
         return ('name: %s, url: %s, branch: %s, version: %s, path: %s' %
                 (self.name, self.url, self.branch, self.version, self.path))
 
+    @staticmethod
+    def from_dict(json):
+        path = json['paths'][0] if 'paths' in json else json['path']
+        return Package(
+            json['unqualified_name'],
+            json['url'],
+            json['branch'],
+            json['version'],
+            path,
+        )
+
 
 class PackageFormatError(Exception):
     def __init__(self, package_string):
@@ -52,6 +63,7 @@ class AlreadyInstalledException(Exception):
         self.link_updated = link_updated
 
 
+PACKAGE_LIST_FILE = 'pkglist.json'
 URL = r'(?P<url>https?://\S+/(?P<name>\S+))'
 GITHUB = r'(?P<github>[\w\-]+/(?P<name>[\w\-]+))'
 BRANCH = r'(:(?P<branch>[\w\-]+))?'
@@ -93,7 +105,7 @@ def package_string_parse_many(package_strings):
         name = groups['name']
         branch = '' if not groups['branch'] else groups['branch']
         version = '' if not groups['version'] else groups['version']
-        path = 'lib/' + name if not groups['path'] else groups['path']
+        path = 'pkg/' + name if not groups['path'] else groups['path']
         packages.append(Package(name, url, branch, version, path))
     return packages
 
@@ -101,7 +113,7 @@ def package_string_parse_many(package_strings):
 def package_list_read(pkgpath):
     """Read package list"""
     try:
-        with open(pkgpath + '/pkglist', 'r') as pkglistfile:
+        with open(PACKAGE_LIST_FILE, 'r') as pkglistfile:
             return json.loads(pkglistfile.read())
     except Exception:
         return []
@@ -114,7 +126,7 @@ def package_list_add_many(pkgpath, packages):
     repo = package_repo_open(pkgpath)
     newentries = []
     updentries = []
-    with open(pkgpath + '/pkglist', 'r+') as pkglistfile:
+    with open(PACKAGE_LIST_FILE, 'r+') as pkglistfile:
         pkglist = json.loads(pkglistfile.read())
         pkgnames = list(map(lambda x: x['name'], pkglist))
         for package in packages:
@@ -131,7 +143,6 @@ def package_list_add_many(pkgpath, packages):
                 newentries.append(package.name)
         pkglistfile.seek(0)
         pkglistfile.write(json.dumps(pkglist))
-    repo.index.add(['pkglist'])
     if repo.is_dirty():  # Something has changed
         repo.index.commit('Updated package list\n\n' +
                           ('New: %s\n' % ', '.join(newentries)
@@ -147,7 +158,7 @@ def package_list_remove_many(pkgpath, packages):
     repo = package_repo_open(pkgpath)
     uninstalled = []
     unlinked = []
-    with open(pkgpath + '/pkglist', 'r+') as pkglistfile:
+    with open(PACKAGE_LIST_FILE, 'r+') as pkglistfile:
         pkglist = json.loads(pkglistfile.read())
         pkgnames = list(map(lambda x: x['name'], pkglist))
         for package in packages:
@@ -159,9 +170,8 @@ def package_list_remove_many(pkgpath, packages):
             else:
                 del pkglist[index]
                 uninstalled.append(package.name)
-    with open(pkgpath + '/pkglist', 'w') as pkglistfile:
+    with open(PACKAGE_LIST_FILE, 'w') as pkglistfile:
         pkglistfile.write(json.dumps(pkglist))
-    repo.index.add(['pkglist'])
     if repo.is_dirty():  # Something has changed
         repo.index.commit('Updated package list\n\n' +
                           ('Uninstalled: %s\n' % ', '.join(uninstalled)
@@ -184,20 +194,31 @@ def package_repo_init(pkgpath):
     sys.stdout.flush()
     pkgrepo = git.Repo.init(pkgpath)
 
-    with open(pkgpath + '/pkglist', 'w+') as pkglist:
-        pkglist.write('[]')  # Start with empty package list
+    pkglist_exists = os.path.exists(PACKAGE_LIST_FILE)
+    if not pkglist_exists:
+        with open(PACKAGE_LIST_FILE, 'w+') as pkglist:
+            pkglist.write('[]')  # Start with empty package list
 
-    pkgrepo.index.add(['pkglist'])
     pkgrepo.index.commit('Initialized repository')
     writeln('Done')
 
     return pkgrepo
 
 
+def package_link_path(path, package):
+    link_path = os.path.abspath(path + '/' + package.path)
+    return link_path
+
+
+def package_repo_path(path, package):
+    repo_path = os.path.abspath(path + '/.pkg/' + package.name)
+    return repo_path
+
+
 def package_link(path, package):
     """Link package directory from pkgpath to package.path"""
     install_path = os.path.abspath(package_dir_path(path) + '/' + package.name)
-    link_path = os.path.abspath(path + '/' + package.path)
+    link_path = package_link_path(path, package)
     link_basedir = '/'.join(link_path.split('/')[:-1])
     try:
         os.mkdir(link_basedir)
@@ -225,9 +246,11 @@ def _package_install_unsafe(path, package, pkgrepo, pkglist, pkgnames):
     """
     write('Installing %s... ' % package.name)
     sys.stdout.flush()
-    if package.name in pkgnames:
+    repo_path = package_repo_path(path, package)
+    if package.name in pkgnames and os.path.exists(repo_path):
         index = pkgnames.index(package.name)
-        if package.path in pkglist[index]['paths']:
+        link_path = package_link_path(path, package)
+        if package.path in pkglist[index]['paths'] and os.path.lexists(link_path):
             writeln('Already installed.')
             raise AlreadyInstalledException(link_updated=False)
         else:
@@ -283,9 +306,19 @@ def package_install(path, package, batch=False, pkgrepo=None, pkglist=None):
     return True
 
 
+def package_install_pkglist(path):
+    pkglist = package_list_read(package_dir_path(path))
+    packages = [Package.from_dict(json) for json in pkglist]
+    package_install_many_parsed(path, packages)
+
+
 def package_install_many(path, packages):
+    pkglist = package_string_parse_many(packages)
+    package_install_many_parsed(path, pkglist)
+
+
+def package_install_many_parsed(path, packages):
     """Install a list of packages"""
-    packages = package_string_parse_many(packages)
     installed_packages = []
     pkgpath = package_dir_path(path)
     pkglist = package_list_read(pkgpath)

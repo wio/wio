@@ -96,9 +96,10 @@ def get_files_recursively(directory, extensions=None):
 def get_files(path, extensions=None):
     """gathers a list of all the files with the extensions in a directory"""
 
+    if not os.path.exists(path):
+        return []
     arr = []
     all_files = os.listdir(path)
-
     for file in all_files:
         if not os.path.isdir(path + '/' + file) and extensions is not None and os.path.splitext(file)[1] in extensions:
             arr.append(linux_path(path + '/' + file))
@@ -111,6 +112,8 @@ def get_files(path, extensions=None):
 def get_dirs_recursively(path):
     """gathers a list of all the subdirectories recursively inside the path"""
 
+    if not os.path.exists(path):
+        return []
     arr = []
     for root, dirs, files in os.walk(path):
         curr_path = '/'.join(root.split(os.sep))
@@ -124,6 +127,8 @@ def get_dirs_recursively(path):
 def get_dirs(path):
     """gathers a list of all the subdirectories inside the path"""
 
+    if not os.path.exists(path):
+        return []
     arr = []
     for file in os.listdir(path):
         if os.path.isdir(path + '/' + file):
@@ -135,6 +140,8 @@ def get_dirs(path):
 def get_dirnames(path):
     """gathers a list of all the names of subdirectories inside the path"""
 
+    if not os.path.exists(path):
+        return []
     arr = []
     for file in os.listdir(path):
         if os.path.isdir(path + '/' + file):

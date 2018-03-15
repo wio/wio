@@ -50,6 +50,13 @@ def parse():
         '--ide',
         help='update project structure for specific ide (default: none)',
         type=str)
+    make_parser = subparsers.add_parser(
+        'make',
+        help='make configured project')
+    make_parser.add_argument(
+        '--make',
+        help='path to make binary',
+        type=str)
     build_parser = subparsers.add_parser(
         'build',
         help='build project')
@@ -140,8 +147,16 @@ def main():
     elif options.action == 'update':
         handle.update_wcosa(path, Board(options.board), IDE(options.ide))
     elif options.action == 'build':
-        use.build_wcosa(path, Generator(options.generator),
-                        options.make, options.cmake)
+        use.build_wcosa(
+            path,
+            Generator(options.generator),
+            options.make,
+            options.cmake)
+    elif options.action == 'make':
+        use.build_wcosa(
+            path,
+            make=options.make,
+            needs_cmake=False)
     elif options.action == 'upload':
         use.upload_wcosa(path, Port(options.port))
     elif options.action == 'clean':
@@ -150,7 +165,10 @@ def main():
         monitor.serial_monitor(options.port, options.baud)
     elif options.action == 'package':
         if options.package_command == 'install':
-            package_manager.package_install_many(
+            if not options.package:
+                package_manager.package_install_pkglist(options.path)
+            else:
+                package_manager.package_install_many(
                     options.path,
                     ' '.join(options.package).split(', '))
         elif options.package_command == 'update':
