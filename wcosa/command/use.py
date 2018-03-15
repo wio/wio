@@ -11,14 +11,10 @@ import subprocess
 
 import serial.tools.list_ports
 
-from wcosa.command import handle
 from wcosa.objects import settings
 from wcosa.objects.objects import (
-    Board,
     Fore,
     Generator,
-    IDE,
-    Path,
 )
 from wcosa.utils import helper, output
 from wcosa.utils.finder import (
@@ -28,7 +24,7 @@ from wcosa.utils.finder import (
 )
 
 
-def build_wcosa(path, generator, make=None, cmake=None):
+def build_wcosa(path, generator=None, make=None, cmake=None, needs_cmake=True):
     """build wcosa project, cmake and make"""
 
     path = str(path)
@@ -71,7 +67,7 @@ def build_wcosa(path, generator, make=None, cmake=None):
 
     output.writeln('done')
 
-    if not str(generator):
+    if not generator or not str(generator):
         generator = Generator(get_generator_for(make_program))
 
     # check if path is valid and get build information from the user config
@@ -95,15 +91,18 @@ def build_wcosa(path, generator, make=None, cmake=None):
             output.writeln('Since a new board is detected, full build will be triggered', Fore.GREEN)
             clean_wcosa(path)
 
-    output.writeln('Running the build using cmake and ' + str(generator), Fore.GREEN)
-    cmake_code = subprocess.call(['cmake', '-G', str(generator), '..'])
-
-    if cmake_code != 0:
-        output.writeln('Project build unsuccessful, cmake exited with error code ' + str(cmake_code), Fore.RED)
-        quit(2)
+    if needs_cmake:
+        output.writeln('Running the build using cmake and ' + str(generator), Fore.GREEN)
+        cmake_code = subprocess.call(['cmake', '-G', str(generator), '..'])
+        if cmake_code != 0:
+            output.writeln('Project build unsuccessful, cmake exited with error code ' + str(cmake_code), Fore.RED)
+            quit(2)
 
     make_code = subprocess.call([make_program])
-
+    # make returns 2 if the project has not been configured
+    if make_code == 2 or make_code == '2':
+        output.writeln('No Makefiles present, run wcosa build', Fore.RED)
+        quit(2)
     if make_code != 0:
         output.writeln('Project build unsuccessful, make exited with error code ' + str(make_code), Fore.RED)
         quit(2)
@@ -202,9 +201,6 @@ def upload_wcosa(path, port):
 
     # do not print the updating logs
     output.output_status(False)
-    handle.update_wcosa(Path(path), Board(None), IDE(None))
-    build_wcosa(path, Generator(None))
-    output.output_status(True)
 
     # reset the port in the user config to the port that was there
     with open(path + '/config.json', 'w') as f:

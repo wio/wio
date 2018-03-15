@@ -20,6 +20,8 @@ END_TAG = '% end'
 FILL_BLOCK_START = '{{'
 FILL_BLOCK_END = '}}'
 
+LIB_SUBDIR = 'lib'
+PKG_SUBDIR = 'pkg'
 
 SRC_FILE_EXTS = ('.cpp', '.c', '.cc')
 HDR_FILE_EXTS = ('.hh', '.h')
@@ -29,7 +31,9 @@ def lib_search(content, project_data):
     """searches for library paths and then completes the templates to include search paths and build library"""
 
     str_to_return = ''
-    for lib in get_dirs(project_data['current-path'] + '/lib'):
+    lib_path = project_data['current-path'] + '/' + LIB_SUBDIR
+    pkg_path = project_data['current-path'] + '/' + PKG_SUBDIR
+    for lib in get_dirs(lib_path) + get_dirs(pkg_path):
         src_files = []
         hdr_files = []
         lib_paths = lib
@@ -101,10 +105,11 @@ def cosa_search(content, project_data):
 def firmware_gen(content, project_data):
     """searches for src files and then generates the firmware code for linking and building the project"""
 
-    curr_lib_path = project_data['current-path'] + '/lib'
+    curr_lib_path = project_data['current-path'] + '/' + LIB_SUBDIR
+    curr_pkg_path = project_data['current-path'] + '/' + PKG_SUBDIR
     str_to_return = ''
 
-    lib_files = ' '.join(get_dirnames(curr_lib_path))
+    lib_files = ' '.join(get_dirnames(curr_lib_path) + get_dirnames(curr_pkg_path))
 
     data = {
         'name': project_data['project-name'],

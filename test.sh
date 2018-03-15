@@ -36,11 +36,11 @@ rm -rf test-wcosa
 mkdir test-wcosa
 cd test-wcosa
 wcosa package install waterloop/wlib
-test -d .pkg/wlib && test -d lib/wlib # Exists and linked at lib/wlib
+test -d .pkg/wlib && test -d pkg/wlib # Exists and linked at pkg/wlib
 wcosa package install waterloop/wlib at wlib-alt
 test -d wlib-alt # Now also linked at wlib-alt
-test $(readlink wlib-alt) = $(readlink lib/wlib) # Point to same location
+test $(readlink wlib-alt) = $(readlink pkg/wlib) # Point to same location
 wcosa package remove waterloop/wlib at wlib-alt
 test -d .pkg/wlib && test ! -d wlib-alt # Still exists, but not at wlib-alt
 wcosa package remove waterloop/wlib
-test ! -d .pkg/wlib && test ! -L lib/wlib # Does not exist and no dangling link
+test ! -d .pkg/wlib && test ! -L pkg/wlib # Does not exist and no dangling link
