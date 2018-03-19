@@ -1,9 +1,0 @@
-ide: "none"
-framework: "cosa"
-platform: "avr"
-tests: False
-clean: False
-gui: False
-file: "none"
-port: "none"
-version: "0.0.1"

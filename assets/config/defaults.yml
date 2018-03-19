@@ -1,0 +1,9 @@
+# This contains all the default values for commandline arguments
+# Path values are not included because they are machine specific
+
+ide: "none"
+framework: "cosa"
+platform: "avr"
+file: "none"
+port: "none"
+version: "0.0.1"

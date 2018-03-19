@@ -1,14 +1,13 @@
 package main
 
-type Config struct {
+// DConfig contains configurations for default commandline arguments
+type DConfig struct {
     Ide string
     Framework string
     Platform string
-    Tests bool
-    Clean bool
-    Gui bool
     File string
     Port string
     Version string
+    Authors []string
 }
 
