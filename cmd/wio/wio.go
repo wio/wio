@@ -13,9 +13,11 @@ import (
     "os"
     "log"
     "fmt"
+    "path/filepath"
 
     "github.com/urfave/cli"
     util "../../internal/ioutils"
+    commandCreate "../../internal/commands/create"
 )
 
 func main()  {
@@ -106,7 +108,7 @@ Run "wio help" to see global options.
                 cli.Command{
                     Name:      "lib",
                     Usage:     "Creates a wio library, intended to be used by other people",
-                    UsageText: "wio create package <DIRECTORY> [command options]",
+                    UsageText: "wio create package <BOARD> <DIRECTORY> [command options]",
                     Flags: []cli.Flag{
                         cli.StringFlag{Name: "ide",
                             Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
@@ -117,17 +119,33 @@ Run "wio help" to see global options.
                         cli.StringFlag{Name: "platform",
                             Usage: "Platform being used for this project. Platform is the type of chip supported (AVR/ ARM)",
                             Value: defaults.Platform},
-                        cli.StringFlag{Name: "board",
-                            Usage: "Board supported for this library",
-                            Value: defaults.Board},
                     },
                     Action: func(c *cli.Context) error {
+                        // check if user defined a board
                         if len(c.Args()) == 0 {
+                            fmt.Println("A Board is needed to create this wio library!")
+                            fmt.Println("\nExecute `wio create app -h` for more details and help")
+                            os.Exit(1)
+                        } else if len(c.Args()) == 1 {
                             fmt.Println("A Directory path/name is needed to create this wio library!")
                             fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         }
-                        fmt.Println("Hello package")
+
+                        directory, _ := filepath.Abs(c.Args()[1])
+
+                        libConfig := commandCreate.ConfigCreate{
+                            AppType: "lib",
+                            Directory: directory,
+                            Board: c.Args()[0],
+                            Framework: c.String("framework"),
+                            Platform: c.String("platform"),
+                            Ide: c.String("ide"),
+                            Tests: true,
+                        }
+
+                        commandCreate.Execute(libConfig)
+
                         return nil
                     },
                 },
@@ -160,7 +178,21 @@ Run "wio help" to see global options.
                             fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         }
-                        fmt.Println("Hello app")
+
+                        directory, _ := filepath.Abs(c.Args()[1])
+
+                        appConfig := commandCreate.ConfigCreate{
+                            AppType: "app",
+                            Directory: directory,
+                            Board: c.Args()[0],
+                            Framework: c.String("framework"),
+                            Platform: c.String("platform"),
+                            Ide: c.String("ide"),
+                            Tests: c.Bool("tests"),
+                        }
+
+                        commandCreate.Execute(appConfig)
+
                         return nil
                     },
                 },

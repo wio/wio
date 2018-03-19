@@ -16,4 +16,3 @@ type DConfig struct {
     Btarget string
     Utarget string
 }
-
