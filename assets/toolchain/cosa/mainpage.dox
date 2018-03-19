@@ -1,0 +1,596 @@
+/** @mainpage Che Cosa?
+
+Cosa is an object-oriented platform for Arduino. It replaces the Arduino
+and Wiring library with a large set of integrated classes that support
+the full range of AVR/ATmega/ATtiny internal hardware modules; all pin
+modes, Digital, and Analog Pins, External and Pin Change Interrupts,
+Analog Comparator, PWM, Watchdog, Timer0/Timer2 (RTT), Timer1 (Servo/Tone),
+UART, USI, SPI, TWI and EEPROM.
+
+Cosa is implemented as an Arduino IDE core. The Cosa platform can be
+used with almost all Arduino boards and ATtiny/ATmega processors. All
+classes may be compiled for all variants.
+
+Though object-oriented with optional operator overloading syntax,
+Cosa is between 2-10X faster than Arduino with regard to digital pin
+functions. This comes with a small price-tag; memory, 4 bytes per
+digital pin and 9 bytes per analog pin. Cosa analog pin objects
+holds the latest sample, and allows an event and interrupt
+handler. See the benchmarks in the examples directory for further
+details.
+
+Cosa contains several data streaming formats for message passing and
+data streaming. Google Protocol Buffers are supported together with a
+data streaming format (Ciao) for encoding of C/C++ language data types
+such as strings, integer and floating pointer numbers into a binary
+format. It may be used for a number of applications; tracing, remote
+procedure calls, data exchange between Arduino devices, etc. The
+format allows user data types to be defined and values exchanged
+without additional encoding. The stream header itself is a pre-defined
+serializable data type. Ciao is used to define an Arduino monitoring
+and control language (Cosa fai) which has much in common with
+Firmata.
+
+The primary programming paradigm is object-oriented and
+state-machine/event driven with proto-threads or multi-tasking. There
+is a large number of device drivers available for SPI, I2C (TWI) and
+1-Wire (OWI). A strict directory structure is used to organize the
+Cosa/driver source code. Sub-directories are used for each driver
+type. This allows a foundation for scaling and configuration.
+
+Cosa uses the Arduino IDE and build system. Cosa classes are included
+with prefix, e.g. "Cosa/FileName.hh". It is possible to use both
+Arduino and Cosa functions together, though in some cases the Cosa
+objects may become inconsistent.
+
+To improve debugging and testing there is assert/trace/syslog style
+support. The IOStream class allows output to both serial wire/wireless
+communication (UART/VWIO) and small TFT displays (such as the ST7735,
+ST7565, HD44780, and PCD8544). The Cosa LCD class extends
+IOStream::Device with additional common LCD functions. The Cosa LCD
+Menu class adds a simple framework for creating menu systems with
+program state such as integer ranges, bitsets and enumeration
+variables. All menu data structures are stored in program memory and
+the SRAM requirement is minimum. A macro set hides the details of
+creating the data structures in program memory.
+
+The drawing Canvas class supports basic drawing operation
+and scripting to reduce program memory footprint. The Canvas class
+also supports drawing of icons and multiple fonts (GLCD and UTFT).
+
+The popular VirtualWire library has been refactored to the
+object-oriented style of Cosa (VWI) and extended with three additional
+codecs; Manchester, 4B5B and Bitstuffing. This allows basic ultra
+cheap wireless nodes with RF315/433 receiver and transmitter. For more
+advanced wireless connections there is also drivers for the Nordic
+Semiconductor NRF24L01+ chip, the TI CC1101 Low-Power Sub-1 GHz RF
+Transceiver, and RFM69.
+
+The goal of this project is to provide an efficient programming
+platform for rapid prototyping of "Internet-of-things"-devices. There
+is an Ethernet/Socket with W5100 Ethernet controller device
+driver. This implementation allows streaming direct to the device
+buffers. Cosa also implements a number of IP protocols; DNS, DHCP,
+NTP, HTTP, SNMP and MQTT.
+
+Unfortunately Cosa is not a beginners entry level programming
+platform, though following some of the design patterns in Cosa will
+help beginners build more complex small scale embedded systems with
+richer concurrency and low power consumption.
+
+Please follow the development of this project on the blog
+http://cosa-arduino.blogspot.se and on the Arduino forum,
+http://arduino.cc/forum/index.php/topic,150299.0.html.
+
+@section References
+
+1. D.tools, http://hci.stanford.edu/research/dtools/ <br>
+2. Processing, http://processing.org/ <br>
+3. Wiring, http://wiring.org.co/ <br>
+4. Quantum Leaps, http://www.state-machine.com/ <br>
+5. Concurrency.cc, http://concurrency.cc/ <br>
+6. Arduino, http://www.arduino.cc/ <br>
+7. Firmata, http://www.firmata.org/wiki/Main_Page <br>
+8. LilyPad, http://web.media.mit.edu/~leah/LilyPad/ <br>
+9. Adafruit, http://www.adafruit.com/ <br>
+10. Microduino, http://www.microduino.cc/ <br>
+11. Jeelabs, http://jeelabs.org/ <br>
+12. Teensy, https://www.pjrc.com/ <br>
+13. Pinoccio, https://pinocc.io/ <br>
+14. LowPowerLab, http://lowpowerlab.com/ <br>
+15. Anarduino, http://www.anarduino.com/ <br>
+16. Wicked Device, http://shop.wickeddevice.com/ <br>
+17. MQTT, http://mqtt.org/ <br>
+18. ThingSpeak, https://thingspeak.com/ <br>
+
+@section Naming
+
+* "Ciao"; interjection hello!, goodbye!. <br>
+* "Che cosa"; pronoun; what. <br>
+* "Cosa"; noun thing, matter; pronoun; what?, what!. <br>
+* "Cosa fai"; what do you do? <br>
+* "Nucleo"; kernel. <br>
+* "Rifare"; remake. <br>
+* "Rete"; network. <br>
+* "Tutto"; all. <br>
+
+@section Note
+
+ATtinyX4/X5/X61, Atmega328P, Atmega1284P, Atmega2560 and Atmega32u4
+based Arduino boards (Uno, Mini, Mini Pro, Micro, Nano, Leonardo,
+LilyPad, LilyPad USB, Mighty, Mega, etc) are all supported.
+
+@section License
+
+Copyright (C) 2012-2015, Mikael Patel
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General
+Public License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+Boston, MA  02111-1307  USA
+*/
+
+/** @page page1 Boards
+Cosa Board pin symbol definitions mapping to difference board/processor types.
+Cosa does not use pin numbers as Arduino/Wiring. Instead strong data type is
+used (enum types) for the specific pin classes; InputPin, OutputPin, AnalogPin,
+etc. The actual board implementation class is selected by the build.
+
+* AdaFruit ATmega32U4<br>
+* Anarduino MiniWireless<br>
+* Arduino Diecimila<br>
+* Arduino Duemilanove<br>
+* Arduino Leonardo<br>
+* Arduino Mega 1280<br>
+* Arduino Mega 2560<br>
+* Arduino Micro<br>
+* Arduino Nano<br>
+* Arduino Pro Micro<br>
+* Arduino Pro Mini<br>
+* Arduino Uno<br>
+* Breadboards (ATtinyX4, ATtinyX5, ATtinyX61, ATmega328, ATmega1284)<br>
+* ITEAD Studio IBoard<br>
+* LilyPad Arduino<br>
+* LilyPad Arduino USB<br>
+* LowPowerLab Moteino<br>
+* LowPowerLab Moteino Mega<br>
+* Pinoccio Scout<br>
+* Microduino-Core<br>
+* Microduino-Core32u4<br>
+* Microduino-Core+<br>
+* PJRC Teensy 2.0<br>
+* PJRC Teensy++ 2.0<br>
+* Wicked Device WildFire V3<br>
+
+*/
+
+/** @page page2 Core
+Cosa core data structures, support classes and run-time abstractions.
+
+@section Types
+Common data types and syntax abstractions.
+
+@section Activity
+Issue a function periodically within a given time frame.
+
+@section Alarm
+Issue a function at a specific time. The alarm may be reissued.
+
+@section AnalogComparator
+Compare input values on the positive pin AIN0 and negative pin AIN1 or
+ADCn (class AnalogComparator).
+
+@section AnalogPin
+Abstract analog pin (class AnalogPin). Allows asynchronous sampling.
+
+@section AnalogPins
+Abstract analog pin set (class AnalogPins). Allow sampling of a set of
+pins with interrupt or event handler when completed.
+
+@section BCD
+Simple two digit BCD convertion functions.
+
+@section Bits
+Bit mask, set and field access macro set.
+
+@section BitSet
+Bitset handling.
+
+@section EEPROM
+Driver for the ATmega/ATtiny internal EEPROM and abstraction of EEPROM
+devices.
+
+@section Event
+Event data structure with type, source and value (class Event).
+
+@section ExternalInterruptPin
+Abstract external interrupt pin (class ExternalInterruptPin). Allows
+interrupt handling on the pin value changes.
+
+@section FixedPoint
+Simple class for fixed point number representation (class FixedPoint)
+
+@section Flash
+Abstract interface for SPI Flash Memory.
+
+@section FS
+Abstract interface for File Systems.
+
+@section FSM
+Finite State Machine support class. States are represented as an
+Event handler. Supports timeout events and period timed state
+machines.
+
+@section InputPin
+Abstract input pin (class InputPin). Allows pullup mode.
+
+@section IOPin
+Abstract pin that may switch between input and output pin (class IOPin).
+
+@section Interrupt
+Interface for Interrupt Handlers.
+
+@section LED
+LED support class; background alert and normal blink.
+
+@section Linkage
+The Cosa collection handling class; double linked circulic list.
+
+@section Listener
+Template class for event listener.
+
+@section Lock
+Synchronized block handling class.
+
+@section Memory
+Memory utility.
+
+@section Math
+Mathematical support functions.
+
+@section Note
+Tone generation support definitions.
+
+@section OutputPin
+Abstract output pin (class OutputPin).
+
+@section Periodic
+Periodic function handler. Syntactic sugar for watchdog timeout
+event handlers (class Periodic).
+
+@section Pin
+Arduino pins abstractions (Pin); abstract, input, output, interrupt and
+analog pin. Captures the mapping from Arduino to processor pins.
+Forces declarative programming of pins in sketches.
+
+@section PinChangeInterrupt
+Abstract interrupt pin (class PinChangeInterrupt). Allows interrupt handling
+on the pin value changes.
+
+@section Power
+Power Management and Sleep modes.
+
+@section PWMPin
+Abstract pulse width modulation pin (class PWMPin).
+
+@section Queue
+Template class for ring-buffer for queueing data elements.
+
+@section Resource
+Abstract Resource Handler; secure acquire and release of resources.
+
+@section RTT
+Real-Time Timer (micro/milli-second).
+
+@section Serial
+Abstract Serial IOStream device class.
+
+@section Servo
+Simple Servo motor driver (Timer/OutputPin).
+
+@section Socket
+Abstract network interface. Implemented by W5100 (SPI) device driver.
+
+@section SPI
+The Serial Peripheral Interface (SPI) device driver support class.
+
+@section String
+String handling class.
+
+@section Time
+Common date/time structure for real-time clocks.
+
+@section Tone
+Tone/Note generator.
+
+@section Trace
+Program trace and system log support functions and macros.
+
+@section TWI
+The I2C/TWI device driver support class (Two Wire Interface, TWI).
+
+@section Watchdog
+The Atmega Watchdog is used as a low power timer for period events and
+delay.
+
+@section Wireless
+Abstract interface for wireless devices.
+
+*/
+
+/** @page page3 Communication
+Cosa contains a number of abstract classes to support writing device
+drivers. These are structured using a delegation design pattern.
+
+@section Ciao
+The Cosa Ciao data stream handler is basically a tagged data format
+that supports the C/C++ language data types, descriptors (struct) and
+sequences of these.
+
+@section Fai
+The Cosa Ciao data stream of Arduino status and commands (Cosa Fai).
+
+@section INET
+Support class and function Internet communication and protocols.
+
+@section IOBuffer
+Circlic buffer for IOStreams (class IOBuffer). Size must be
+Power(2). May be used as a string buffer device, or to connect
+different IOStreams.
+
+@section IOEvent
+IOStream filter class that may push events when data has been received
+and send completed.
+
+@section IOStream
+Basic in-/output stream support class IOStream. Requires implementation of
+Stream::Device and/or Stream::Filter.
+
+@section OWI
+The 1-wire device driver support class (One Wire Interface, OWI). Allows
+device rom search and connection to multiple devices on one-wire bus.
+
+*/
+
+/** @page page4 Wired
+The ATmega/tiny processors contain several module for serial
+communication with other devices (UART, TWI and SPI). A number of
+hardware device also use the 1-Wire protocol (OWI). TWI, SPI and OWI
+are defined with Driver and Device abstract classes to allow both
+device drivers and slave devices. As a slave device the ATmega/tiny
+may act as a device on the wire.
+
+@section UART
+Basic UART device handler with internal buffering. The class
+requires an input- and output IOBuffer instance. UART is a sub-class
+of IOStream::Device. See Trace for typical usage.
+
+@section CDC
+USB Serial communication with internal buffering.
+
+@section RS485
+Basic RS485 device handler with internal buffering. An extension of
+the UART class with 485/DE signal handling on message
+completion. Simple master/slave protocol inspired by MODBUS.
+
+*/
+
+/** @page page5 Wireless
+Cosa provides an object-oriented version of VirtualWire (VWI) which
+acts as a device driver for RF433/335 modules. Cosa also support the
+NRF24L01+ and TI CC1101 devices.
+
+@section CC1101
+Device driver for the TI CC1101 Low-Power Sub-1 GHz RF Transceiver (SPI).
+
+@section IR
+An elementary IR receiver driver class for TSOP4838 (InputPin).
+
+@section NEXA
+NEXA Wireless (RF433) Lighting Control receiver and transmitter
+(ExternalInterruptPin/OutputPin).
+
+@section NRF24L01P
+Driver for the nRF24L01 Single Chip 2.4GHz Transceiver (SPI).
+
+@section RFM69
+Driver for the RFM69W/HW ISM Transceiver Modules (SPI).
+
+@section VWI
+VWI (Virtual Wire Interface) provides features to send short messages,
+without addressing, retransmit or acknowledgment, a bit like UDP over
+wireless, using ASK (Amplitude Shift Keying). Supports a number of
+inexpensive radio transmitters and receivers (RF315/433), and may be
+configured to use different codecs; VirtualWireCodec, ManchesterCodec,
+Block4B5BCodec, and BitstuffingCodec (InputPin/Timer).
+*/
+
+/** @page page6 Internet
+High-level Internet (IP) protocol implemented with the Socket interface.
+
+@section W5100
+The W5100 Ethernet Controller device driver support class
+(SPI). Implements the Socket Interface.
+
+@section DHCP
+Dynamic Host Configuration Protocol (DHCP). Request network address for device.
+
+@section DNS
+Domain Name Service access class (DNS). Request network address for other
+device using symbolic (readable) name.
+
+*/
+
+/** @page page7 Sensors
+@section Button
+Debounded Button; Sampled input pin (with internal pullup
+resistor). Uses a watchdog timeout event (64 ms) for sampling and
+on change calls an event action. Subclass Button and implement the
+virtual on_change() method.
+
+@section Keypad
+Handling of keypad using resistor net and analog reading. Periodically
+samples the analog pin and maps to key code. Callback on_key_down/up()
+are called when a key down/up is detected.
+
+@section Rotary Encoder
+State machine based Rotary Encoder handler. Uses interrupt pins and
+pushes an Event::CHANGE_TYPE on change with direction. Subclass
+Rotary::Encoder and implement the virtual on_event() method. Support
+for Dials both normal and accelerated.
+
+@section Touch
+Touch Capacitive Sensor using periodic discharging to detect a
+sensor touch.
+
+@section DHT11
+DHT11 Humidity & Temperature Sensor device driver. Subclass
+and implement the event handler, on_event(), to allow periodic
+read of device (OutputPin/InputPin).
+
+@section HC-SR04
+Device driver for Ultrasonic range module HC-SR04. Subclass
+and implement the change event handler, on_change(). Attach
+to watchdog timeout queue to perform periodic read and check
+of change (InputPin).
+
+@section DS18B20
+Driver for the DS18B20 Programmable Resolution 1-Write Digital
+Thermometer (OWI).
+
+@section ADXL345
+Driver for the ADXL345 Digital Accelerometer (TWI).
+
+@section HMC5883L
+Driver for the HMC5883L 3-Axis Digital Compass (TWI).
+
+@section PCF8591
+Driver for the PCF8591 2-Wire 8-bit A/D and D/A converter (TWI).
+
+@section BMP085
+Driver for the BMP085 Digital Pressure sensor (TWI).
+
+@section L3G4200D
+Driver for the L3G4200D Digital Gyroscope (TWI).
+
+@section MPU6050
+Driver for MPU6050 Motion Processing Unit; Digital thermometer,
+accelerometer and gyroscope (TWI).
+*/
+
+/** @page page8 Displays
+Cosa display abstraction and device drivers.
+
+@section Canvas
+Virtual Canvas device; abstraction of small screens, LCD/TFT, with
+Font and Icon handling. The class Element may be used to define
+graphical objects with local graphical Context. See Textbox for an
+example of Element.
+
+@section LCD
+Abstract character based LCD device driver interface and support
+adapters (SPI and Pins).
+
+@section ST7735
+Device driver for ST7735, 262K Color Single-Chip TFT Controller (SPI).
+
+@section ST7565
+Device driver for ST7565 64x128 pixels matrix LCD controller/driver
+(Serial OutputPin).
+
+@section PCD8544
+Device driver for PCD8544 48x84 pixels matrix LCD controller/driver
+(Serial OutputPin).
+
+@section HD44780
+Device driver for HD44780 (aka 1602) 16x2/20x4 character LCD
+controller/driver (Serial OutputPin/Port direct/SPI).
+*/
+
+/** @page page9 Storage
+@section AT24CXX
+Driver for the AT24CXX 2-Wire Serial EEPROM (TWI). Allows page
+write and block read. Supports device AT24C32 (8K) to AT24C512
+(64K).
+
+@section SD
+Driver for block level access of SD cards (SPI).
+
+@section FAT16
+FAT16 file system and file access on SD cards (SPI).
+*/
+
+/** @page page10 Auxiliary
+
+@section DS1302
+Driver for the DS1302, Trickle-Charge Timekeeping Chip, 31 X 8 RAM (Pins).
+
+@section DS1307
+Driver for the DS1307, 64 X 8, Serial I2C Real-Time Clock (TWI).
+
+@section DS3231
+Driver for the DS3231, Extremely Accurate I2C-Integrated RTC/TCXO/Crystal.
+
+@section PCF8574
+Driver for the PCF8574/PCF8574A Remote 8-bit I/O expander for I2C-bus
+with interrupt.
+
+*/
+
+/** @page page11 Libraries
+
+@section ICMP
+ICMP Ping support class.
+
+@section HTTP
+HTTP support classes HTTP::Server and HTTP::Client.
+
+@section MQTT
+MQTT V3.1 client support class MQTT::Client.
+
+@section NEXA
+NEXA Wireless Protocol sender and receiver.
+
+@section NTP
+Network Time Protocol (NTP) to access clock on internet server.
+
+@section Nucleos
+Coroutine based multi-tasking; threads, semaphore, mutex and actors.
+
+@section ProtocolBuffer
+The Cosa implementation of Google ProtocolBuffer data streaming.
+
+@section ProtoThread
+Cosa implementation of protothreads; A protothread is a
+low-overhead mechanism for concurrent programming. Protothreads
+function as stackless, lightweight threads providing a blocking
+context using minimal memory per protothread. Cosa/ProtoThread
+supports event to thread mapping and timers (class ProtoThread).
+
+@section Shell
+Command line parse and execution support.
+
+@section SNMP
+Small Network Management Protocol agent support class (SNMP).
+
+@section Telnet
+Telnet server support class.
+
+@section ThingSpeak
+ThingSpeak channel and talkback support class.
+
+@section UML
+UML actors classes and run-time.
+
+*/
+
