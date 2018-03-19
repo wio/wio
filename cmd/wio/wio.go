@@ -1,16 +1,12 @@
 // Copyright 2018 Waterloop. All rights reserved.
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
-// Author: Deep Dhillon
-// Last Modified: 03/18/2018
-
-/*
-    Wio is a tool to make development of embedded system applications easier and simpler.
-    It allows for building, testing, and uploading AVR applications for Commandline.
- */
 
 
-package main
+// Package main contains the main code for Wio.
+// Wio is a tool to make development of embedded system applications easier and simpler.
+// It allows for building, testing, and uploading AVR applications for Commandline.
+ package main
 
 import (
     "time"
@@ -321,17 +317,56 @@ Run "wio help" to see global options.
             },
         },
         {
-            Name:      "upgrade",
-            Usage:     "Upgrades the current version of the program",
-            UsageText: "wio upgrade [command options]",
-            Flags: []cli.Flag{
-                cli.StringFlag{Name: "version",
-                    Usage: "Specify the exact version to upgrade/downgrade wio to",
-                    Value: defaults.Version,
+          Name: "packager",
+          Usage: "Package manager for Wio projects",
+          Subcommands: cli.Commands{
+              cli.Command{
+                Name: "get",
+                Usage: "Gets all the packages being used in the project",
+                  Flags: []cli.Flag{
+                      cli.BoolFlag{Name: "clean",
+                          Usage: "Cleans all the current packages and re get all of them",
+                      },
+                  },
+                Action: func(c *cli.Context) error {
+                      return nil
+                  },
+              },
+              cli.Command{
+                  Name: "update",
+                  Usage: "Updates all the packages being used in the project and makes sure they are correct version",
+                  Action: func(c *cli.Context) error {
+                      return nil
+                  },
+              },
+          },
+        },
+        {
+            Name: "tool",
+            Usage: "Contains various tools related to setup, initialize and upgrade of Wio",
+            Subcommands: cli.Commands{
+                cli.Command{
+                    Name:      "setup",
+                    Usage:     "When tool is newly installed, it sets up the tool for the machine",
+                    UsageText: "wio setup",
+                    Action: func(c *cli.Context) error {
+                        return nil
+                    },
                 },
-            },
-            Action: func(c *cli.Context) error {
-                return nil
+                cli.Command{
+                    Name:      "upgrade",
+                    Usage:     "Upgrades the current version of the program",
+                    UsageText: "wio upgrade [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "version",
+                            Usage: "Specify the exact version to upgrade/downgrade wio to",
+                            Value: defaults.Version,
+                        },
+                    },
+                    Action: func(c *cli.Context) error {
+                        return nil
+                    },
+                },
             },
         },
     }
