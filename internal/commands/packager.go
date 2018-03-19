@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Cleans all the build files for the project
+// Package manager for wio
 package commands
