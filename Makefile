@@ -30,5 +30,6 @@ run:
 
 deps:
 	@echo Gathering dependencies:
-	$(GOGET) -u -v github.com/miguelmota/go-coinmarketcap gopkg.in/urfave/cli.v2 github.com/anaskhan96/soup
+	$(GOGET) -u -v "github.com/urfave/cli"
+	$(GOGET) -u -v "gopkg.in/yaml.v2"
 	@echo Dependencies up to date!
