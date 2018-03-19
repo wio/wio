@@ -1,4 +1,4 @@
-wcosa/
+.wio/
 pkg/
 .pkg/
 CMakeListsPrivate.txt

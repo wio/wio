@@ -12,6 +12,8 @@ type DConfig struct {
     File string
     Port string
     Version string
-    Authors []string
+    Board string
+    Btarget string
+    Utarget string
 }
 
