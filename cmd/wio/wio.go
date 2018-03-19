@@ -17,8 +17,9 @@ import (
     "os"
     "log"
     "fmt"
-    "../util"
+
     "github.com/urfave/cli"
+    util "../../internal/ioutils"
 )
 
 func main()  {
@@ -88,25 +89,16 @@ Options:
    {{end}}{{end}}
 Run "wio help" to see global options.
 `
-    defaults := Config{}
-    data, _ := util.FileToString("cmd/wio/wio-config.yml")
+    // get default configuration values
+    defaults := DConfig{}
+    data, _ := util.FileToString("assets/config/defaults.yml")
     util.ToYmlStruct(data, &defaults)
-    
+
     app := cli.NewApp()
     app.Name = "wio"
     app.Version = defaults.Version
     app.EnableBashCompletion = true
     app.Compiled = time.Now()
-    app.Authors = []cli.Author{
-        {
-            Name:  "Deep Dhillon",
-            Email: "deep@deepdhillon.ca",
-        },
-        {
-            Name:  "Jeff Niu",
-            Email: "jeffniu22@gmail.com",
-        },
-    }
     app.Copyright = "Copyright (c) 2018 Waterloop"
     app.Usage = "Create, Build and Upload AVR projects"
 

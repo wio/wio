@@ -1,4 +1,4 @@
-package waterloop_utils
+package ioutils
 
 import (
     "io/ioutil"
@@ -16,6 +16,7 @@ const (
 
 // Reads the file and provides it's content as a string
 func FileToString(fileName string) (string, error) {
+    fileName, _ = GetPath(fileName)
     buff, err := ioutil.ReadFile(fileName)
     str := string(buff)
 
