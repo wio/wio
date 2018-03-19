@@ -104,8 +104,8 @@ Run "wio help" to see global options.
             Usage: "Creates and initializes a wio project.\n\nIt also works as an updater when called on already created projects.",
             Subcommands: cli.Commands{
                 cli.Command{
-                    Name:      "package",
-                    Usage:     "Creates a wio package, intended to be used by other people",
+                    Name:      "lib",
+                    Usage:     "Creates a wio library, intended to be used by other people",
                     UsageText: "wio create package <DIRECTORY> [command options]",
                     Flags: []cli.Flag{
                         cli.StringFlag{Name: "ide",
@@ -117,16 +117,17 @@ Run "wio help" to see global options.
                         cli.StringFlag{Name: "platform",
                             Usage: "Platform being used for this project. Platform is the type of chip supported (AVR/ ARM)",
                             Value: defaults.Platform},
-
+                        cli.StringFlag{Name: "board",
+                            Usage: "Board supported for this library",
+                            Value: defaults.Board},
                     },
                     Action: func(c *cli.Context) error {
                         if len(c.Args()) == 0 {
-                            fmt.Println("A Directory path/name is needed to create this wio application!")
-                            fmt.Println("Execute `wio create app -h` for more details and help")
+                            fmt.Println("A Directory path/name is needed to create this wio library!")
+                            fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         }
                         fmt.Println("Hello package")
-                        fmt.Println(c.String("ide"))
                         return nil
                     },
                 },
@@ -152,15 +153,14 @@ Run "wio help" to see global options.
                         // check if user defined a board
                         if len(c.Args()) == 0 {
                             fmt.Println("A Board is needed to create this wio application!")
-                            fmt.Println("Execute `wio create app -h` for more details and help")
+                            fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         } else if len(c.Args()) == 1 {
                             fmt.Println("A Directory path/name is needed to create this wio application!")
-                            fmt.Println("Execute `wio create app -h` for more details and help")
+                            fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         }
                         fmt.Println("Hello app")
-                        fmt.Println(c.String("platform"))
                         return nil
                     },
                 },
@@ -173,7 +173,10 @@ Run "wio help" to see global options.
             Flags: []cli.Flag{
                 cli.BoolFlag{Name: "clean",
                     Usage: "Clean the project before building it",
-
+                },
+                cli.StringFlag{Name: "target",
+                    Usage: "Build a specified target instead of building all the targets",
+                    Value: defaults.Btarget,
                 },
             },
             Action: func(c *cli.Context) error {
@@ -204,6 +207,10 @@ Run "wio help" to see global options.
                     Usage: "Port to upload the project to",
                     Value: defaults.Port,
                 },
+                cli.StringFlag{Name: "target",
+                    Usage: "Uploads a specified target instead of the main/default target",
+                    Value: defaults.Utarget,
+                },
             },
             Action: func(c *cli.Context) error {
                 return nil
@@ -225,6 +232,10 @@ Run "wio help" to see global options.
                     Usage: "Port to upload the project to, (default: automatically select)",
                     Value: defaults.Port,
                 },
+                cli.StringFlag{Name: "target",
+                    Usage: "Builds, and uploads a specified target instead of the main/default target",
+                    Value: defaults.Utarget,
+                },
             },
             Action: func(c *cli.Context) error {
                 return nil
@@ -241,6 +252,10 @@ Run "wio help" to see global options.
                 cli.StringFlag{Name: "port",
                     Usage: "Port to upload the project to, (default: automatically select)",
                     Value: defaults.Port,
+                },
+                cli.StringFlag{Name: "target",
+                    Usage: "Builds, and uploads a specified target instead of the main/default target",
+                    Value: defaults.Utarget,
                 },
             },
             Action: func(c *cli.Context) error {
@@ -317,32 +332,32 @@ Run "wio help" to see global options.
             },
         },
         {
-          Name: "packager",
-          Usage: "Package manager for Wio projects",
-          Subcommands: cli.Commands{
-              cli.Command{
-                Name: "get",
-                Usage: "Gets all the packages being used in the project",
-                  Flags: []cli.Flag{
-                      cli.BoolFlag{Name: "clean",
-                          Usage: "Cleans all the current packages and re get all of them",
-                      },
-                  },
-                Action: func(c *cli.Context) error {
-                      return nil
-                  },
-              },
-              cli.Command{
-                  Name: "update",
-                  Usage: "Updates all the packages being used in the project and makes sure they are correct version",
-                  Action: func(c *cli.Context) error {
-                      return nil
-                  },
-              },
-          },
+            Name:  "packager",
+            Usage: "Package manager for Wio projects",
+            Subcommands: cli.Commands{
+                cli.Command{
+                    Name:  "get",
+                    Usage: "Gets all the packages being used in the project",
+                    Flags: []cli.Flag{
+                        cli.BoolFlag{Name: "clean",
+                            Usage: "Cleans all the current packages and re get all of them",
+                        },
+                    },
+                    Action: func(c *cli.Context) error {
+                        return nil
+                    },
+                },
+                cli.Command{
+                    Name:  "update",
+                    Usage: "Updates all the packages being used in the project and makes sure they are correct version",
+                    Action: func(c *cli.Context) error {
+                        return nil
+                    },
+                },
+            },
         },
         {
-            Name: "tool",
+            Name:  "tool",
             Usage: "Contains various tools related to setup, initialize and upgrade of Wio",
             Subcommands: cli.Commands{
                 cli.Command{

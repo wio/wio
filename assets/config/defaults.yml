@@ -7,3 +7,6 @@ platform: "avr"
 file: "none"
 port: "none"
 version: "0.0.1"
+board: "none"
+btarget: "all"        # build target
+utarget: "default"    # upload target

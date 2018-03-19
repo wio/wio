@@ -26,7 +26,7 @@ clean:
 	@echo Cleaning Finished!!
 
 run:
-	@./bin/$(BINARY_NAME)
+	@./bin/$(BINARY_NAME) ${ARGS}
 
 deps:
 	@echo Gathering dependencies:
