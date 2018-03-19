@@ -1,7 +1,10 @@
 package main
 
-func main() {
+import "fmt"
+
+func main()  {
     /*
-    All the command line related code goes here
+    command line code here
      */
+     fmt.Println("Bruhh")
 }
