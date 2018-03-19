@@ -15,9 +15,10 @@ package main
 import (
     "time"
     "os"
-    "github.com/urfave/cli"
     "log"
     "fmt"
+    "../util"
+    "github.com/urfave/cli"
 )
 
 func main()  {
@@ -87,10 +88,13 @@ Options:
    {{end}}{{end}}
 Run "wio help" to see global options.
 `
-
+    defaults := Config{}
+    data, _ := util.FileToString("cmd/wio/wio-config.yml")
+    util.ToYmlStruct(data, &defaults)
+    
     app := cli.NewApp()
     app.Name = "wio"
-    app.Version = "0.0.1"
+    app.Version = defaults.Version
     app.EnableBashCompletion = true
     app.Compiled = time.Now()
     app.Authors = []cli.Author{
@@ -109,7 +113,7 @@ Run "wio help" to see global options.
     app.Commands = []cli.Command{
         {
             Name:  "create",
-            Usage: "Creates and initializes a wio project",
+            Usage: "Creates and initializes a wio project.\n\nIt also works as an updater when called on already created projects.",
             Subcommands: cli.Commands{
                 cli.Command{
                     Name:      "package",
@@ -118,13 +122,14 @@ Run "wio help" to see global options.
                     Flags: []cli.Flag{
                         cli.StringFlag{Name: "ide",
                             Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
-                            Value: "none"},
+                            Value: defaults.Ide},
                         cli.StringFlag{Name: "framework",
                             Usage: "Framework being used for this project. Framework contains the core libraries",
-                            Value: "cosa"},
+                            Value: defaults.Framework},
                         cli.StringFlag{Name: "platform",
                             Usage: "Platform being used for this project. Platform is the type of chip supported (AVR/ ARM)",
-                            Value: "avr"},
+                            Value: defaults.Platform},
+
                     },
                     Action: func(c *cli.Context) error {
                         if len(c.Args()) == 0 {
@@ -133,6 +138,7 @@ Run "wio help" to see global options.
                             os.Exit(1)
                         }
                         fmt.Println("Hello package")
+                        fmt.Println(c.String("ide"))
                         return nil
                     },
                 },
@@ -141,12 +147,15 @@ Run "wio help" to see global options.
                     Usage:     "Creates a wio application, intended to be compiled and uploaded to a device",
                     UsageText: "wio create app <BOARD> <DIRECTORY> [command options]",
                     Flags: []cli.Flag{
+                        cli.StringFlag{Name: "ide",
+                            Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
+                            Value: defaults.Ide},
                         cli.StringFlag{Name: "framework",
                             Usage: "Framework being used for this project. Framework contains the core libraries",
-                            Value: "cosa"},
+                            Value: defaults.Framework},
                         cli.StringFlag{Name: "platform",
                             Usage: "Platform being used for this project. Platform is the type of chip supported (AVR/ ARM)",
-                            Value: "avr"},
+                            Value: defaults.Platform},
                         cli.BoolFlag{Name: "tests",
                             Usage: "Creates a test folder to support unit testing",
                         },
@@ -176,6 +185,7 @@ Run "wio help" to see global options.
             Flags: []cli.Flag{
                 cli.BoolFlag{Name: "clean",
                     Usage: "Clean the project before building it",
+
                 },
             },
             Action: func(c *cli.Context) error {
@@ -200,9 +210,11 @@ Run "wio help" to see global options.
             Flags: []cli.Flag{
                 cli.StringFlag{Name: "file",
                     Usage: "Hex file can be provided to upload; program will upload that file",
+                    Value: defaults.File,
                 },
                 cli.StringFlag{Name: "port",
-                    Usage: "Port to upload the project to, (default: automatically select)",
+                    Usage: "Port to upload the project to",
+                    Value: defaults.Port,
                 },
             },
             Action: func(c *cli.Context) error {
@@ -219,9 +231,11 @@ Run "wio help" to see global options.
                 },
                 cli.StringFlag{Name: "file",
                     Usage: "Hex file can be provided to upload; program will upload that file",
+                    Value: defaults.File,
                 },
                 cli.StringFlag{Name: "port",
                     Usage: "Port to upload the project to, (default: automatically select)",
+                    Value: defaults.Port,
                 },
             },
             Action: func(c *cli.Context) error {
@@ -238,6 +252,7 @@ Run "wio help" to see global options.
                 },
                 cli.StringFlag{Name: "port",
                     Usage: "Port to upload the project to, (default: automatically select)",
+                    Value: defaults.Port,
                 },
             },
             Action: func(c *cli.Context) error {
@@ -254,6 +269,7 @@ Run "wio help" to see global options.
                 },
                 cli.StringFlag{Name: "port",
                     Usage: "Port to upload the project to, (default: automatically select)",
+                    Value: defaults.Port,
                 },
             },
             Action: func(c *cli.Context) error {
@@ -319,6 +335,7 @@ Run "wio help" to see global options.
             Flags: []cli.Flag{
                 cli.StringFlag{Name: "version",
                     Usage: "Specify the exact version to upgrade/downgrade wio to",
+                    Value: defaults.Version,
                 },
             },
             Action: func(c *cli.Context) error {
