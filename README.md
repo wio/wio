@@ -18,6 +18,40 @@ will replace the old tool. Please stay tuned as development progresses
 For `wcosa` tool, check it out here: [wcosa](https://github.com/waterloop/wcosa)
 
 
+## Development
+If anyone is interested in working on this projects, follow the following:
+
+**Getting Setup**
+* Clone this repo:
+```
+git clone https://www.github.com/dhillondeep/wio
+```
+* Create a feature branch and checkout that branch
+* Install dependencies:
+```
+make deps
+```
+* Build project:
+```
+make build
+```
+* Run project:
+```
+// this without any arguments
+make run
+
+// with arguments
+make run ARGS="create -h"
+```
+
+**Commands**
+
+All the commands are split into seperate files inside `internal/commands` package.
+You can write code for each command there and the main file in `cmd/wio` will pick up the changes.
+Every command has an **execute** function. This function is an entry point and is provided will all the information.
+
+
+
 ## Committers
 Deep Dhillon (@dhillondeep)
 
