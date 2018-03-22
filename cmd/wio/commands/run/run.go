@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Cleans all the build files for the project
-package commands
+// Builds, Tests, and Uploads the project to a device
+package run

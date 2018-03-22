@@ -2,10 +2,20 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
+package types
 
-// Part of commands/create package, which contains create command and sub commands provided by the tool.
-// A struct to hold all the data for create command
-package create
+// DConfig contains configurations for default commandline arguments
+type DConfig struct {
+    Ide string
+    Framework string
+    Platform string
+    File string
+    Port string
+    Version string
+    Board string
+    Btarget string
+    Utarget string
+}
 
 type ConfigCreate struct {
     AppType     string
@@ -16,4 +26,3 @@ type ConfigCreate struct {
     Ide         string
     Tests       bool
 }
-

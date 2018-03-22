@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Runs the serial monitor
-package commands
+// Package manager for wio
+package packager

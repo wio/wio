@@ -9,6 +9,7 @@ package create
 
 import (
     "fmt"
+    . "wio/cmd/wio/types"
 )
 
 // Executes lib sub command of create command

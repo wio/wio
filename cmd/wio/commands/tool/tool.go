@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Configures paths for the tools used for development
-package commands
+// Contains various tools related to setup, initialize, and upgrade of Wio
+package tool

@@ -7,8 +7,17 @@
 // Creates and initializes a wio project. It also works as an updater when called on already created projects.
 package create
 
+import (
+    . "wio/cmd/wio/types"
+)
+
 // Executes the create command provided configuration packet
 func Execute(config ConfigCreate) {
+
+    // create a directory
+    // create common project structure
+    // move common template files
+
     if config.AppType == "app" {
         executeApp(config)
     } else {

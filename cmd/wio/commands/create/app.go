@@ -9,6 +9,7 @@ package create
 
 import (
     "fmt"
+    . "wio/cmd/wio/types"
 )
 
 // Executes app sub command of create command
