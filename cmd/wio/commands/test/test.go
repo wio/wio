@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Uploads the project to a device
-package commands
+// Runs unit tests available in the project
+package test

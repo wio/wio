@@ -16,8 +16,9 @@ import (
     "path/filepath"
 
     "github.com/urfave/cli"
-    util "../../internal/ioutils"
-    commandCreate "../../internal/commands/create"
+    util "wio/cmd/wio/utils"
+    commandCreate "wio/cmd/wio/commands/create"
+    . "wio/cmd/wio/types"
 )
 
 func main()  {
@@ -134,7 +135,7 @@ Run "wio help" to see global options.
 
                         directory, _ := filepath.Abs(c.Args()[1])
 
-                        libConfig := commandCreate.ConfigCreate{
+                        libConfig := ConfigCreate{
                             AppType: "lib",
                             Directory: directory,
                             Board: c.Args()[0],
@@ -181,7 +182,7 @@ Run "wio help" to see global options.
 
                         directory, _ := filepath.Abs(c.Args()[1])
 
-                        appConfig := commandCreate.ConfigCreate{
+                        appConfig := ConfigCreate{
                             AppType: "app",
                             Directory: directory,
                             Board: c.Args()[0],

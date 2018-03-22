@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Runs doxygen tool to create documentation for the code
-package commands
+// Cleans all the build files for the project
+package clean

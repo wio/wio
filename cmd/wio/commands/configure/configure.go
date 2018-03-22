@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Runs unit tests available in the project
-package commands
+// Configures paths for the tools used for development
+package configure

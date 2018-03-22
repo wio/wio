@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Show information about the installed tooling
-package commands
+// Builds the project
+package build

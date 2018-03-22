@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Contains various tools related to setup, initialize, and upgrade of Wio
-package commands
+// Uploads the project to a device
+package upload

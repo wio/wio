@@ -30,6 +30,5 @@ run:
 
 deps:
 	@echo Gathering dependencies:
-	$(GOGET) -u -v "github.com/urfave/cli"
-	$(GOGET) -u -v "gopkg.in/yaml.v2"
+	$(GOGET) -t -v ./...
 	@echo Dependencies up to date!

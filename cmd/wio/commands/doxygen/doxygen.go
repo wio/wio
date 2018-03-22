@@ -4,5 +4,5 @@
 
 
 // Part of commands package, which contains all the commands provided by the tool.
-// Analyzes C/C++ code statically
-package commands
+// Runs doxygen tool to create documentation for the code
+package doxygen
