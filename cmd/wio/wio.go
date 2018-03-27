@@ -109,7 +109,7 @@ Run "wio help" to see global options.
                 cli.Command{
                     Name:      "lib",
                     Usage:     "Creates a wio library, intended to be used by other people",
-                    UsageText: "wio create package <BOARD> <DIRECTORY> [command options]",
+                    UsageText: "wio create package <DIRECTORY> <BOARD> [command options]",
                     Flags: []cli.Flag{
                         cli.StringFlag{Name: "ide",
                             Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
@@ -124,21 +124,21 @@ Run "wio help" to see global options.
                     Action: func(c *cli.Context) error {
                         // check if user defined a board
                         if len(c.Args()) == 0 {
-                            fmt.Println("A Board is needed to create this wio library!")
+                            fmt.Println("A Directory path/name is needed to create this wio library!")
                             fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         } else if len(c.Args()) == 1 {
-                            fmt.Println("A Directory path/name is needed to create this wio library!")
+                            fmt.Println("A Board is needed to create this wio library!")
                             fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         }
 
-                        directory, _ := filepath.Abs(c.Args()[1])
+                        directory, _ := filepath.Abs(c.Args()[0])
 
                         libConfig := ConfigCreate{
                             AppType: "lib",
                             Directory: directory,
-                            Board: c.Args()[0],
+                            Board: c.Args()[1],
                             Framework: c.String("framework"),
                             Platform: c.String("platform"),
                             Ide: c.String("ide"),
@@ -153,7 +153,7 @@ Run "wio help" to see global options.
                 cli.Command{
                     Name:      "app",
                     Usage:     "Creates a wio application, intended to be compiled and uploaded to a device",
-                    UsageText: "wio create app <BOARD> <DIRECTORY> [command options]",
+                    UsageText: "wio create app <DIRECTORY> <BOARD> [command options]",
                     Flags: []cli.Flag{
                         cli.StringFlag{Name: "ide",
                             Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
@@ -171,21 +171,21 @@ Run "wio help" to see global options.
                     Action: func(c *cli.Context) error {
                         // check if user defined a board
                         if len(c.Args()) == 0 {
-                            fmt.Println("A Board is needed to create this wio application!")
+                            fmt.Println("A Directory path/name is needed to create this wio application!")
                             fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         } else if len(c.Args()) == 1 {
-                            fmt.Println("A Directory path/name is needed to create this wio application!")
+                            fmt.Println("A Board is needed to create this wio application!")
                             fmt.Println("\nExecute `wio create app -h` for more details and help")
                             os.Exit(1)
                         }
 
-                        directory, _ := filepath.Abs(c.Args()[1])
+                        directory, _ := filepath.Abs(c.Args()[0])
 
                         appConfig := ConfigCreate{
                             AppType: "app",
                             Directory: directory,
-                            Board: c.Args()[0],
+                            Board: c.Args()[1],
                             Framework: c.String("framework"),
                             Platform: c.String("platform"),
                             Ide: c.String("ide"),

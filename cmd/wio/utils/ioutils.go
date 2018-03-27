@@ -53,3 +53,16 @@ func ToYmlStruct(data string, out interface{}) (error) {
     return e
 }
 
+/*
+func CreateRelativeFolder(directory string, path string) {
+    absPath, e := filepath.Abs(directory + string(filepath.Separator) + path)
+
+    TurnVerbose()
+
+    if e != nil {
+        PrintBlue()
+    }
+    os.Mkdir(, os.ModePerm)
+}
+*/
+
