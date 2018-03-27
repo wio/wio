@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "LXF0pCVlBcXJLG+HoSVP+3ZYmpw=",
+			"path": "github.com/logrusorgru/aurora",
+			"revision": "ca24023cc0175fdf372518cb1c5062cc86db2634",
+			"revisionTime": "2018-01-21T01:52:16Z"
+		},
+		{
+			"checksumSHA1": "9/2qvuFPQxW7ZXzQSOYwqZb5cNg=",
+			"path": "github.com/urfave/cli",
+			"revision": "8e01ec4cd3e2d84ab2fe90d8210528ffbb06d8ff",
+			"revisionTime": "2018-02-26T03:02:53Z"
+		},
+		{
+			"checksumSHA1": "HmUAWd1Jm25cGH4Pyf3Zgp2RhkI=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb",
+			"revisionTime": "2018-03-26T05:07:29Z"
+		}
+	],
+	"rootPath": "wio"
+}

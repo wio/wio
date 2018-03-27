@@ -18,5 +18,6 @@ tragets:
 # wio will pull the dependencies based on your platform and framework and will compile it
 dependencies:
   #package1:
+  #  url:
   #  version:
   #  compile_flags:
