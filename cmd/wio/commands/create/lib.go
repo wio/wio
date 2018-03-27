@@ -25,6 +25,7 @@ func (lib Lib) createStructure() (error) {
     srcPath := lib.config.Directory + string(filepath.Separator) + "src"
     libPath := lib.config.Directory + string(filepath.Separator) + "lib"
     testPath := lib.config.Directory + string(filepath.Separator) + "test"
+    wioPath := lib.config.Directory + string(filepath.Separator) + ".wio"
 
     err := os.MkdirAll(srcPath, os.ModePerm)
     if err != nil {
@@ -32,6 +33,11 @@ func (lib Lib) createStructure() (error) {
     }
 
     err = os.MkdirAll(libPath, os.ModePerm)
+    if err != nil {
+        return err
+    }
+
+    err = os.MkdirAll(wioPath, os.ModePerm)
     if err != nil {
         return err
     }
