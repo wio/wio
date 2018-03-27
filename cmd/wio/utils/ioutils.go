@@ -6,6 +6,8 @@ import (
     "path/filepath"
 
     "gopkg.in/yaml.v2"
+    "os"
+    "io"
 )
 
 const (
@@ -53,16 +55,42 @@ func ToYmlStruct(data string, out interface{}) (error) {
     return e
 }
 
-/*
-func CreateRelativeFolder(directory string, path string) {
-    absPath, e := filepath.Abs(directory + string(filepath.Separator) + path)
-
-    TurnVerbose()
-
-    if e != nil {
-        PrintBlue()
+// Copies file from src to dist and if dest file exists, it overrides the file
+// content based on if override is specified
+func Copy(src string, dest string, override bool) (error) {
+    if _, err := os.Stat(dest); err == nil  && !override {
+        return nil
     }
-    os.Mkdir(, os.ModePerm)
+
+    srcFile, err := os.Open(src)
+
+    if err != nil {
+        return err
+    }
+    defer srcFile.Close()
+
+    destFile, err := os.Create(dest) // creates if file doesn't exist
+    if err != nil {
+        return err
+    }
+    defer destFile.Close()
+
+    _, err = io.Copy(destFile, srcFile) // check first var for number of bytes copied
+    if err != nil {
+        return err
+    }
+
+    err = destFile.Sync()
+    if err != nil {
+        return err
+    }
+
+    return nil
 }
-*/
+
+// Get's the path to the root directory of this project
+func GetExecutableRootPath() (string, error) {
+    _, configFileName, _, _ := runtime.Caller(0)
+    return filepath.Abs(configFileName + "/../../../../")
+}
 

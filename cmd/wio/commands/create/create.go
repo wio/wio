@@ -47,7 +47,7 @@ func Execute(config ConfigCreate) {
         createType.printProjectStructure()
     }
 
-    err = createType.createStructure()
+    err = createType.createTemplateProject()
 
     if err != nil {
         fmt.Println(Red(" [failure]"))
