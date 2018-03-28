@@ -9,8 +9,6 @@ package create
 
 import (
     "path/filepath"
-    "io/ioutil"
-    "encoding/json"
     "regexp"
     "strings"
 
@@ -27,35 +25,15 @@ func GetRoot() (string, error){
     return rootPath, err
 }
 
-// Returns a path to template files. User needs to provide a relative path to get the full path
-func GetAssetsPathRelative(fileName string) (string, error) {
-    rootPath, err := GetRoot()
-
-    return rootPath + string(filepath.Separator) + "assets" + string(filepath.Separator) + fileName, err
-}
-
 // Parses the paths.json file and uses that to get paths to copy files to and from
 // It also stores all the paths as a map to be used later on
-func ParsePathsAndCopy(path string, config ConfigCreate, tags []string) (map[string]string, error) {
-    text, err := ioutil.ReadFile(path)
-    if err != nil {
-        return nil, err
-    }
-
+func ParsePathsAndCopy(path string, config ConfigCreate, ioData IOData, tags []string) (map[string]string, error) {
     var paths = Paths{}
-    err = json.Unmarshal([]byte(text), &paths)
-    if err != nil {
-        return nil, err
-    }
+    err := ioData.ParseJson(path, &paths)
 
     var re, e = regexp.Compile(`{{.+}}`)
     if e != nil {
         return nil, e
-    }
-
-    rootPath, err := GetRoot()
-    if err != nil {
-        return nil, err
     }
 
     pathsMap := make(map[string]string)
@@ -63,10 +41,7 @@ func ParsePathsAndCopy(path string, config ConfigCreate, tags []string) (map[str
     for i := 0; i < len(paths.Paths); i++ {
         for t := 0; t < len(tags); t++ {
             if paths.Paths[i].Id == tags[t] {
-                src, e := filepath.Abs(re.ReplaceAllString(paths.Paths[i].Src, rootPath))
-                if e != nil {
-                    return nil, e
-                }
+                src := paths.Paths[i].Src
 
                 des, e := filepath.Abs(re.ReplaceAllString(paths.Paths[i].Des, config.Directory))
                 if e != nil {
@@ -78,7 +53,7 @@ func ParsePathsAndCopy(path string, config ConfigCreate, tags []string) (map[str
 
                 override := paths.Paths[i].Override
 
-                err = utils.Copy(src, des, override)
+                err = ioData.CopyAsset(src, des, override)
                 if err != nil {
                     return nil, err
                 }

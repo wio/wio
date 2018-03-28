@@ -18,6 +18,7 @@ import (
 
 type App struct {
     config ConfigCreate
+    ioData IOData
 }
 
 type Data struct {
@@ -83,12 +84,9 @@ func (app App) createTemplateProject() (error) {
         strArray = append(strArray, "app-clion")
     }
 
-    path, err := GetAssetsPathRelative("config" + sep + "paths.json")
-    if err != nil {
-        return err
-    }
+    path := "assets" + sep + "config" + sep + "paths.json"
 
-    paths, err := ParsePathsAndCopy(path, app.config, strArray)
+    paths, err := ParsePathsAndCopy(path, app.config, app.ioData, strArray)
     if err != nil {
         return err
     }
@@ -111,7 +109,7 @@ func (app App) printNextCommands() {
 }
 
 func (app App) fillTemplates(paths map[string]string) (error) {
-    err := app.createAndFillConfig(paths)
+    err := app.FillConfig(paths)
     if err != nil {
         return err
     }
@@ -120,7 +118,7 @@ func (app App) fillTemplates(paths map[string]string) (error) {
 }
 
 // Handles config file for app
-func (app App) createAndFillConfig(paths map[string]string) (error) {
+func (app App) FillConfig(paths map[string]string) (error) {
     viper.SetConfigName("project")
     viper.AddConfigPath(app.config.Directory)
     err := viper.ReadInConfig()
@@ -155,15 +153,19 @@ func (app App) createAndFillConfig(paths map[string]string) (error) {
     viper.Set("libraries", libraries)
 
     configData := viper.AllSettings()
-    infoPath, err := GetAssetsPathRelative("templates" + sep + "config" + sep + "project-app-help")
+    infoPath := "assets" + sep + "templates" + sep + "config" + sep + "project-app-help"
     if err != nil {
         return err
     }
 
-    err = PrettyWriteConfig(infoPath, configData, paths["project.yml"])
+    err = PrettyWriteConfig(infoPath, configData, app.ioData, paths["project.yml"])
     if err != nil {
         return err
     }
 
+    return nil
+}
+
+func (app App) FillCMake(paths map[string]string) (error) {
     return nil
 }

@@ -11,6 +11,7 @@ all: build run
 
 build:
 	@echo Building $(BINARY_NAME) project:
+	@cd "$(CURDIR)/cmd/$(BINARY_NAME)/data" && $(GOPATH)/bin/go-bindata -nomemcopy -pkg data -prefix ../../../ ../../../assets/config/... ../../../assets/templates/...
 	@cd "$(CURDIR)/cmd/$(BINARY_NAME)" && $(GOBUILD) -o $(BINARY_NAME) -v
 	@if ! [ -d "bin" ]; then \
 		mkdir bin; \

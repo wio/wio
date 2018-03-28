@@ -4,6 +4,13 @@
 
 package types
 
+type IOData interface {
+    CopyAsset(string, string, bool) (error)
+    Read(string) ([]byte, error)
+    ParseJson(string, interface{}) (error)
+    ParseYml(string, interface{}) (error)
+}
+
 // DConfig contains configurations for default commandline arguments
 type DConfig struct {
     Ide string

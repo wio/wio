@@ -23,7 +23,7 @@ type Type interface {
 }
 
 // Executes the create command provided configuration packet
-func Execute(config ConfigCreate) {
+func Execute(config ConfigCreate, ioData IOData) {
     fmt.Print(Brown("Project Name: "))
     fmt.Println(Cyan(filepath.Base(config.Directory)))
     fmt.Print(Brown("Project Type: "))
@@ -32,16 +32,17 @@ func Execute(config ConfigCreate) {
     fmt.Println(Cyan(config.Directory))
     fmt.Println()
 
-    var createType Type = App{config:config}
+    var createType Type = App{config:config, ioData:ioData}
 
     if config.AppType == "lib" {
-        createType = Lib{config:config}
+        createType = Lib{config:config, ioData:ioData}
     }
 
     fmt.Print(Brown("Creating project structure ..."))
     err := createType.createStructure()
 
     if err != nil {
+        panic(err)
         fmt.Println(Red(" [failure]"))
     } else {
         createType.printProjectStructure()
@@ -50,6 +51,7 @@ func Execute(config ConfigCreate) {
     err = createType.createTemplateProject()
 
     if err != nil {
+        panic(err)
         fmt.Println(Red(" [failure]"))
         fmt.Println(Brown("Project creation failed!"))
     } else {
