@@ -1,0 +1,18 @@
+lib:
+  name: name
+  version: 0.0.1
+  authors: []
+  license: []
+  platform: platform
+  framework: []
+  board: [ALL]
+  compile_flags: []
+  ide: ide
+  default_target: test
+
+  targets:
+    test:
+      board: board
+      compile_flags: []
+
+libraries:

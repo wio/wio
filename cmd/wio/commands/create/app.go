@@ -13,12 +13,24 @@ import (
 
     . "wio/cmd/wio/types"
     . "github.com/logrusorgru/aurora"
-    "wio/cmd/wio/utils"
+    "github.com/spf13/viper"
 )
 
 type App struct {
     config ConfigCreate
 }
+
+type Data struct {
+    Id string
+    Src string
+    Des string
+    Override bool
+}
+
+type Paths struct {
+    Paths []Data
+}
+
 
 // Creates project structure for application type
 func (app App) createStructure() (error) {
@@ -64,59 +76,25 @@ func (app App) printProjectStructure() {
 
 // Creates a template project that is ready to build and upload for application type
 func (app App) createTemplateProject() (error) {
-    root, err := utils.GetExecutableRootPath()
-    rootPath = root
-
-    if err != nil {
-        return err
-    }
-
-    // copy config file
-    configPathSrc := GetTemplatesRelativeFile("config" + sep + "project-app.yml")
-    configPathDest := app.config.Directory + sep + "project.yml"
-
-    err = utils.Copy(configPathSrc, configPathDest, false)
-
-    if err != nil {
-        return err
-    }
-
-    // copy main.cpp from template in src folder
-    mainPathSrc := GetTemplatesRelativeFile("sample-program" + sep + "main.cpp")
-    mainPathDest := app.config.Directory + sep + "src" + sep + "main.cpp"
-
-    err = utils.Copy(mainPathSrc, mainPathDest, false)
-
-    if err != nil {
-        return err
-    }
-
-    // copy CMakeLists.txt from template in .wio folder
-    cmakeSrc := GetTemplatesRelativeFile( "cmake" + sep + "CMakeLists.txt.tpl")
-    cmakeDest := app.config.Directory + sep + ".wio" + sep + "CMakeLists.txt"
-
-    err = utils.Copy(cmakeSrc, cmakeDest, true)
-
-    if err != nil {
-        return err
-    }
-
-    // copy .gitignore file to the root
-    gitignoreSrc := GetTemplatesRelativeFile("gitignore" + sep + ".gitignore-general")
+    strArray := make([]string, 1)
+    strArray[0] = "app-gen"
 
     if app.config.Ide == "clion" {
-        gitignoreSrc = GetTemplatesRelativeFile("gitignore" + sep + ".gitignore-clion")
+        strArray = append(strArray, "app-clion")
     }
-    gitignoreDest := app.config.Directory + sep + ".gitignore"
 
-    err = utils.Copy(gitignoreSrc, gitignoreDest, false)
+    path, err := GetAssetsPathRelative("config" + sep + "paths.json")
+    if err != nil {
+        return err
+    }
 
+    paths, err := ParsePathsAndCopy(path, app.config, strArray)
     if err != nil {
         return err
     }
 
     // fill the templates
-    return fillTemplates()
+    return app.fillTemplates(paths)
 
     return nil
 }
@@ -132,6 +110,60 @@ func (app App) printNextCommands() {
     }
 }
 
-func fillTemplates() (error) {
+func (app App) fillTemplates(paths map[string]string) (error) {
+    err := app.createAndFillConfig(paths)
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
+
+// Handles config file for app
+func (app App) createAndFillConfig(paths map[string]string) (error) {
+    viper.SetConfigName("project")
+    viper.AddConfigPath(app.config.Directory)
+    err := viper.ReadInConfig()
+
+    if err != nil {
+        return err
+    }
+
+    // parse app
+    wioApp, err := getAppStruct(viper.GetStringMap("app"))
+    if err != nil {
+        return err
+    }
+
+    // parse libraries
+    libraries := getLibrariesStruct(viper.GetStringMap("libraries"))
+
+    // write new config
+    wioApp.Ide = app.config.Ide
+    wioApp.Platform = app.config.Platform
+    wioApp.Framework = app.config.Framework
+    wioApp.Name = filepath.Base(app.config.Directory)
+
+    if wioApp.Default_target == "" {
+        wioApp.Default_target = "main"
+    }
+
+    wioApp.Targets[wioApp.Default_target] = &TargetStruct{}
+    wioApp.Targets[wioApp.Default_target].Board = app.config.Board
+
+    viper.Set("app", wioApp)
+    viper.Set("libraries", libraries)
+
+    configData := viper.AllSettings()
+    infoPath, err := GetAssetsPathRelative("templates" + sep + "config" + sep + "project-app-help")
+    if err != nil {
+        return err
+    }
+
+    err = PrettyWriteConfig(infoPath, configData, paths["project.yml"])
+    if err != nil {
+        return err
+    }
+
     return nil
 }

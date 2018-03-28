@@ -1,6 +1,4 @@
 .wio/
-pkg/
-.pkg/
 CMakeListsPrivate.txt
 .idea/
 cmake-build-debug/

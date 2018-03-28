@@ -91,7 +91,7 @@ Run "wio help" to see global options.
     // get default configuration values
     defaults := DConfig{}
     data, _ := util.FileToString("assets/config/defaults.yml")
-    util.ToYmlStruct(data, &defaults)
+    util.ToYmlStruct([]byte(data), &defaults)
 
     app := cli.NewApp()
     app.Name = "wio"
@@ -109,7 +109,7 @@ Run "wio help" to see global options.
                 cli.Command{
                     Name:      "lib",
                     Usage:     "Creates a wio library, intended to be used by other people",
-                    UsageText: "wio create package <DIRECTORY> <BOARD> [command options]",
+                    UsageText: "wio create lib <DIRECTORY> <BOARD> [command options]",
                     Flags: []cli.Flag{
                         cli.StringFlag{Name: "ide",
                             Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",

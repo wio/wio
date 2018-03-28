@@ -1,0 +1,12 @@
+# app tag is the core information about the project. Here you can specify the platform and framework used
+# for the application. Some key points:
+# - You can create multiple targets (executables) to test your application (default is one target)
+# - Frameworks supported are: avr
+# - Platform supported are: cosa
+# - You can specify any libraries that are being used by your library
+#   libraries:
+#     NAME:
+#       url:
+#       version:
+#       compile_flags: []
+

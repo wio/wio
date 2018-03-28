@@ -1,23 +1,13 @@
-wio:
-  name:
-  description:
-  ide:
-  platform:
-  default_target: "main"
+app:
+  name: name
+  ide: ide
+  platform: platform
+  framework: framework
+  default_target: main
 
-# targets are executables that can be built and uploaded
-# every wio application will have a main target, which runs by default
-# user can add other targets to test on different boards and with different flags
-tragets:
-  main:
-    board:
-    framework:
-    compile_flags:
+  targets:
+    main:
+      board: board
+      compile_flags: []
 
-# dependencies are the libraries your program depends on
-# wio will pull the dependencies based on your platform and framework and will compile it
-dependencies:
-  #package1:
-  #  url:
-  #  version:
-  #  compile_flags:
+libraries:
