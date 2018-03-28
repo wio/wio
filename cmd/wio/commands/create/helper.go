@@ -135,22 +135,6 @@ func getTargetsStruct(data map[string]interface{}) (TargetsStruct) {
     return targets
 }
 
-// Reads lines from a path
-func readLines(path string) ([]string, error) {
-    file, err := os.Open(path)
-    if err != nil {
-        return nil, err
-    }
-    defer file.Close()
-
-    var lines []string
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        lines = append(lines, scanner.Text())
-    }
-    return lines, scanner.Err()
-}
-
 // WriteLines writes the lines to the given file.
 func writeAppConfig(lines []string, path string) error {
     file, err := os.Create(path)
@@ -175,19 +159,20 @@ func writeAppConfig(lines []string, path string) error {
 }
 
 // Prints Config file with nice spacing and info at the top
-func PrettyWriteConfig(infoPath string, configData interface{}, configPath string) (error) {
+func PrettyWriteConfig(infoPath string, configData interface{}, ioData IOData, configPath string) (error) {
     ymlData, err := yaml.Marshal(configData)
     if err != nil {
         return err
     }
 
-    infoData, err := readLines(infoPath)
+    infoData, err := ioData.Read(infoPath)
+    infoDataSlice :=  strings.Split(string(infoData), "\n")
     if err != nil {
         return err
     }
 
     totalConfig := make([]string, 0)
-    totalConfig = append(totalConfig, infoData...)
+    totalConfig = append(totalConfig, infoDataSlice...)
     totalConfig = append(totalConfig, string(ymlData))
 
     err = os.Remove(configPath)

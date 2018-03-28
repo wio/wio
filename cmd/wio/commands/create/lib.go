@@ -20,6 +20,7 @@ import (
 
 type Lib struct {
     config ConfigCreate
+    ioData IOData
 }
 
 // Creates project structure for library type
@@ -69,12 +70,8 @@ func (lib Lib) createTemplateProject() (error) {
         strArray = append(strArray, "lib-clion")
     }
 
-    path, err := GetAssetsPathRelative("config" + sep + "paths.json")
-    if err != nil {
-        return err
-    }
-
-    paths, err := ParsePathsAndCopy(path, lib.config, strArray)
+    path := "assets" + sep + "config" + sep + "paths.json"
+    paths, err := ParsePathsAndCopy(path, lib.config, lib.ioData, strArray)
     if err != nil {
         return err
     }
@@ -94,7 +91,7 @@ func (lib Lib) printNextCommands() {
 }
 
 func (lib Lib) fillTemplates(paths map[string]string) (error) {
-    err := lib.createAndFillConfig(paths)
+    err := lib.FillConfig(paths)
     if err != nil {
         return err
     }
@@ -103,7 +100,7 @@ func (lib Lib) fillTemplates(paths map[string]string) (error) {
 }
 
 // Handles config file for lib
-func (lib Lib) createAndFillConfig(paths map[string]string) (error) {
+func (lib Lib) FillConfig(paths map[string]string) (error) {
     viper.SetConfigName("project")
     viper.AddConfigPath(lib.config.Directory)
     err := viper.ReadInConfig()
@@ -138,15 +135,19 @@ func (lib Lib) createAndFillConfig(paths map[string]string) (error) {
     viper.Set("libraries", libraries)
 
     configData := viper.AllSettings()
-    infoPath, err := GetAssetsPathRelative("templates" + sep + "config" + sep + "project-lib-help")
+    infoPath := "assets" + sep + "templates" + sep + "config" + sep + "project-lib-help"
     if err != nil {
         return err
     }
 
-    err = PrettyWriteConfig(infoPath, configData, paths["project.yml"])
+    err = PrettyWriteConfig(infoPath, configData, lib.ioData, paths["project.yml"])
     if err != nil {
         return err
     }
 
+    return nil
+}
+
+func (lib Lib) FillCMake(paths map[string]string) (error) {
     return nil
 }

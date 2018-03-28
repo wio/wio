@@ -16,11 +16,12 @@ import (
     "path/filepath"
 
     "github.com/urfave/cli"
-    util "wio/cmd/wio/utils"
     commandCreate "wio/cmd/wio/commands/create"
     . "wio/cmd/wio/types"
+    "wio/cmd/wio/data"
 )
 
+//go:generate go-bindata -nomemcopy -prefix ../../ ../../assets/config/... ../../assets/templates/...
 func main()  {
     // override help template
     cli.AppHelpTemplate =
@@ -88,10 +89,17 @@ Options:
    {{end}}{{end}}
 Run "wio help" to see global options.
 `
+
+    // create a way to access binary data
+    assetData := data.AssetData{}
+
     // get default configuration values
     defaults := DConfig{}
-    data, _ := util.FileToString("assets/config/defaults.yml")
-    util.ToYmlStruct([]byte(data), &defaults)
+    err := assetData.ParseYml("assets/config/defaults.yml", &defaults)
+
+    if err != nil {
+        log.Fatal(err)
+    }
 
     app := cli.NewApp()
     app.Name = "wio"
@@ -145,7 +153,7 @@ Run "wio help" to see global options.
                             Tests: true,
                         }
 
-                        commandCreate.Execute(libConfig)
+                        commandCreate.Execute(libConfig, assetData)
 
                         return nil
                     },
@@ -192,7 +200,7 @@ Run "wio help" to see global options.
                             Tests: c.Bool("tests"),
                         }
 
-                        commandCreate.Execute(appConfig)
+                        commandCreate.Execute(appConfig, assetData)
 
                         return nil
                     },
@@ -424,7 +432,7 @@ Run "wio help" to see global options.
         return nil
     }
 
-    err := app.Run(os.Args)
+    err = app.Run(os.Args)
 
     if err != nil {
         log.Fatal(err)
