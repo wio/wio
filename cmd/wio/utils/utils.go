@@ -49,10 +49,21 @@ func GetPath(currPath string) (string, error) {
 }
 
 // Converts a String to Yml struct
-func ToYmlStruct(data string, out interface{}) (error) {
-    e := yaml.Unmarshal([]byte(data), out)
+func ToYmlStruct(data []byte, out interface{}) (error) {
+    e := yaml.Unmarshal(data, out)
 
     return e
+}
+
+// Converts YML structure to string and write it to file
+func ToFileYml(in interface{}, fileName string) (error) {
+    data, err := yaml.Marshal(in)
+    if err != nil {
+        return err
+    }
+
+    err = ioutil.WriteFile(fileName, data, os.ModePerm)
+    return err
 }
 
 // Copies file from src to dist and if dest file exists, it overrides the file
@@ -89,8 +100,17 @@ func Copy(src string, dest string, override bool) (error) {
 }
 
 // Get's the path to the root directory of this project
-func GetExecutableRootPath() (string, error) {
+func GetExecutableRootPath  () (string, error) {
     _, configFileName, _, _ := runtime.Caller(0)
     return filepath.Abs(configFileName + "/../../../../")
 }
 
+// Appends a string to string slice only if it is missing
+func AppendIfMissing(slice []string, i string) []string {
+    for _, ele := range slice {
+        if ele == i {
+            return slice
+        }
+    }
+    return append(slice, i)
+}

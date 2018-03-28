@@ -14,6 +14,8 @@ import (
 
     . "wio/cmd/wio/types"
     . "github.com/logrusorgru/aurora"
+    "github.com/spf13/viper"
+    "wio/cmd/wio/utils"
 )
 
 type Lib struct {
@@ -60,6 +62,26 @@ func (lib Lib) printProjectStructure() {
 
 // Creates a template project that is ready to build and upload for library type
 func (lib Lib) createTemplateProject() (error) {
+    strArray := make([]string, 1)
+    strArray[0] = "lib-gen"
+
+    if lib.config.Ide == "clion" {
+        strArray = append(strArray, "lib-clion")
+    }
+
+    path, err := GetAssetsPathRelative("config" + sep + "paths.json")
+    if err != nil {
+        return err
+    }
+
+    paths, err := ParsePathsAndCopy(path, lib.config, strArray)
+    if err != nil {
+        return err
+    }
+
+    // fill the templates
+    return lib.fillTemplates(paths)
+
     return nil
 }
 
@@ -69,4 +91,62 @@ func (lib Lib) printNextCommands() {
     fmt.Println(Cyan("`wio run -h`"))
     fmt.Println(Cyan("`wio upload -h`"))
     fmt.Println(Cyan("`wio test -h`"))
+}
+
+func (lib Lib) fillTemplates(paths map[string]string) (error) {
+    err := lib.createAndFillConfig(paths)
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
+
+// Handles config file for lib
+func (lib Lib) createAndFillConfig(paths map[string]string) (error) {
+    viper.SetConfigName("project")
+    viper.AddConfigPath(lib.config.Directory)
+    err := viper.ReadInConfig()
+
+    if err != nil {
+        return err
+    }
+
+    // parse app
+    wioLib, err := getLibStruct(viper.GetStringMap("lib"))
+    if err != nil {
+        return err
+    }
+
+    // parse libraries
+    libraries := getLibrariesStruct(viper.GetStringMap("libraries"))
+
+    // write new config
+    wioLib.Ide = lib.config.Ide
+    wioLib.Platform = lib.config.Platform
+    wioLib.Framework = utils.AppendIfMissing(wioLib.Framework, lib.config.Framework)
+    wioLib.Name = filepath.Base(lib.config.Directory)
+
+    if wioLib.Default_target == "" {
+        wioLib.Default_target = "test"
+    }
+
+    wioLib.Targets[wioLib.Default_target] = &TargetStruct{}
+    wioLib.Targets[wioLib.Default_target].Board = lib.config.Board
+
+    viper.Set("lib", wioLib)
+    viper.Set("libraries", libraries)
+
+    configData := viper.AllSettings()
+    infoPath, err := GetAssetsPathRelative("templates" + sep + "config" + sep + "project-lib-help")
+    if err != nil {
+        return err
+    }
+
+    err = PrettyWriteConfig(infoPath, configData, paths["project.yml"])
+    if err != nil {
+        return err
+    }
+
+    return nil
 }
