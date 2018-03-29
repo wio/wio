@@ -70,6 +70,11 @@ func setField(obj interface{}, name string, value interface{}) error {
 func getAppStruct(data map[string]interface{}) (AppStruct, error) {
     wio := AppStruct{}
     wioMap := data
+
+    if len(wioMap) == 0 {
+        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "app"`)
+    }
+
     var err error = nil
     for k := range wioMap {
         if k == "targets" {
@@ -78,6 +83,11 @@ func getAppStruct(data map[string]interface{}) (AppStruct, error) {
             err = setField(&wio, k, wioMap[k])
         }
     }
+
+    if wio.Targets == nil {
+        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "app.targets"`)
+    }
+
     return wio, err
 }
 
@@ -95,6 +105,11 @@ func parseSlice(wioMap map[string]interface{}, tag string) ([]string) {
 func getLibStruct(data map[string]interface{}) (LibStruct, error) {
     wio := LibStruct{}
     wioMap := data
+
+    if len(wioMap) == 0 {
+        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "lib"`)
+    }
+
     var err error = nil
     for k := range wioMap {
         if k == "authors" {
@@ -113,6 +128,11 @@ func getLibStruct(data map[string]interface{}) (LibStruct, error) {
             err = setField(&wio, k, wioMap[k])
         }
     }
+
+    if wio.Targets == nil {
+        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "lib.targets"`)
+    }
+
     return wio, err
 }
 

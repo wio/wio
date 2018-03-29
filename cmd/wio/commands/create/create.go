@@ -9,9 +9,9 @@ package create
 
 import (
     . "wio/cmd/wio/types"
-    . "github.com/logrusorgru/aurora"
-    "fmt"
+    . "wio/cmd/wio/io"
     "path/filepath"
+    "os"
 )
 
 // Interface for project types and how they are created
@@ -24,13 +24,13 @@ type Type interface {
 
 // Executes the create command provided configuration packet
 func Execute(config ConfigCreate, ioData IOData) {
-    fmt.Print(Brown("Project Name: "))
-    fmt.Println(Cyan(filepath.Base(config.Directory)))
-    fmt.Print(Brown("Project Type: "))
-    fmt.Println(Cyan(config.AppType))
-    fmt.Print(Brown("Project Path: "))
-    fmt.Println(Cyan(config.Directory))
-    fmt.Println()
+    Norm.Yellow("Project Name: ")
+    Norm.Cyan(filepath.Base(config.Directory) + "\n")
+    Norm.Yellow("Project Type: ")
+    Norm.Cyan(config.AppType + "\n")
+    Norm.Yellow("Project Path: ")
+    Norm.Cyan(config.Directory + "\n")
+    Norm.White("\n")
 
     var createType Type = App{config:config, ioData:ioData}
 
@@ -38,26 +38,30 @@ func Execute(config ConfigCreate, ioData IOData) {
         createType = Lib{config:config, ioData:ioData}
     }
 
-    fmt.Print(Brown("Creating project structure ..."))
+    Norm.Yellow("Creating project structure ... ")
     err := createType.createStructure()
 
     if err != nil {
-        panic(err)
-        fmt.Println(Red(" [failure]"))
+        Norm.Red( "[failure]\n")
+        Verb.Error(err.Error() + "\n")
+        os.Exit(2)
     } else {
+        Norm.Green("[success]\n")
         createType.printProjectStructure()
     }
 
+    Norm.White("\n")
+    Norm.Yellow("Creating template project ... ")
     err = createType.createTemplateProject()
 
     if err != nil {
-        panic(err)
-        fmt.Println(Red(" [failure]"))
-        fmt.Println(Brown("Project creation failed!"))
+        Norm.Red("[failure]\n")
+        Verb.Error(err.Error() + "\n")
     } else {
-        fmt.Println()
-        fmt.Println(Brown("Project has been successfully created and initialized!!"))
-        fmt.Println(Brown("Check following commands: "))
+        Norm.Green("[success]\n")
+        Norm.White("\n")
+        Norm.Yellow( "Project has been successfully created and initialized!!\n")
+        Norm.Green("Check following commands: \n")
         createType.printNextCommands()
     }
 }

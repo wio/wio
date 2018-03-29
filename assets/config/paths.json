@@ -46,7 +46,7 @@
       "id": "lib-gen",
       "src": "assets/templates/config/project-lib.yml",
       "des": "{{PRJ-ROOT}}/project.yml",
-      "override": true
+      "override": false
     },
     {
       "id": "lib-gen",

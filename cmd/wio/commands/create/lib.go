@@ -10,10 +10,9 @@ package create
 import (
     "path/filepath"
     "os"
-    "fmt"
 
+    . "wio/cmd/wio/io"
     . "wio/cmd/wio/types"
-    . "github.com/logrusorgru/aurora"
     "github.com/spf13/viper"
     "wio/cmd/wio/utils"
 )
@@ -34,31 +33,35 @@ func (lib Lib) createStructure() (error) {
     if err != nil {
         return err
     }
+    Verb.Verbose("\n")
+    Verb.Verbose(`* Created "src" folder` + "\n")
 
     err = os.MkdirAll(libPath, os.ModePerm)
     if err != nil {
         return err
     }
+    Verb.Verbose(`* Created "lib" folder` + "\n")
 
     err = os.MkdirAll(wioPath, os.ModePerm)
     if err != nil {
         return err
     }
+    Verb.Verbose(`* Created ".wio" folder` + "\n")
 
     err = os.MkdirAll(testPath, os.ModePerm)
     if err != nil {
         return err
     }
+    Verb.Verbose(`* Created "test" folder` + "\n")
 
     return nil
 }
 
 // Prints the project structure for library type
 func (lib Lib) printProjectStructure() {
-    fmt.Println()
-    fmt.Println(Cyan("src    - put your source files here."))
-    fmt.Println(Cyan("lib    - libraries for the project go here."))
-    fmt.Println(Cyan("test   - put your files for unit testing here."))
+    Norm.Cyan("src    - put your source files here.\n")
+    Norm.Cyan("lib    - libraries for the project go here.\n")
+    Norm.Cyan("test   - put your files for unit testing here.\n")
 }
 
 // Creates a template project that is ready to build and upload for library type
@@ -66,8 +69,12 @@ func (lib Lib) createTemplateProject() (error) {
     strArray := make([]string, 1)
     strArray[0] = "lib-gen"
 
+    Verb.Verbose("\n")
     if lib.config.Ide == "clion" {
+        Verb.Verbose("* Clion Ide available so ide template set up will be used\n")
         strArray = append(strArray, "lib-clion")
+    } else {
+        Verb.Verbose("* General template setup will be used\n")
     }
 
     path := "assets" + sep + "config" + sep + "paths.json"
@@ -75,19 +82,18 @@ func (lib Lib) createTemplateProject() (error) {
     if err != nil {
         return err
     }
+    Verb.Verbose("* All Template files created in their right position\n")
 
     // fill the templates
     return lib.fillTemplates(paths)
-
-    return nil
 }
 
 // Prints all the commands relevant to library type
 func (lib Lib) printNextCommands() {
-    fmt.Println(Cyan("`wio build -h`"))
-    fmt.Println(Cyan("`wio run -h`"))
-    fmt.Println(Cyan("`wio upload -h`"))
-    fmt.Println(Cyan("`wio test -h`"))
+    Norm.Cyan("`wio build -h`\n")
+    Norm.Cyan("`wio run -h`\n")
+    Norm.Cyan("`wio upload -h`\n")
+    Norm.Cyan("`wio test -h`\n")
 }
 
 func (lib Lib) fillTemplates(paths map[string]string) (error) {
@@ -95,6 +101,7 @@ func (lib Lib) fillTemplates(paths map[string]string) (error) {
     if err != nil {
         return err
     }
+    Verb.Verbose("* Finished Filling/Updating Project.yml template\n")
 
     return nil
 }
@@ -104,19 +111,21 @@ func (lib Lib) FillConfig(paths map[string]string) (error) {
     viper.SetConfigName("project")
     viper.AddConfigPath(lib.config.Directory)
     err := viper.ReadInConfig()
-
     if err != nil {
         return err
     }
+    Verb.Verbose("* Loaded Project.yml file template\n")
 
     // parse app
     wioLib, err := getLibStruct(viper.GetStringMap("lib"))
     if err != nil {
         return err
     }
+    Verb.Verbose("* Parsed lib tag of the template\n")
 
     // parse libraries
     libraries := getLibrariesStruct(viper.GetStringMap("libraries"))
+    Verb.Verbose("* Parsed libraries tag of the template\n")
 
     // write new config
     wioLib.Ide = lib.config.Ide
@@ -136,14 +145,12 @@ func (lib Lib) FillConfig(paths map[string]string) (error) {
 
     configData := viper.AllSettings()
     infoPath := "assets" + sep + "templates" + sep + "config" + sep + "project-lib-help"
-    if err != nil {
-        return err
-    }
 
     err = PrettyWriteConfig(infoPath, configData, lib.ioData, paths["project.yml"])
     if err != nil {
         return err
     }
+    Verb.Verbose("* Filled/Updated template written back to the file\n")
 
     return nil
 }

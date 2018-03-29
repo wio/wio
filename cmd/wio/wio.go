@@ -18,7 +18,7 @@ import (
     "github.com/urfave/cli"
     commandCreate "wio/cmd/wio/commands/create"
     . "wio/cmd/wio/types"
-    "wio/cmd/wio/data"
+    "wio/cmd/wio/io"
 )
 
 //go:generate go-bindata -nomemcopy -prefix ../../ ../../assets/config/... ../../assets/templates/...
@@ -49,6 +49,9 @@ Global options:
    {{end}}{{end}}{{if .Copyright }}
 Available commands:
 {{range .Commands}}{{if not .HideHelp}}   {{join .Names ", "}}{{ "\t"}}{{.Usage}}{{ "\n" }}{{end}}{{end}}{{end}}{{if .VisibleFlags}}
+Global options:
+   {{range $index, $option := .VisibleFlags}}{{if $index}}
+   {{end}}{{$option}}{{end}}{{end}}{{if .Copyright}}
 Copyright:
    {{.Copyright}}
    {{end}}{{if .Version}}
@@ -91,7 +94,7 @@ Run "wio help" to see global options.
 `
 
     // create a way to access binary data
-    assetData := data.AssetData{}
+    assetData := io.AssetData{}
 
     // get default configuration values
     defaults := DConfig{}
@@ -101,6 +104,7 @@ Run "wio help" to see global options.
         log.Fatal(err)
     }
 
+
     app := cli.NewApp()
     app.Name = "wio"
     app.Version = defaults.Version
@@ -108,6 +112,12 @@ Run "wio help" to see global options.
     app.Compiled = time.Now()
     app.Copyright = "Copyright (c) 2018 Waterloop"
     app.Usage = "Create, Build and Upload AVR projects"
+
+    app.Flags = []cli.Flag {
+        cli.BoolFlag{Name: "verbose",
+            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+            },
+    }
 
     app.Commands = []cli.Command{
         {
@@ -152,6 +162,7 @@ Run "wio help" to see global options.
                             Ide: c.String("ide"),
                             Tests: true,
                         }
+                        turnVerbose(c.GlobalBool("verbose"))
 
                         commandCreate.Execute(libConfig, assetData)
 
@@ -199,6 +210,7 @@ Run "wio help" to see global options.
                             Ide: c.String("ide"),
                             Tests: c.Bool("tests"),
                         }
+                        turnVerbose(c.GlobalBool("verbose"))
 
                         commandCreate.Execute(appConfig, assetData)
 
@@ -436,5 +448,12 @@ Run "wio help" to see global options.
 
     if err != nil {
         log.Fatal(err)
+    }
+}
+
+// Set's verbose mode on
+func turnVerbose(value bool) {
+    if value == true {
+        io.SetVerbose()
     }
 }
