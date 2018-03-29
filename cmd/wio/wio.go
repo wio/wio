@@ -52,6 +52,7 @@ Available commands:
 Global options:
    {{range $index, $option := .VisibleFlags}}{{if $index}}
    {{end}}{{$option}}{{end}}{{end}}{{if .Copyright}}
+
 Copyright:
    {{.Copyright}}
    {{end}}{{if .Version}}
@@ -122,7 +123,7 @@ Run "wio help" to see global options.
     app.Commands = []cli.Command{
         {
             Name:  "create",
-            Usage: "Creates and initializes a wio project.\n\nIt also works as an updater when called on already created projects.",
+            Usage: "Creates and initializes a wio project. Also acts as updater/fixer",
             Subcommands: cli.Commands{
                 cli.Command{
                     Name:      "lib",

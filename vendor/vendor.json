@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "VsE3zx2d8kpwj97TWhYddzAwBrY=",
+			"path": "github.com/fatih/color",
+			"revision": "507f6050b8568533fb3f5504de8e5205fa62a114",
+			"revisionTime": "2018-02-13T13:34:03Z"
+		},
+		{
 			"checksumSHA1": "7NP1qUMF8Kx1y0zANxx0e+oq9Oo=",
 			"path": "github.com/fsnotify/fsnotify",
 			"revision": "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9",
@@ -69,16 +75,24 @@
 			"revisionTime": "2018-03-20T20:20:55Z"
 		},
 		{
-			"checksumSHA1": "LXF0pCVlBcXJLG+HoSVP+3ZYmpw=",
-			"path": "github.com/logrusorgru/aurora",
-			"revision": "ca24023cc0175fdf372518cb1c5062cc86db2634",
-			"revisionTime": "2018-01-21T01:52:16Z"
-		},
-		{
 			"checksumSHA1": "NiPRC0JDsfCFir75S1TrFHPP8+M=",
 			"path": "github.com/magiconair/properties",
 			"revision": "2c9e9502788518c97fe44e8955cd069417ee89df",
 			"revisionTime": "2018-02-17T13:45:45Z"
+		},
+		{
+			"checksumSHA1": "XEV3BI3nHA/rNa/tIgB7fVCrDww=",
+			"origin": "github.com/fatih/color/vendor/github.com/mattn/go-colorable",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "507f6050b8568533fb3f5504de8e5205fa62a114",
+			"revisionTime": "2018-02-13T13:34:03Z"
+		},
+		{
+			"checksumSHA1": "y/A5iuvwjytQE2CqVuphQRXR2nI=",
+			"origin": "github.com/fatih/color/vendor/github.com/mattn/go-isatty",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "507f6050b8568533fb3f5504de8e5205fa62a114",
+			"revisionTime": "2018-02-13T13:34:03Z"
 		},
 		{
 			"checksumSHA1": "Yvzge1YQcD/wSDXLD5qNHqmI/0s=",
@@ -91,6 +105,12 @@
 			"path": "github.com/pelletier/go-toml",
 			"revision": "66540cf1fcd2c3aee6f6787dfa32a6ae9a870f12",
 			"revisionTime": "2018-03-23T18:52:43Z"
+		},
+		{
+			"checksumSHA1": "v5CCEZdC63TIkIL8TUeURBcZzNc=",
+			"path": "github.com/shiena/ansicolor",
+			"revision": "a422bbe96644373c5753384a59d678f7d261ff10",
+			"revisionTime": "2015-11-19T15:19:21Z"
 		},
 		{
 			"checksumSHA1": "P4yvHwYcMQsDfhwCCBLMG3nzA50=",
