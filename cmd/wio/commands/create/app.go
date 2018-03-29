@@ -8,11 +8,10 @@ package create
 
 import (
     "os"
-    "fmt"
     "path/filepath"
 
+    . "wio/cmd/wio/io"
     . "wio/cmd/wio/types"
-    . "github.com/logrusorgru/aurora"
     "github.com/spf13/viper"
 )
 
@@ -43,16 +42,20 @@ func (app App) createStructure() (error) {
     if err != nil {
         return err
     }
+    Verb.Verbose("\n")
+    Verb.Verbose(`* Created "src" folder` + "\n")
 
     err = os.MkdirAll(libPath, os.ModePerm)
     if err != nil {
         return err
     }
+    Verb.Verbose(`* Created "lib" folder` + "\n")
 
     err = os.MkdirAll(wioPath, os.ModePerm)
     if err != nil {
         return err
     }
+    Verb.Verbose(`* Created ".wio" folder` + "\n")
 
     if app.config.Tests {
         testPath := app.config.Directory + string(filepath.Separator) + "test"
@@ -60,6 +63,7 @@ func (app App) createStructure() (error) {
         if err != nil {
             return err
         }
+        Verb.Verbose(`* Created "tests" folder` + "\n")
     }
 
     return nil
@@ -67,11 +71,10 @@ func (app App) createStructure() (error) {
 
 // Prints the project structure for application type
 func (app App) printProjectStructure() {
-    fmt.Println()
-    fmt.Println(Cyan("src    - put your source files here."))
-    fmt.Println(Cyan("lib    - libraries for the project go here."))
+    Norm.Cyan("src    - put your source files here.\n")
+    Norm.Cyan("lib    - libraries for the project go here.\n")
     if app.config.Tests {
-        fmt.Println(Cyan("test   - put your files for unit testing here."))
+        Norm.Cyan("test   - put your files for unit testing here.\n")
     }
 }
 
@@ -80,31 +83,33 @@ func (app App) createTemplateProject() (error) {
     strArray := make([]string, 1)
     strArray[0] = "app-gen"
 
+    Verb.Verbose("\n")
     if app.config.Ide == "clion" {
+        Verb.Verbose("* Clion Ide available so ide template set up will be used\n")
         strArray = append(strArray, "app-clion")
+    } else {
+        Verb.Verbose("* General template setup will be used\n")
     }
 
     path := "assets" + sep + "config" + sep + "paths.json"
-
     paths, err := ParsePathsAndCopy(path, app.config, app.ioData, strArray)
     if err != nil {
         return err
     }
+    Verb.Verbose("* All Template files created in their right position\n")
 
     // fill the templates
     return app.fillTemplates(paths)
-
-    return nil
 }
 
 // Prints all the commands relevant to application type
 func (app App) printNextCommands() {
-    fmt.Println(Cyan("`wio build -h`"))
-    fmt.Println(Cyan("`wio run -h`"))
-    fmt.Println(Cyan("`wio upload -h`"))
+    Norm.Cyan("`wio build -h`\n")
+    Norm.Cyan("`wio run -h`\n")
+    Norm.Cyan("`wio upload -h`\n")
 
     if app.config.Tests {
-        fmt.Println(Cyan("`wio test -h`"))
+        Norm.Cyan("`wio test -h`\n")
     }
 }
 
@@ -122,19 +127,21 @@ func (app App) FillConfig(paths map[string]string) (error) {
     viper.SetConfigName("project")
     viper.AddConfigPath(app.config.Directory)
     err := viper.ReadInConfig()
-
     if err != nil {
         return err
     }
+    Verb.Verbose("* Loaded Project.yml file template\n")
 
     // parse app
     wioApp, err := getAppStruct(viper.GetStringMap("app"))
     if err != nil {
         return err
     }
+    Verb.Verbose("* Parsed app tag of the template\n")
 
     // parse libraries
     libraries := getLibrariesStruct(viper.GetStringMap("libraries"))
+    Verb.Verbose("* Parsed libraries tag of the template\n")
 
     // write new config
     wioApp.Ide = app.config.Ide
@@ -154,14 +161,12 @@ func (app App) FillConfig(paths map[string]string) (error) {
 
     configData := viper.AllSettings()
     infoPath := "assets" + sep + "templates" + sep + "config" + sep + "project-app-help"
-    if err != nil {
-        return err
-    }
 
     err = PrettyWriteConfig(infoPath, configData, app.ioData, paths["project.yml"])
     if err != nil {
         return err
     }
+    Verb.Verbose("* Filled/Updated template written back to the file\n")
 
     return nil
 }

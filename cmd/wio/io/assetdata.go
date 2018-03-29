@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 
 
-// Package contains interfaces to access data like assets
+// Package contains interfaces to access data like assets and stuff related to io
 // This file contains an interface to access data stored in binary
-package data
+package io
 
 import (
     "os"

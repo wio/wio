@@ -11,9 +11,9 @@ import (
 )
 
 const (
-    WINDOWS string = "windows"
-    DARWIN  string = "darwin"
-    LINUX   string = "linux"
+    WINDOWS = "windows"
+    DARWIN  = "darwin"
+    LINUX   = "linux"
 )
 
 // Reads the file and provides it's content as a string
