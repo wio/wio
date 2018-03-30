@@ -9,50 +9,18 @@ package create
 
 import (
     "path/filepath"
-    "os"
 
-    . "wio/cmd/wio/io"
-    . "wio/cmd/wio/types"
-    "github.com/spf13/viper"
-    "wio/cmd/wio/utils"
+    . "wio/cmd/wio/utils/io"
+    . "wio/cmd/wio/utils"
+    "wio/cmd/wio/utils/types"
 )
-
-type Lib struct {
-    config ConfigCreate
-    ioData IOData
-}
 
 // Creates project structure for library type
 func (lib Lib) createStructure() (error) {
-    srcPath := lib.config.Directory + string(filepath.Separator) + "src"
-    libPath := lib.config.Directory + string(filepath.Separator) + "lib"
-    testPath := lib.config.Directory + string(filepath.Separator) + "test"
-    wioPath := lib.config.Directory + string(filepath.Separator) + ".wio"
-
-    err := os.MkdirAll(srcPath, os.ModePerm)
-    if err != nil {
-        return err
-    }
     Verb.Verbose("\n")
-    Verb.Verbose(`* Created "src" folder` + "\n")
-
-    err = os.MkdirAll(libPath, os.ModePerm)
-    if err != nil {
+    if err := createStructure(lib.args.Directory, "src", "lib", "test", ".wio/targets"); err != nil {
         return err
     }
-    Verb.Verbose(`* Created "lib" folder` + "\n")
-
-    err = os.MkdirAll(wioPath, os.ModePerm)
-    if err != nil {
-        return err
-    }
-    Verb.Verbose(`* Created ".wio" folder` + "\n")
-
-    err = os.MkdirAll(testPath, os.ModePerm)
-    if err != nil {
-        return err
-    }
-    Verb.Verbose(`* Created "test" folder` + "\n")
 
     return nil
 }
@@ -66,26 +34,16 @@ func (lib Lib) printProjectStructure() {
 
 // Creates a template project that is ready to build and upload for library type
 func (lib Lib) createTemplateProject() (error) {
-    strArray := make([]string, 1)
-    strArray[0] = "lib-gen"
+    config := &types.LibConfig{}
+    var err error
 
-    Verb.Verbose("\n")
-    if lib.config.Ide == "clion" {
-        Verb.Verbose("* Clion Ide available so ide template set up will be used\n")
-        strArray = append(strArray, "lib-clion")
-    } else {
-        Verb.Verbose("* General template setup will be used\n")
-    }
+    if err = copyTemplates(lib.args); err != nil { return err }
+    if config, err = lib.FillConfig(); err != nil { return err }
 
-    path := "assets" + sep + "config" + sep + "paths.json"
-    paths, err := ParsePathsAndCopy(path, lib.config, lib.ioData, strArray)
-    if err != nil {
-        return err
-    }
-    Verb.Verbose("* All Template files created in their right position\n")
+    // create cmake files for each target
+    copyTargetCMakes(lib.args.Directory, lib.args.AppType, config.MainTag.Targets)
 
-    // fill the templates
-    return lib.fillTemplates(paths)
+    return nil
 }
 
 // Prints all the commands relevant to library type
@@ -96,63 +54,34 @@ func (lib Lib) printNextCommands() {
     Norm.Cyan("`wio test -h`\n")
 }
 
-func (lib Lib) fillTemplates(paths map[string]string) (error) {
-    err := lib.FillConfig(paths)
-    if err != nil {
-        return err
-    }
-    Verb.Verbose("* Finished Filling/Updating Project.yml template\n")
-
-    return nil
-}
-
 // Handles config file for lib
-func (lib Lib) FillConfig(paths map[string]string) (error) {
-    viper.SetConfigName("project")
-    viper.AddConfigPath(lib.config.Directory)
-    err := viper.ReadInConfig()
-    if err != nil {
-        return err
-    }
+func (lib Lib) FillConfig() (*types.LibConfig, error) {
     Verb.Verbose("* Loaded Project.yml file template\n")
 
-    // parse app
-    wioLib, err := getLibStruct(viper.GetStringMap("lib"))
-    if err != nil {
-        return err
-    }
-    Verb.Verbose("* Parsed lib tag of the template\n")
+    libConfig := types.LibConfig{}
+    if err := NormalIO.ParseYml(lib.args.Directory + Sep + "project.yml", &libConfig);
+    err != nil { return nil, err }
 
-    // parse libraries
-    libraries := getLibrariesStruct(viper.GetStringMap("libraries"))
-    Verb.Verbose("* Parsed libraries tag of the template\n")
+    // make modifications to the data
+    libConfig.MainTag.Ide = lib.args.Ide
+    libConfig.MainTag.Platform = lib.args.Platform
+    libConfig.MainTag.Framework = AppendIfMissing(libConfig.MainTag.Framework, lib.args.Framework)
+    libConfig.MainTag.Name = filepath.Base(lib.args.Directory)
 
-    // write new config
-    wioLib.Ide = lib.config.Ide
-    wioLib.Platform = lib.config.Platform
-    wioLib.Framework = utils.AppendIfMissing(wioLib.Framework, lib.config.Framework)
-    wioLib.Name = filepath.Base(lib.config.Directory)
-
-    if wioLib.Default_target == "" {
-        wioLib.Default_target = "test"
+    if libConfig.MainTag.Default_target == "" {
+        libConfig.MainTag.Default_target = "test"
     }
 
-    wioLib.Targets[wioLib.Default_target] = &TargetStruct{}
-    wioLib.Targets[wioLib.Default_target].Board = lib.config.Board
+    libConfig.MainTag.Targets[libConfig.MainTag.Default_target] = &types.TargetSubTags{}
+    libConfig.MainTag.Targets[libConfig.MainTag.Default_target].Board = lib.args.Board
 
-    viper.Set("lib", wioLib)
-    viper.Set("libraries", libraries)
+    Verb.Verbose("* Modified information in the configuration\n")
 
-    configData := viper.AllSettings()
-    infoPath := "assets" + sep + "templates" + sep + "config" + sep + "project-lib-help"
-
-    err = PrettyWriteConfig(infoPath, configData, lib.ioData, paths["project.yml"])
-    if err != nil {
-        return err
-    }
+    if err := PrettyPrintConfig(lib.args.AppType, &libConfig, lib.args.Directory + Sep + "project.yml");
+    err != nil { return nil, err }
     Verb.Verbose("* Filled/Updated template written back to the file\n")
 
-    return nil
+    return &libConfig, nil
 }
 
 func (lib Lib) FillCMake(paths map[string]string) (error) {

@@ -17,8 +17,8 @@ import (
 
     "github.com/urfave/cli"
     commandCreate "wio/cmd/wio/commands/create"
-    . "wio/cmd/wio/types"
-    "wio/cmd/wio/io"
+    . "wio/cmd/wio/utils/types"
+    "wio/cmd/wio/utils/io"
 )
 
 //go:generate go-bindata -nomemcopy -prefix ../../ ../../assets/config/... ../../assets/templates/...
@@ -93,18 +93,13 @@ Options:
    {{end}}{{end}}
 Run "wio help" to see global options.
 `
-
-    // create a way to access binary data
-    assetData := io.AssetData{}
-
     // get default configuration values
     defaults := DConfig{}
-    err := assetData.ParseYml("assets/config/defaults.yml", &defaults)
+    err := io.AssetIO.ParseYml("config/defaults.yml", &defaults)
 
     if err != nil {
         log.Fatal(err)
     }
-
 
     app := cli.NewApp()
     app.Name = "wio"
@@ -154,7 +149,7 @@ Run "wio help" to see global options.
 
                         directory, _ := filepath.Abs(c.Args()[0])
 
-                        libConfig := ConfigCreate{
+                        libArgs := CliArgs{
                             AppType: "lib",
                             Directory: directory,
                             Board: c.Args()[1],
@@ -165,7 +160,7 @@ Run "wio help" to see global options.
                         }
                         turnVerbose(c.GlobalBool("verbose"))
 
-                        commandCreate.Execute(libConfig, assetData)
+                        commandCreate.Execute(libArgs)
 
                         return nil
                     },
@@ -202,7 +197,7 @@ Run "wio help" to see global options.
 
                         directory, _ := filepath.Abs(c.Args()[0])
 
-                        appConfig := ConfigCreate{
+                        appArgs := CliArgs{
                             AppType: "app",
                             Directory: directory,
                             Board: c.Args()[1],
@@ -213,7 +208,7 @@ Run "wio help" to see global options.
                         }
                         turnVerbose(c.GlobalBool("verbose"))
 
-                        commandCreate.Execute(appConfig, assetData)
+                        commandCreate.Execute(appArgs)
 
                         return nil
                     },

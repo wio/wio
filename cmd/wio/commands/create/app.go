@@ -7,63 +7,25 @@
 package create
 
 import (
-    "os"
     "path/filepath"
 
-    . "wio/cmd/wio/io"
-    . "wio/cmd/wio/types"
-    "github.com/spf13/viper"
+    . "wio/cmd/wio/utils/io"
+    . "wio/cmd/wio/utils"
+    "wio/cmd/wio/utils/types"
 )
-
-type App struct {
-    config ConfigCreate
-    ioData IOData
-}
-
-type Data struct {
-    Id string
-    Src string
-    Des string
-    Override bool
-}
-
-type Paths struct {
-    Paths []Data
-}
 
 
 // Creates project structure for application type
 func (app App) createStructure() (error) {
-    srcPath := app.config.Directory + string(filepath.Separator) + "src"
-    libPath := app.config.Directory + string(filepath.Separator) + "lib"
-    wioPath := app.config.Directory + string(filepath.Separator) + ".wio"
-
-    err := os.MkdirAll(srcPath, os.ModePerm)
-    if err != nil {
-        return err
-    }
     Verb.Verbose("\n")
-    Verb.Verbose(`* Created "src" folder` + "\n")
-
-    err = os.MkdirAll(libPath, os.ModePerm)
-    if err != nil {
+    if err := createStructure(app.args.Directory, "src", "lib", ".wio/targets"); err != nil {
         return err
     }
-    Verb.Verbose(`* Created "lib" folder` + "\n")
 
-    err = os.MkdirAll(wioPath, os.ModePerm)
-    if err != nil {
-        return err
-    }
-    Verb.Verbose(`* Created ".wio" folder` + "\n")
-
-    if app.config.Tests {
-        testPath := app.config.Directory + string(filepath.Separator) + "test"
-        err = os.MkdirAll(testPath, os.ModePerm)
-        if err != nil {
+    if app.args.Tests {
+        if err := createStructure(app.args.Directory, "test"); err != nil {
             return err
         }
-        Verb.Verbose(`* Created "tests" folder` + "\n")
     }
 
     return nil
@@ -73,33 +35,23 @@ func (app App) createStructure() (error) {
 func (app App) printProjectStructure() {
     Norm.Cyan("src    - put your source files here.\n")
     Norm.Cyan("lib    - libraries for the project go here.\n")
-    if app.config.Tests {
+    if app.args.Tests {
         Norm.Cyan("test   - put your files for unit testing here.\n")
     }
 }
 
 // Creates a template project that is ready to build and upload for application type
 func (app App) createTemplateProject() (error) {
-    strArray := make([]string, 1)
-    strArray[0] = "app-gen"
+    config := &types.AppConfig{}
+    var err error
 
-    Verb.Verbose("\n")
-    if app.config.Ide == "clion" {
-        Verb.Verbose("* Clion Ide available so ide template set up will be used\n")
-        strArray = append(strArray, "app-clion")
-    } else {
-        Verb.Verbose("* General template setup will be used\n")
-    }
+    if err = copyTemplates(app.args); err != nil { return err }
+    if config, err = app.FillConfig(); err != nil { return err }
 
-    path := "assets" + sep + "config" + sep + "paths.json"
-    paths, err := ParsePathsAndCopy(path, app.config, app.ioData, strArray)
-    if err != nil {
-        return err
-    }
-    Verb.Verbose("* All Template files created in their right position\n")
+    // create cmake files for each target
+    copyTargetCMakes(app.args.Directory, app.args.AppType, config.MainTag.Targets)
 
-    // fill the templates
-    return app.fillTemplates(paths)
+    return nil
 }
 
 // Prints all the commands relevant to application type
@@ -108,67 +60,39 @@ func (app App) printNextCommands() {
     Norm.Cyan("`wio run -h`\n")
     Norm.Cyan("`wio upload -h`\n")
 
-    if app.config.Tests {
+    if app.args.Tests {
         Norm.Cyan("`wio test -h`\n")
     }
 }
 
-func (app App) fillTemplates(paths map[string]string) (error) {
-    err := app.FillConfig(paths)
-    if err != nil {
-        return err
-    }
-
-    return nil
-}
-
 // Handles config file for app
-func (app App) FillConfig(paths map[string]string) (error) {
-    viper.SetConfigName("project")
-    viper.AddConfigPath(app.config.Directory)
-    err := viper.ReadInConfig()
-    if err != nil {
-        return err
-    }
+func (app App) FillConfig() (*types.AppConfig, error) {
     Verb.Verbose("* Loaded Project.yml file template\n")
 
-    // parse app
-    wioApp, err := getAppStruct(viper.GetStringMap("app"))
-    if err != nil {
-        return err
-    }
-    Verb.Verbose("* Parsed app tag of the template\n")
+    appConfig := types.AppConfig{}
+    if err := NormalIO.ParseYml(app.args.Directory + Sep + "project.yml", &appConfig);
+    err != nil { return nil, err }
 
-    // parse libraries
-    libraries := getLibrariesStruct(viper.GetStringMap("libraries"))
-    Verb.Verbose("* Parsed libraries tag of the template\n")
+    // make modifications to the data
+    appConfig.MainTag.Ide = app.args.Ide
+    appConfig.MainTag.Platform = app.args.Platform
+    appConfig.MainTag.Framework = app.args.Framework
+    appConfig.MainTag.Name = filepath.Base(app.args.Directory)
 
-    // write new config
-    wioApp.Ide = app.config.Ide
-    wioApp.Platform = app.config.Platform
-    wioApp.Framework = app.config.Framework
-    wioApp.Name = filepath.Base(app.config.Directory)
-
-    if wioApp.Default_target == "" {
-        wioApp.Default_target = "main"
+    if appConfig.MainTag.Default_target == "" {
+        appConfig.MainTag.Default_target = "main"
     }
 
-    wioApp.Targets[wioApp.Default_target] = &TargetStruct{}
-    wioApp.Targets[wioApp.Default_target].Board = app.config.Board
+    appConfig.MainTag.Targets[appConfig.MainTag.Default_target] = &types.TargetSubTags{}
+    appConfig.MainTag.Targets[appConfig.MainTag.Default_target].Board = app.args.Board
 
-    viper.Set("app", wioApp)
-    viper.Set("libraries", libraries)
+    Verb.Verbose("* Modified information in the configuration\n")
 
-    configData := viper.AllSettings()
-    infoPath := "assets" + sep + "templates" + sep + "config" + sep + "project-app-help"
-
-    err = PrettyWriteConfig(infoPath, configData, app.ioData, paths["project.yml"])
-    if err != nil {
-        return err
-    }
+    if err := PrettyPrintConfig(app.args.AppType, &appConfig, app.args.Directory + Sep + "project.yml");
+    err != nil { return nil, err }
     Verb.Verbose("* Filled/Updated template written back to the file\n")
 
-    return nil
+    return &appConfig, nil
 }
 
 func (app App) FillCMake(paths map[string]string) (error) {

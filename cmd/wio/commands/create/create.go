@@ -8,38 +8,30 @@
 package create
 
 import (
-    . "wio/cmd/wio/types"
-    . "wio/cmd/wio/io"
+    . "wio/cmd/wio/utils/types"
+    . "wio/cmd/wio/utils/io"
     "path/filepath"
     "os"
 )
 
-// Interface for project types and how they are created
-type Type interface {
-    createStructure() (error)
-    printProjectStructure()
-    createTemplateProject() (error)
-    printNextCommands()
-}
-
 // Executes the create command provided configuration packet
-func Execute(config ConfigCreate, ioData IOData) {
+func Execute(args CliArgs) {
     Norm.Yellow("Project Name: ")
-    Norm.Cyan(filepath.Base(config.Directory) + "\n")
+    Norm.Cyan(filepath.Base(args.Directory) + "\n")
     Norm.Yellow("Project Type: ")
-    Norm.Cyan(config.AppType + "\n")
+    Norm.Cyan(args.AppType + "\n")
     Norm.Yellow("Project Path: ")
-    Norm.Cyan(config.Directory + "\n")
+    Norm.Cyan(args.Directory + "\n")
     Norm.White("\n")
 
-    var createType Type = App{config:config, ioData:ioData}
+    var projectType ProjectTypes = App{args:&args}
 
-    if config.AppType == "lib" {
-        createType = Lib{config:config, ioData:ioData}
+    if args.AppType == "lib" {
+        projectType = Lib{args:&args}
     }
 
     Norm.Yellow("Creating project structure ... ")
-    err := createType.createStructure()
+    err := projectType.createStructure()
 
     if err != nil {
         Norm.Red( "[failure]\n")
@@ -47,12 +39,12 @@ func Execute(config ConfigCreate, ioData IOData) {
         os.Exit(2)
     } else {
         Norm.Green("[success]\n")
-        createType.printProjectStructure()
+        projectType.printProjectStructure()
     }
 
     Norm.White("\n")
     Norm.Yellow("Creating template project ... ")
-    err = createType.createTemplateProject()
+    err = projectType.createTemplateProject()
 
     if err != nil {
         Norm.Red("[failure]\n")
@@ -62,6 +54,6 @@ func Execute(config ConfigCreate, ioData IOData) {
         Norm.White("\n")
         Norm.Yellow( "Project has been successfully created and initialized!!\n")
         Norm.Green("Check following commands: \n")
-        createType.printNextCommands()
+        projectType.printNextCommands()
     }
 }

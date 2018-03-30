@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 
-// Package contains interfaces to access data like assets and stuff related to io
+// Package io contains helper functions related to io
 // This file contains an interface to print output to io in various colors and modes
 package io
 
@@ -12,7 +12,6 @@ import (
     "os"
 
     "github.com/shiena/ansicolor"
-    "wio/cmd/wio/utils"
     "github.com/fatih/color"
 )
 
@@ -34,7 +33,7 @@ func SetVerbose() {
 func (writer writer) Black(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[30m", "\x1b[39m")
     } else {
@@ -46,7 +45,7 @@ func (writer writer) Black(format string, a ...interface{}) {
 func (writer writer) Red(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[31m", "\x1b[39m")
     } else {
@@ -58,7 +57,7 @@ func (writer writer) Red(format string, a ...interface{}) {
 func (writer writer) Green(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[32m", "\x1b[39m")
     } else {
@@ -70,7 +69,7 @@ func (writer writer) Green(format string, a ...interface{}) {
 func (writer writer) Yellow(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[33m", "\x1b[39m")
     } else {
@@ -82,7 +81,7 @@ func (writer writer) Yellow(format string, a ...interface{}) {
 func (writer writer) Blue(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[34m", "\x1b[39m")
     } else {
@@ -94,7 +93,7 @@ func (writer writer) Blue(format string, a ...interface{}) {
 func (writer writer) Magenta(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[35m", "\x1b[39m")
     } else {
@@ -106,7 +105,7 @@ func (writer writer) Magenta(format string, a ...interface{}) {
 func (writer writer) Cyan(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[36m", "\x1b[39m")
     } else {
@@ -118,7 +117,7 @@ func (writer writer) Cyan(format string, a ...interface{}) {
 func (writer writer) White(format string, a ...interface{}) {
     if !writer.verbose { return }
 
-    if utils.GetOS() == utils.WINDOWS {
+    if GetOS() == WINDOWS {
         text := "%s" + format + "%s"
         fmt.Fprintf(w, text, "\x1b[37m", "\x1b[39m")
     } else {
