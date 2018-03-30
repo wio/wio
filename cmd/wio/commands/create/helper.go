@@ -8,198 +8,97 @@
 package create
 
 import (
+    "regexp"
+    "path/filepath"
+
+    . "wio/cmd/wio/utils/io"
     "os"
-    "bufio"
-    "strings"
-    "fmt"
-    "reflect"
-    "errors"
-    . "wio/cmd/wio/types"
-    "gopkg.in/yaml.v2"
+    "wio/cmd/wio/utils/types"
 )
 
-// Converts map interface read from YML to Libraries structure
-func getLibrariesStruct(data map[string]interface{}) (LibrariesStruct) {
-    libraries := LibrariesStruct{}
-    for k := range data {
-        dependencyMap := data[k].(map[string]interface{})
-        library := &LibraryStruct{}
+// Parses the paths.json file and uses that to get paths to copy files to and from
+// It also stores all the paths as a map to be used later on
+func parsePathsAndCopy(jsonPath string, projectPath string, tags []string) (error) {
+    var paths = Paths{}
+    if err := AssetIO.ParseJson(jsonPath, &paths); err != nil { return err }
 
-        library.Url = dependencyMap["url"].(string)
-        library.Version = dependencyMap["version"].(string)
-        var compileF []string
-        compileFlags := reflect.ValueOf(dependencyMap["compile_flags"].(interface{}))
-        for i := 0; i < compileFlags.Len(); i++ {
-            compileF = append(compileF, compileFlags.Index(i).Interface().(string))
-        }
-
-        library.Compile_flags = compileF
-        libraries[string(k)] = library
+    var re, e = regexp.Compile(`{{.+}}`)
+    if e != nil {
+        return e
     }
 
-    return libraries
+    var sources []string
+    var destinations []string
+    var overrides []bool
+
+    for i := 0; i < len(paths.Paths); i++ {
+        for t := 0; t < len(tags); t++ {
+            if paths.Paths[i].Id == tags[t] {
+                sources = append(sources, paths.Paths[i].Src)
+
+                destination, e := filepath.Abs(re.ReplaceAllString(paths.Paths[i].Des, projectPath))
+                if e != nil {
+                    return e
+                }
+
+                destinations = append(destinations, destination)
+                overrides = append(overrides, paths.Paths[i].Override)
+            }
+        }
+    }
+
+    return AssetIO.CopyMultipleFiles(sources, destinations, overrides)
 }
 
-// Uses reflection to set the field of structure based on map key
-func setField(obj interface{}, name string, value interface{}) error {
-    name = strings.Title(name)
-    structValue := reflect.ValueOf(obj).Elem()
-    structFieldValue := structValue.FieldByName(name)
+// generic method to create structure based on a list of paths provided
+func createStructure(projectPath string, relPaths ...string) (error) {
+    for path := 0; path < len(relPaths); path++ {
+        fullPath := projectPath + Sep + relPaths[path]
 
-    if !structFieldValue.IsValid() {
-        return fmt.Errorf("no such field: %s in obj", name)
+        if err := os.MkdirAll(fullPath, os.ModePerm); err != nil {
+            return err
+        }
+        Verb.Verbose(`* Created "` +  relPaths[path] + `" folder` + "\n")
     }
-
-    if !structFieldValue.CanSet() {
-        return fmt.Errorf("cannot set %s field value", name)
-    }
-
-    val := reflect.ValueOf(value)
-    structFieldType := structFieldValue.Type()
-
-    if structFieldType != val.Type() {
-        return errors.New("provided value type didn't match obj field type")
-    }
-
-    structFieldValue.Set(val)
 
     return nil
 }
 
-// Converts map interface read from YML to App structure
-func getAppStruct(data map[string]interface{}) (AppStruct, error) {
-    wio := AppStruct{}
-    wioMap := data
+// generic method to copy templates based on command line arguments
+func copyTemplates(cliArgs *types.CliArgs) (error) {
+    strArray := make([]string, 1)
+    strArray[0] = cliArgs.AppType + "-gen"
 
-    if len(wioMap) == 0 {
-        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "app"`)
+    Verb.Verbose("\n")
+    if cliArgs.Ide == "clion" {
+        Verb.Verbose("* Clion Ide available so ide template set up will be used\n")
+        strArray = append(strArray, cliArgs.AppType + "-clion")
+    } else {
+        Verb.Verbose("* General template setup will be used\n")
     }
 
-    var err error = nil
-    for k := range wioMap {
-        if k == "targets" {
-            wio.Targets = getTargetsStruct(wioMap[k].(map[string]interface{}))
-        } else{
-            err = setField(&wio, k, wioMap[k])
+    jsonPath := "config" + Sep + "paths.json"
+    if err := parsePathsAndCopy(jsonPath, cliArgs.Directory, strArray); err != nil { return err }
+    Verb.Verbose("* All Template files created in their right position\n")
+
+    return nil
+}
+
+// Generic method to copy cmake files for each target
+func copyTargetCMakes(projectPath string, projectType string, targets types.TargetsTag) {
+    for target := range targets {
+        srcPath := "templates/cmake/CMakeTarget.cmake-" + projectType + ".tpl"
+        destPath := projectPath + Sep + ".wio" + Sep + "targets" + Sep + target + ".cmake"
+        AssetIO.CopyFile(srcPath, destPath, true)
+    }
+}
+
+// Appends a string to string slice only if it is missing
+func AppendIfMissing(slice []string, i string) []string {
+    for _, ele := range slice {
+        if ele == i {
+            return slice
         }
     }
-
-    if wio.Targets == nil {
-        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "app.targets"`)
-    }
-
-    return wio, err
-}
-
-// Parses slice interface and copies values over to an actual slice
-func parseSlice(wioMap map[string]interface{}, tag string) ([]string) {
-    var dataF []string
-    data := reflect.ValueOf(wioMap[tag].(interface{}))
-    for i := 0; i < data.Len(); i++ {
-        dataF = append(dataF, data.Index(i).Interface().(string))
-    }
-    return dataF
-}
-
-// Converts map interface read from YML to Lib structure
-func getLibStruct(data map[string]interface{}) (LibStruct, error) {
-    wio := LibStruct{}
-    wioMap := data
-
-    if len(wioMap) == 0 {
-        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "lib"`)
-    }
-
-    var err error = nil
-    for k := range wioMap {
-        if k == "authors" {
-            wio.Authors = parseSlice(wioMap, "authors")
-        } else if k == "license" {
-            wio.License = parseSlice(wioMap, "license")
-        } else if k == "framework" {
-            wio.Framework = parseSlice(wioMap, "framework")
-        } else if k == "board" {
-            wio.Board = parseSlice(wioMap, "board")
-        } else if k == "compile_flags" {
-            wio.Compile_flags = parseSlice(wioMap, "compile_flags")
-        } else if k == "targets" {
-            wio.Targets = getTargetsStruct(wioMap[k].(map[string]interface{}))
-        } else{
-            err = setField(&wio, k, wioMap[k])
-        }
-    }
-
-    if wio.Targets == nil {
-        return wio, errors.New(`parsed Data from Project.yml is empty or invalid for tag "lib.targets"`)
-    }
-
-    return wio, err
-}
-
-// Converts map interface read from YML to Targets structure
-func getTargetsStruct(data map[string]interface{}) (TargetsStruct) {
-    targets := TargetsStruct{}
-    for k := range data {
-        targetMap := data[k].(map[string]interface{})
-        target := &TargetStruct{}
-        target.Board = targetMap["board"].(string)
-        var compileF []string
-        compileFlags := reflect.ValueOf(targetMap["compile_flags"].(interface{}))
-        for i := 0; i < compileFlags.Len(); i++ {
-            compileF = append(compileF, compileFlags.Index(i).Interface().(string))
-        }
-        target.Compile_flags = compileF
-        targets[string(k)] = target
-    }
-
-    return targets
-}
-
-// WriteLines writes the lines to the given file.
-func writeAppConfig(lines []string, path string) error {
-    file, err := os.Create(path)
-    if err != nil {
-        return err
-    }
-    defer file.Close()
-
-    w := bufio.NewWriter(file)
-    for _, line := range lines {
-        tokens := strings.Split(line, "\n")
-        for _, token := range tokens {
-            if strings.Contains(token, "targets:") ||
-                (strings.Contains(token, "libraries:") && !strings.Contains(token, "#   libraries:")) {
-                fmt.Fprint(w, "\n")
-            }
-            fmt.Fprintln(w, token)
-        }
-    }
-
-    return w.Flush()
-}
-
-// Prints Config file with nice spacing and info at the top
-func PrettyWriteConfig(infoPath string, configData interface{}, ioData IOData, configPath string) (error) {
-    ymlData, err := yaml.Marshal(configData)
-    if err != nil {
-        return err
-    }
-
-    infoData, err := ioData.Read(infoPath)
-    infoDataSlice :=  strings.Split(string(infoData), "\n")
-    if err != nil {
-        return err
-    }
-
-    totalConfig := make([]string, 0)
-    totalConfig = append(totalConfig, infoDataSlice...)
-    totalConfig = append(totalConfig, string(ymlData))
-
-    err = os.Remove(configPath)
-    if err != nil {
-        return err
-    }
-
-    err = writeAppConfig(totalConfig, configPath)
-    return err
+    return append(slice, i)
 }
