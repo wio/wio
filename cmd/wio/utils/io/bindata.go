@@ -103,7 +103,31 @@ func assetsConfigDefaultsYml() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/config/defaults.yml", size: 309, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
+=======
+	info := bindataFileInfo{name: "assets/config/defaults.yml", size: 324, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _assetsConfigPathsYml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4a\x2c\x4a\x29\xcd\xcc\xcb\xd7\x2d\x4e\xc9\xd6\x2d\x48\x2c\xc9\xb0\x52\x50\x52\xe2\xe5\x4a\xce\x2f\x4e\x44\x13\x4a\x2c\x2b\x42\xe6\x15\xe5\x22\xf1\x72\x13\xb3\x53\x91\x75\xa3\xf1\x01\x01\x00\x00\xff\xff\x30\x8e\xc4\x3e\x64\x00\x00\x00"
+
+func assetsConfigPathsYmlBytes() ([]byte, error) {
+	return bindataRead(
+		_assetsConfigPathsYml,
+		"assets/config/paths.yml",
+	)
+}
+
+func assetsConfigPathsYml() (*asset, error) {
+	bytes, err := assetsConfigPathsYmlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "assets/config/paths.yml", size: 100, mode: os.FileMode(438), modTime: time.Unix(1526246066, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -143,7 +167,11 @@ func assetsConfigPathsYml() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/config/paths.yml", size: 94, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/cmake/CMakeListsApp.txt.tpl", size: 781, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -163,7 +191,11 @@ func assetsTemplatesCmakeCmakelistsTxtAppTpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/cmake/CMakeLists.txt-app.tpl", size: 894, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/cmake/CMakeListsPkg.txt.tpl", size: 1105, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -183,7 +215,11 @@ func assetsTemplatesCmakeCmakelistsTxtLibTpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/cmake/CMakeLists.txt-lib.tpl", size: 894, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/cmake/dependencies.txt", size: 481, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -203,7 +239,11 @@ func assetsTemplatesCmakeCmaketargetCmakeAppTpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/cmake/CMakeTarget.cmake-app.tpl", size: 894, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/config/app-helper.txt", size: 582, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -223,7 +263,11 @@ func assetsTemplatesCmakeCmaketargetCmakeLibTpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/cmake/CMakeTarget.cmake-lib.tpl", size: 894, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/config/dependencies-helper.txt", size: 738, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -243,7 +287,11 @@ func assetsTemplatesConfigProjectAppHelp() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/config/project-app-help", size: 465, mode: os.FileMode(420), modTime: time.Unix(1522274298, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/config/pkg-helper.txt", size: 959, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -283,7 +331,11 @@ func assetsTemplatesConfigProjectLibHelp() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/config/project-lib-help", size: 645, mode: os.FileMode(420), modTime: time.Unix(1522274300, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/config/project-pkg.yml", size: 253, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -303,7 +355,11 @@ func assetsTemplatesConfigProjectLibYml() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/config/project-lib.yml", size: 245, mode: os.FileMode(420), modTime: time.Unix(1522260204, 0)}
+=======
+	info := bindataFileInfo{name: "assets/templates/config/targets-helper.txt", size: 303, mode: os.FileMode(438), modTime: time.Unix(1526258808, 0)}
+>>>>>>> More commands and minor fixes (#37)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
