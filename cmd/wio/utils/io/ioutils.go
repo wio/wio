@@ -2,7 +2,6 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
-
 // Package io contains helper functions related to io
 // This file contains all the utilities available to be used from copying files to reading JSON
 package io
@@ -42,7 +41,7 @@ func (assetHandler AssetHandler) GetRoot() (string, error) {
 // Copies file from src to destination and if destination file exists, it overrides the file
 // content based on if override is specified. Copies file from OS filesystem
 func (normalHandler NormalHandler) CopyFile(source string, destination string, override bool) (error) {
-    if _, err := os.Stat(destination); err == nil  && !override {
+    if _, err := os.Stat(destination); err == nil && !override {
         return nil
     }
 
@@ -74,8 +73,8 @@ func (normalHandler NormalHandler) CopyFile(source string, destination string, o
 
 // Copies file from src to destination and if destination file exists, it overrides the file
 // content based on if override is specified. Copies file from binary assets
-func (assetHandler AssetHandler) CopyFile(source string, destination  string, override bool) (error) {
-    if _, err := os.Stat(destination); err == nil  && !override {
+func (assetHandler AssetHandler) CopyFile(source string, destination string, override bool) (error) {
+    if _, err := os.Stat(destination); err == nil && !override {
         return nil
     }
 

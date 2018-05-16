@@ -9,6 +9,7 @@
  package main
 
 import (
+<<<<<<< HEAD
     "time"
     "os"
     "log"
@@ -26,6 +27,26 @@ func main()  {
     // override help template
     cli.AppHelpTemplate =
 `Wio a simplified development process for embedded applications.
+=======
+    "wio/cmd/wio/utils/io"
+    "github.com/urfave/cli"
+    "time"
+    "os"
+    "wio/cmd/wio/commands"
+    "wio/cmd/wio/commands/create"
+    "wio/cmd/wio/commands/pac"
+    "wio/cmd/wio/utils/io/log"
+    "wio/cmd/wio/types"
+    "wio/cmd/wio/commands/build"
+    "wio/cmd/wio/commands/clean"
+    "wio/cmd/wio/commands/run"
+)
+
+func main() {
+    // override help template
+    cli.AppHelpTemplate =
+        `Wio a simplified development process for embedded applications.
+>>>>>>> More commands and minor fixes (#37)
 Create, Build, Test, and Upload AVR projects from Commandline.
 
 Common Commands:
@@ -62,8 +83,13 @@ Vesrion:
 Run "wio command <help>" for more information about a command.
 `
 
+<<<<<<< HEAD
 cli.CommandHelpTemplate =
 `{{.Usage}}
+=======
+    cli.CommandHelpTemplate =
+        `{{.Usage}}
+>>>>>>> More commands and minor fixes (#37)
 
 Usage: {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Category}}
 
@@ -79,8 +105,13 @@ Available commands:
 Run "wio help" to see global options.
 `
 
+<<<<<<< HEAD
 cli.SubcommandHelpTemplate =
 `{{.Usage}}
+=======
+    cli.SubcommandHelpTemplate =
+        `{{.Usage}}
+>>>>>>> More commands and minor fixes (#37)
 
 Usage: {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
 
@@ -94,6 +125,7 @@ Options:
 Run "wio help" to see global options.
 `
     // get default configuration values
+<<<<<<< HEAD
     defaults := DConfig{}
     err := io.AssetIO.ParseYml("config/defaults.yml", &defaults)
 
@@ -101,6 +133,17 @@ Run "wio help" to see global options.
         log.Fatal(err)
     }
 
+=======
+    defaults := types.DConfig{}
+    err := io.AssetIO.ParseYml("config/defaults.yml", &defaults)
+    if err != nil {
+        log.Error(false, err.Error())
+    }
+
+    // command that will be executed
+    var command commands.Command
+
+>>>>>>> More commands and minor fixes (#37)
     app := cli.NewApp()
     app.Name = "wio"
     app.Version = defaults.Version
@@ -109,6 +152,7 @@ Run "wio help" to see global options.
     app.Copyright = "Copyright (c) 2018 Waterloop"
     app.Usage = "Create, Build and Upload AVR projects"
 
+<<<<<<< HEAD
     app.Flags = []cli.Flag {
         cli.BoolFlag{Name: "verbose",
             Usage: "Turns verbose mode on to show detailed errors and commands being executed",
@@ -124,6 +168,17 @@ Run "wio help" to see global options.
                     Name:      "lib",
                     Usage:     "Creates a wio library, intended to be used by other people",
                     UsageText: "wio create lib <DIRECTORY> <BOARD> [command options]",
+=======
+    app.Commands = []cli.Command{
+        {
+            Name:  "create",
+            Usage: "Creates and initializes a wio project.",
+            Subcommands: cli.Commands{
+                cli.Command{
+                    Name:      "pkg",
+                    Usage:     "Creates a wio package, intended to be used by other people",
+                    UsageText: "wio create pkg <DIRECTORY> <BOARD> [command options]",
+>>>>>>> More commands and minor fixes (#37)
                     Flags: []cli.Flag{
                         cli.StringFlag{Name: "ide",
                             Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
@@ -134,6 +189,7 @@ Run "wio help" to see global options.
                         cli.StringFlag{Name: "platform",
                             Usage: "Platform being used for this project. Platform is the type of chip supported (AVR/ ARM)",
                             Value: defaults.Platform},
+<<<<<<< HEAD
                     },
                     Action: func(c *cli.Context) error {
                         // check if user defined a board
@@ -163,6 +219,14 @@ Run "wio help" to see global options.
                         commandCreate.Execute(libArgs)
 
                         return nil
+=======
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = create.Create{Context: c, Type: create.PKG, Update: false}
+>>>>>>> More commands and minor fixes (#37)
                     },
                 },
                 cli.Command{
@@ -182,6 +246,7 @@ Run "wio help" to see global options.
                         cli.BoolFlag{Name: "tests",
                             Usage: "Creates a test folder to support unit testing",
                         },
+<<<<<<< HEAD
                     },
                     Action: func(c *cli.Context) error {
                         // check if user defined a board
@@ -211,19 +276,82 @@ Run "wio help" to see global options.
                         commandCreate.Execute(appArgs)
 
                         return nil
+=======
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = create.Create{Context: c, Type: create.APP, Update: false}
+                    },
+                },
+            },
+        },
+        {
+            Name:  "update",
+            Usage: "Updates the current project and fixes any issues.",
+            Subcommands: cli.Commands{
+                cli.Command{
+                    Name:      "pkg",
+                    Usage:     "Updates a wio package, intended to be used by other people",
+                    UsageText: "wio update pkg <DIRECTORY> [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "board",
+                            Usage: "Board being used for this project. This will use this board for the update",
+                            Value: defaults.Board},
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = create.Create{Context: c, Type: create.PKG, Update: true}
+                    },
+                },
+                cli.Command{
+                    Name:      "app",
+                    Usage:     "Updates a wio application, intended to be compiled and uploaded to a device",
+                    UsageText: "wio update app <DIRECTORY> [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "board",
+                            Usage: "Board being used for this project. This will use this board for the update",
+                            Value: defaults.Board},
+                        cli.StringFlag{Name: "ide",
+                            Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
+                            Value: defaults.Ide},
+                        cli.StringFlag{Name: "framework",
+                            Usage: "Framework being used for this project. Framework contains the core libraries",
+                            Value: defaults.Framework},
+                        cli.StringFlag{Name: "platform",
+                            Usage: "Platform being used for this project. Platform is the type of chip supported (AVR/ ARM)",
+                            Value: defaults.Platform},
+                        cli.BoolFlag{Name: "tests",
+                            Usage: "Creates a test folder to support unit testing",
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = create.Create{Context: c, Type: create.APP, Update: true}
+>>>>>>> More commands and minor fixes (#37)
                     },
                 },
             },
         },
         {
             Name:      "build",
+<<<<<<< HEAD
             Usage:     "Builds the project",
+=======
+            Usage:     "Builds the wio project.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio build [command options]",
             Flags: []cli.Flag{
                 cli.BoolFlag{Name: "clean",
                     Usage: "Clean the project before building it",
                 },
                 cli.StringFlag{Name: "target",
+<<<<<<< HEAD
                     Usage: "Build a specified target instead of building all the targets",
                     Value: defaults.Btarget,
                 },
@@ -233,25 +361,71 @@ Run "wio help" to see global options.
                 build based on the type of project (from config file)
                  */
                 return nil
+=======
+                    Usage: "Build a specified target instead of building the default",
+                    Value: defaults.Btarget,
+                },
+                cli.StringFlag{Name: "dir",
+                    Usage: "Directory for the project (default: current working directory)",
+                    Value: getCurrDir(),
+                },
+                cli.BoolFlag{Name: "verbose",
+                    Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                },
+            },
+            Action: func(c *cli.Context) {
+                command = build.Build{Context: c}
+>>>>>>> More commands and minor fixes (#37)
             },
         },
         {
             Name:      "clean",
+<<<<<<< HEAD
             Usage:     "Cleans all the build files for the project",
             UsageText: "wio clean",
             Action: func(c *cli.Context) error {
                 return nil
+=======
+            Usage:     "Cleans all the build files for the project.",
+            UsageText: "wio clean",
+            Flags: []cli.Flag{
+                cli.StringFlag{Name: "target",
+                    Usage: "Cleans build files for a specified target instead of cleaning all the targets",
+                    Value: defaults.Btarget,
+                },
+                cli.StringFlag{Name: "dir",
+                    Usage: "Directory for the project (default: current working directory)",
+                    Value: getCurrDir(),
+                },
+                cli.BoolFlag{Name: "verbose",
+                    Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                },
+            },
+            Action: func(c *cli.Context) {
+                command = clean.Clean{Context: c}
+>>>>>>> More commands and minor fixes (#37)
             },
         },
         {
             Name:      "upload",
+<<<<<<< HEAD
             Usage:     "Uploads the project to a device",
+=======
+            Usage:     "Uploads the project to a device.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio upload [command options]",
             Flags: []cli.Flag{
                 cli.StringFlag{Name: "file",
                     Usage: "Hex file can be provided to upload; program will upload that file",
                     Value: defaults.File,
                 },
+<<<<<<< HEAD
+=======
+                cli.StringFlag{Name: "dir",
+                    Usage: "Directory for the project (default: current working directory)",
+                    Value: getCurrDir(),
+                },
+>>>>>>> More commands and minor fixes (#37)
                 cli.StringFlag{Name: "port",
                     Usage: "Port to upload the project to",
                     Value: defaults.Port,
@@ -260,6 +434,12 @@ Run "wio help" to see global options.
                     Usage: "Uploads a specified target instead of the main/default target",
                     Value: defaults.Utarget,
                 },
+<<<<<<< HEAD
+=======
+                cli.BoolFlag{Name: "verbose",
+                    Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                },
+>>>>>>> More commands and minor fixes (#37)
             },
             Action: func(c *cli.Context) error {
                 return nil
@@ -267,20 +447,31 @@ Run "wio help" to see global options.
         },
         {
             Name:      "run",
+<<<<<<< HEAD
             Usage:     "Builds, Tests, and Uploads the project to a device",
+=======
+            Usage:     "Builds and Uploads the project to a device.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio run [command options]",
             Flags: []cli.Flag{
                 cli.BoolFlag{Name: "clean",
                     Usage: "Clean the project before building it",
                 },
+<<<<<<< HEAD
                 cli.StringFlag{Name: "file",
                     Usage: "Hex file can be provided to upload; program will upload that file",
                     Value: defaults.File,
+=======
+                cli.StringFlag{Name: "target",
+                    Usage: "Builds, and uploads a specified target instead of the main/default target",
+                    Value: defaults.Utarget,
+>>>>>>> More commands and minor fixes (#37)
                 },
                 cli.StringFlag{Name: "port",
                     Usage: "Port to upload the project to, (default: automatically select)",
                     Value: defaults.Port,
                 },
+<<<<<<< HEAD
                 cli.StringFlag{Name: "target",
                     Usage: "Builds, and uploads a specified target instead of the main/default target",
                     Value: defaults.Utarget,
@@ -288,11 +479,27 @@ Run "wio help" to see global options.
             },
             Action: func(c *cli.Context) error {
                 return nil
+=======
+                cli.StringFlag{Name: "dir",
+                    Usage: "Directory for the project (default: current working directory)",
+                    Value: getCurrDir(),
+                },
+                cli.BoolFlag{Name: "verbose",
+                    Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                },
+            },
+            Action: func(c *cli.Context) {
+                command = run.Run{Context: c}
+>>>>>>> More commands and minor fixes (#37)
             },
         },
         {
             Name:      "test",
+<<<<<<< HEAD
             Usage:     "Runs unit tests available in the project",
+=======
+            Usage:     "Runs unit tests available in the project.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio test",
             Flags: []cli.Flag{
                 cli.BoolFlag{Name: "clean",
@@ -306,6 +513,12 @@ Run "wio help" to see global options.
                     Usage: "Builds, and uploads a specified target instead of the main/default target",
                     Value: defaults.Utarget,
                 },
+<<<<<<< HEAD
+=======
+                cli.BoolFlag{Name: "verbose",
+                    Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                },
+>>>>>>> More commands and minor fixes (#37)
             },
             Action: func(c *cli.Context) error {
                 return nil
@@ -313,7 +526,11 @@ Run "wio help" to see global options.
         },
         {
             Name:      "monitor",
+<<<<<<< HEAD
             Usage:     "Runs the serial monitor",
+=======
+            Usage:     "Runs the serial monitor.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio monitor [command options]",
             Flags: []cli.Flag{
                 cli.BoolFlag{Name: "gui",
@@ -323,6 +540,12 @@ Run "wio help" to see global options.
                     Usage: "Port to upload the project to, (default: automatically select)",
                     Value: defaults.Port,
                 },
+<<<<<<< HEAD
+=======
+                cli.BoolFlag{Name: "verbose",
+                    Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                },
+>>>>>>> More commands and minor fixes (#37)
             },
             Action: func(c *cli.Context) error {
                 return nil
@@ -330,13 +553,18 @@ Run "wio help" to see global options.
         },
         {
             Name:      "doctor",
+<<<<<<< HEAD
             Usage:     "Show information about the installed tooling",
+=======
+            Usage:     "Guide development tooling and system configurations.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio doctor",
             Action: func(c *cli.Context) error {
                 return nil
             },
         },
         {
+<<<<<<< HEAD
             Name:      "configure",
             Usage:     "Configures paths for the tools used for development",
             UsageText: "wio configure [command options]",
@@ -367,6 +595,10 @@ Run "wio help" to see global options.
         {
             Name:      "analyze",
             Usage:     "Analyzes C/C++ code statically",
+=======
+            Name:      "analyze",
+            Usage:     "Analyzes C/C++ code statically.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio analyze",
             Action: func(c *cli.Context) error {
                 return nil
@@ -374,23 +606,38 @@ Run "wio help" to see global options.
         },
         {
             Name:      "doxygen",
+<<<<<<< HEAD
             Usage:     "Runs doxygen tool to create documentation for the code",
+=======
+            Usage:     "Runs doxygen tool to create documentation for the code.",
+>>>>>>> More commands and minor fixes (#37)
             UsageText: "wio doxygen",
             Action: func(c *cli.Context) error {
                 return nil
             },
         },
         {
+<<<<<<< HEAD
             Name:  "packager",
             Usage: "Package manager for Wio projects",
             Subcommands: cli.Commands{
                 cli.Command{
                     Name:  "get",
                     Usage: "Gets all the packages being used in the project",
+=======
+            Name:  "pac",
+            Usage: "Package manager for Wio projects.",
+            Subcommands: cli.Commands{
+                cli.Command{
+                    Name:      "get",
+                    Usage:     "Gets all the libraries mentioned in wio.yml file and vendor folder",
+                    UsageText: "wio libraries get [command options]",
+>>>>>>> More commands and minor fixes (#37)
                     Flags: []cli.Flag{
                         cli.BoolFlag{Name: "clean",
                             Usage: "Cleans all the current packages and re get all of them",
                         },
+<<<<<<< HEAD
                     },
                     Action: func(c *cli.Context) error {
                         return nil
@@ -429,6 +676,52 @@ Run "wio help" to see global options.
                     },
                     Action: func(c *cli.Context) error {
                         return nil
+=======
+                        cli.StringFlag{Name: "version_control",
+                            Usage: "Specify the version control tool to usage",
+                            Value: "git",
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = pac.Pac{Context: c, Type: pac.GET}
+                    },
+                },
+                cli.Command{
+                    Name:      "update",
+                    Usage:     "Updates all the libraries mentioned in wio.yml file and vendor folder.",
+                    UsageText: "wio libraries update [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "version_control",
+                            Usage: "Specify the version control tool to usage",
+                            Value: "git",
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = pac.Pac{Context: c, Type: pac.UPDATE}
+                    },
+                },
+                cli.Command{
+                    Name:      "collect",
+                    Usage:     "Creates vendor folder and puts all the libraries in that folder",
+                    UsageText: "wio libraries collect [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "path",
+                            Usage: "Path to collect a library instead of collecting all of them",
+                            Value: "none",
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = pac.Pac{Context: c, Type: pac.COLLECT}
+>>>>>>> More commands and minor fixes (#37)
                     },
                 },
             },
@@ -440,6 +733,7 @@ Run "wio help" to see global options.
         return nil
     }
 
+<<<<<<< HEAD
     err = app.Run(os.Args)
 
     if err != nil {
@@ -452,4 +746,25 @@ func turnVerbose(value bool) {
     if value == true {
         io.SetVerbose()
     }
+=======
+    if err = app.Run(os.Args); err != nil {
+        panic(err)
+    }
+
+    // execute the command
+    if command != nil {
+        // check if verbose flag is true
+        if command.GetContext().Bool("verbose") {
+            log.SetVerbose()
+        }
+
+        command.Execute()
+    }
+}
+
+func getCurrDir() (string) {
+    directory, err := os.Getwd()
+    commands.RecordError(err, "")
+    return directory
+>>>>>>> More commands and minor fixes (#37)
 }
