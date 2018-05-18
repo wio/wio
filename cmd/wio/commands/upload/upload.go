@@ -113,12 +113,10 @@ func RunUpload(directoryCli string, targetCli string, port string) {
 
     for _, port := range ports {
         if port.PID != "" {
-            desc, err := getDeviceDescription(port.PID)
-            if err != nil {
-                panic(err)
-            } else {
-                fmt.Println(desc)
-            }
+            fmt.Printf("Found port: %v\n", port.Name)
+            fmt.Printf("Manufacturer: %v\n", port.Manufacturer)
+            fmt.Printf("Product: %v\n", port.Product)
+            fmt.Println()
         }
     }
 
