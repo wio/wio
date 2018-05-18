@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "bpXiiJR+oABf9TV80mtgS9lESWg=",
+			"path": "github.com/GuoXi/go-serial/enumerator",
+			"revision": "eae63539987d9b2a5788b465295ad2b2597fb25e",
+			"revisionTime": "2018-04-27T03:20:17Z"
+		},
+		{
 			"checksumSHA1": "VsE3zx2d8kpwj97TWhYddzAwBrY=",
 			"path": "github.com/fatih/color",
 			"revision": "507f6050b8568533fb3f5504de8e5205fa62a114",
@@ -13,6 +19,18 @@
 			"path": "github.com/go-errors/errors",
 			"revision": "a6af135bd4e28680facf08a3d206b454abc877a4",
 			"revisionTime": "2018-02-26T18:00:45Z"
+		},
+		{
+			"checksumSHA1": "Zs2T3UrC5GS3CvV7Ku+bKXFgqzM=",
+			"path": "github.com/google/gousb",
+			"revision": "5115a55a0324bb8a46152070979ec80aa07632a9",
+			"revisionTime": "2018-04-05T11:23:20Z"
+		},
+		{
+			"checksumSHA1": "tNB1ryQ8RdvhUQpH0IXYEQq+4yk=",
+			"path": "github.com/google/gousb/usbid",
+			"revision": "5115a55a0324bb8a46152070979ec80aa07632a9",
+			"revisionTime": "2018-04-05T11:23:20Z"
 		},
 		{
 			"checksumSHA1": "XEV3BI3nHA/rNa/tIgB7fVCrDww=",
@@ -37,6 +55,12 @@
 		{
 			"checksumSHA1": "nRLbdzPbNFtvnZt1yExwINHEc5c=",
 			"path": "golang.org/x/sys/unix",
+			"revision": "13d03a9a82fba647c21a0ef8fba44a795d0f0835",
+			"revisionTime": "2018-03-26T12:16:02Z"
+		},
+		{
+			"checksumSHA1": "Dfz4tGItokMvHZENCsBmPPB8FGQ=",
+			"path": "golang.org/x/sys/windows",
 			"revision": "13d03a9a82fba647c21a0ef8fba44a795d0f0835",
 			"revisionTime": "2018-03-26T12:16:02Z"
 		},

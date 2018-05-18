@@ -78,7 +78,6 @@ type DConfig struct {
     Ide       string
     Framework string
     Platform  string
-    File      string
     Port      string
     Version   string
     Board     string

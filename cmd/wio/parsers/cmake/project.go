@@ -16,7 +16,7 @@ import (
 // This creates the main cmake file based on the target provided. This method is used for creating the main cmake for
 // project type of "pkg". This CMake file links the package with the target provided so that it can tested and run
 // before getting shipped
-func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, framework string, target string,
+func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port string, framework string, target string,
     targetFlags []string, pkgFlags []string, depTree []*parsers.DependencyTree) (error) {
 
     executablePath, err := io.NormalIO.GetRoot()
@@ -39,6 +39,7 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, frame
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_NAME}}", pkgName, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{TARGET_NAME}}", target, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{BOARD}}", board, -1)
+    templateDataStr = strings.Replace(templateDataStr, "{{PORT}}", port, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{FRAMEWORK}}",
         strings.ToUpper(framework), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{TARGET_COMPILE_FLAGS}}",
@@ -61,7 +62,7 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, frame
 
 // This creates the main cmake file based on the target. This method is used for creating the main cmake for project
 // type of "app". In this it does not link any library but rather just populates a target that can be uploaded
-func CreateAppMainCMakeLists(appName string, appPath string, board string, framework string, target string,
+func CreateAppMainCMakeLists(appName string, appPath string, board string, port string, framework string, target string,
     targetFlags []string, depTree []*parsers.DependencyTree) (error) {
 
     executablePath, err := io.NormalIO.GetRoot()
@@ -83,6 +84,7 @@ func CreateAppMainCMakeLists(appName string, appPath string, board string, frame
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_NAME}}", appName, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{TARGET_NAME}}", target, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{BOARD}}", board, -1)
+    templateDataStr = strings.Replace(templateDataStr, "{{PORT}}", port, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{FRAMEWORK}}",
         strings.ToUpper(framework), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{TARGET_COMPILE_FLAGS}}",

@@ -34,11 +34,11 @@ func (build Build) GetContext() (*cli.Context) {
 // Runs the build command when cli build option is provided
 func (build Build) Execute() {
     RunBuild(build.Context.String("dir"), build.Context.String("target"),
-        build.Context.Bool("clean"))
+        build.Context.Bool("clean"), "")
 }
 
 // This function allows other packages to call build as well. This is also used when cli build is executed
-func RunBuild(directoryCli string, targetCli string, cleanCli bool) {
+func RunBuild(directoryCli string, targetCli string, cleanCli bool, port string) {
     directory, err := filepath.Abs(directoryCli)
     commands.RecordError(err, "")
 
@@ -100,8 +100,8 @@ func RunBuild(directoryCli string, targetCli string, cleanCli bool) {
     }
 
     // create the target
-    createTarget(name, directory, targetToBuild.Board, framework, targetToBuildName, targetToBuild.Compile_flags,
-        pkgCompileFlags, dependencies)
+    createTarget(name, directory, targetToBuild.Board, port, framework, targetToBuildName,
+        targetToBuild.Compile_flags, pkgCompileFlags, dependencies)
 
     // build the target
     buildTarget(directory, targetToBuildName)
@@ -118,8 +118,8 @@ func removeTarget(directory string) {
     os.Remove(depPath)
 }
 
-func createTarget(name string, directory string, board string, framework string, target string, targetFlags []string,
-    pkgFlags []string, dependencies types.DependenciesTag) (error) {
+func createTarget(name string, directory string, board string, port string, framework string, target string,
+    targetFlags []string, pkgFlags []string, dependencies types.DependenciesTag) (error) {
     // parse dependencies and create a dependencies.cmake file
     dependencyTree, err := cmake.ParseDepsAndCreateCMake(directory, dependencies)
     if err != nil {
@@ -129,13 +129,13 @@ func createTarget(name string, directory string, board string, framework string,
     // create the main CMakeLists.txt file
     if pkgFlags != nil {
         // create cmake for package type
-        if err := cmake.CreatePkgMainCMakeLists(name, directory, board, framework, target, targetFlags, pkgFlags,
-            dependencyTree); err != nil {
+        if err := cmake.CreatePkgMainCMakeLists(name, directory, board, port, framework, target, targetFlags,
+            pkgFlags, dependencyTree); err != nil {
             return err
         }
     } else {
         // create cmake for app type
-        if err := cmake.CreateAppMainCMakeLists(name, directory, board, framework, target, targetFlags,
+        if err := cmake.CreateAppMainCMakeLists(name, directory, board, port, framework, target, targetFlags,
             dependencyTree); err != nil {
             return err
         }
