@@ -28,7 +28,7 @@ func (run Run) GetContext() (*cli.Context) {
 func (run Run) Execute() {
     // execute build command
     build.RunBuild(run.Context.String("dir"), run.Context.String("target"),
-        run.Context.Bool("clean"))
+        run.Context.Bool("clean"), run.Context.String("upload"))
 
     // execute upload command
 }

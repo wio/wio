@@ -40,6 +40,7 @@ func main()  {
     "wio/cmd/wio/commands/build"
     "wio/cmd/wio/commands/clean"
     "wio/cmd/wio/commands/run"
+    "wio/cmd/wio/commands/upload"
 )
 
 func main() {
@@ -415,12 +416,15 @@ Run "wio help" to see global options.
 >>>>>>> More commands and minor fixes (#37)
             UsageText: "wio upload [command options]",
             Flags: []cli.Flag{
+<<<<<<< HEAD
                 cli.StringFlag{Name: "file",
                     Usage: "Hex file can be provided to upload; program will upload that file",
                     Value: defaults.File,
                 },
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> adding upload support
                 cli.StringFlag{Name: "dir",
                     Usage: "Directory for the project (default: current working directory)",
                     Value: getCurrDir(),
@@ -441,8 +445,8 @@ Run "wio help" to see global options.
                 },
 >>>>>>> More commands and minor fixes (#37)
             },
-            Action: func(c *cli.Context) error {
-                return nil
+            Action: func(c *cli.Context)  {
+                command = upload.Upload{Context: c}
             },
         },
         {
@@ -483,6 +487,10 @@ Run "wio help" to see global options.
                 cli.StringFlag{Name: "dir",
                     Usage: "Directory for the project (default: current working directory)",
                     Value: getCurrDir(),
+                },
+                cli.StringFlag{Name: "port",
+                    Usage: "Port to upload the project to",
+                    Value: defaults.Port,
                 },
                 cli.BoolFlag{Name: "verbose",
                     Usage: "Turns verbose mode on to show detailed errors and commands being executed",
