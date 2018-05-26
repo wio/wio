@@ -14,6 +14,7 @@ import (
     "os"
     "wio/cmd/wio/utils/io"
     "wio/cmd/wio/utils"
+    "wio/cmd/wio/utils/io/log"
 )
 
 type Clean struct {
@@ -32,22 +33,44 @@ func (clean Clean) Execute() {
         clean.Context.IsSet("target"))
 }
 
+// This function allows other packages to call the clean command. It contains
+// all the main functionality
 func RunClean(directoryCli string, targetCli string, targetProvided bool) {
     directory, err := filepath.Abs(directoryCli)
     commands.RecordError(err, "")
 
     targetToCleanName := targetCli
 
+    log.Norm.Yellow(true, "Cleaning build files")
+
     if !targetProvided {
+        log.Norm.Cyan(false, "cleaning all the targets ... ")
+
         // clean everything
-        commands.RecordError(os.RemoveAll(directory+io.Sep+".wio"+io.Sep+"build"+io.Sep+"targets"), "")
+        if err := os.RemoveAll(directory+io.Sep+".wio"+io.Sep+"build"+io.Sep+"targets"); err != nil {
+            commands.RecordError(err, "failure")
+        } else {
+            log.Norm.Green(true, "success")
+        }
     } else {
         // clean an individual target
         targetPath := directory + io.Sep + ".wio" + io.Sep + "build" + io.Sep + "targets" + io.Sep + targetToCleanName
 
         if utils.PathExists(targetPath) {
+            log.Norm.Cyan(false, "cleaning target: \"" + targetToCleanName + "\" ... ")
+
             // delete the target
-            commands.RecordError(os.RemoveAll(targetPath), "")
+            if err := os.RemoveAll(targetPath); err != nil {
+                commands.RecordError(err, "failure")
+            } else {
+                log.Norm.Green(true, "success")
+            }
+
+        } else {
+            log.Norm.Cyan(false, "No build files exists for target: \"" + targetToCleanName + "\" ... ")
+            log.Norm.Green(true, "skipped")
         }
     }
+
+    log.Norm.Yellow(true, "Clean command executed successfully!!")
 }

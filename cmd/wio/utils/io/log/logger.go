@@ -132,3 +132,8 @@ func (writer writer) Verbose(newLine bool, text string, a ...interface{}) {
 
     writer.Write(newLine, text, a...)
 }
+
+// This returns true if verbose mode is on and false otherwise
+func (writer writer) IsVerbose() bool {
+    return writer.verbose
+}
