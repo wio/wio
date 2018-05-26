@@ -19,6 +19,6 @@ include(${DEPENDENCY_FILE})
 file(GLOB_RECURSE SRC_FILES "${PROJECT_PATH}/src/*.cpp" "${PROJECT_PATH}/src/*.cc" "${PROJECT_PATH}/src/*.c")
 generate_arduino_firmware(${TARGET_NAME}
     SRCS ${SRC_FILES}
-    BOARD ${BOARD})
-    PORT {{PORT}}
+    BOARD ${BOARD}
+    PORT {{PORT}})
 target_compile_definitions(${TARGET_NAME} PRIVATE __AVR_${FRAMEWORK}__ {{TARGET_COMPILE_FLAGS}})

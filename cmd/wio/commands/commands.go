@@ -1,10 +1,10 @@
 package commands
 
 import (
-    "github.com/go-errors/errors"
-    "os"
     "wio/cmd/wio/utils/io/log"
     "github.com/urfave/cli"
+    "fmt"
+    "os"
 )
 
 type Command interface {
@@ -12,13 +12,33 @@ type Command interface {
     Execute()
 }
 
-func RecordError(err error, message string) {
-    if err != nil {
-        if message != "" {
-            log.Norm.Red(true, message)
-        }
+type ExitError struct {
+    code int
+    error
+}
 
-        log.Error(true, err.(*errors.Error).ErrorStack())
-        os.Exit(2)
+func (exitError ExitError) ExitCode() int {
+    return exitError.code
+}
+
+// RecordError function allows for error handling with error code and
+// nice console error logs
+func RecordError(err error, message string, more ...interface{}) {
+    if err == nil {
+        return
     }
+
+    if message != "" {
+        log.Norm.Red(true, message)
+    }
+
+    log.Norm.Red(true, "Error Report: ")
+
+    if len(more) > 0 {
+        fmt.Fprintln(os.Stderr, more...)
+    }
+
+    exitCoder := ExitError{code: 2, error: err}
+
+    cli.HandleExitCoder(exitCoder)
 }

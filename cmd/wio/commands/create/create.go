@@ -12,6 +12,19 @@ import (
     . "wio/cmd/wio/utils/io"
     "path/filepath"
     "os"
+    "wio/cmd/wio/utils/io"
+    "wio/cmd/wio/types"
+    "regexp"
+    "wio/cmd/wio/utils"
+    "bufio"
+    "strings"
+    "wio/cmd/wio/commands"
+    "errors"
+)
+
+const (
+    APP = "app"
+    PKG = "pkg"
 )
 
 /// This structure wraps all the important features needed for a create and update command
@@ -41,7 +54,13 @@ func (create Create) GetContext() (*cli.Context) {
 func (create Create) Execute() {
     commands.RecordError(create.error, "")
 
-    var projectType ProjectTypes = App{args:&args}
+    if !create.Update && len(create.Context.Args()) < 2 {
+        // When we are creating a project we need both directory and a board from args
+        commands.RecordError(errors.New("Project directory or Board not specified"), "")
+    } else if !create.Update && len(create.Context.Args()) < 1 {
+        // When we are updating a project we only need directory from args
+        commands.RecordError(errors.New("Project directory not specified"), "")
+    }
 
     if args.AppType == "lib" {
         projectType = Lib{args:&args}
