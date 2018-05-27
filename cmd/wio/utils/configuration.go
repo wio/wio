@@ -14,33 +14,20 @@ import (
 )
 
 // Write configuration for the project with information on top and nice spacing
-<<<<<<< HEAD
-func PrettyPrintConfig(projectType string, projectConfig interface{}, filePath string) (error) {
-    infoPath := "templates" + Sep + "config" + Sep + "project-" + projectType + "-help"
-=======
 func PrettyPrintConfig(projectConfig interface{}, filePath string) (error) {
     appInfoPath := "templates" + io.Sep + "config" + io.Sep + "app-helper.txt"
     pkgInfoPath := "templates" + io.Sep + "config" + io.Sep + "pkg-helper.txt"
     targetsInfoPath := "templates" + io.Sep + "config" + io.Sep + "targets-helper.txt"
     dependenciesInfoPath := "templates" + io.Sep + "config" + io.Sep + "dependencies-helper.txt"
->>>>>>> More commands and minor fixes (#37)
 
     var ymlData []byte
-    var infoData []byte
+    var appInfoData []byte
+    var pkgInfoData []byte
+    var targetsInfoData []byte
+    var dependenciesInfoData []byte
     var err error
 
     // get data
-<<<<<<< HEAD
-    if ymlData, err = yaml.Marshal(projectConfig); err != nil { return err }
-    if infoData, err = AssetIO.ReadFile(infoPath); err != nil { return err }
-
-    infoDataSlice :=  strings.Split(string(infoData), "\n")
-    totalConfig := make([]string, 0)
-    totalConfig = append(totalConfig, infoDataSlice...)
-    totalConfig = append(totalConfig, string(ymlData))
-
-    if err = os.Remove(filePath); err != nil { return err }
-=======
     if ymlData, err = yaml.Marshal(projectConfig); err != nil {
         return err
     }
@@ -96,8 +83,6 @@ func PrettyPrintConfig(projectConfig interface{}, filePath string) (error) {
     }
 
     err = io.NormalIO.WriteFile(filePath, []byte(finalString))
->>>>>>> More commands and minor fixes (#37)
 
-    err = writeProjectConfig(totalConfig, filePath)
     return err
 }

@@ -2,15 +2,14 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
-
-// Part of commands/create package, which contains create command and sub commands provided by the tool.
-// Creates and initializes a wio project. It also works as an updater when called on already created projects.
+// Part of commands/create package, which contains create and update command and sub commands provided by the tool.
+// Creates, updates and initializes a wio project.
 package create
 
 import (
-    . "wio/cmd/wio/utils/types"
-    . "wio/cmd/wio/utils/io"
+    "github.com/urfave/cli"
     "path/filepath"
+    "wio/cmd/wio/utils/io/log"
     "os"
     "wio/cmd/wio/utils/io"
     "wio/cmd/wio/types"
@@ -63,10 +62,6 @@ func (create Create) Execute() {
         commands.RecordError(errors.New("project directory not specified"), "failure")
     }
 
-<<<<<<< HEAD
-    if args.AppType == "lib" {
-        projectType = Lib{args:&args}
-=======
     createPacket := &PacketCreate{}
 
     // fetch directory based on the argument
@@ -102,7 +97,6 @@ You can use: wio create <app type> DIRECTORY BOARD`
         create.createStructure(createPacket.directory, true)
         create.initialProjectSetup(createPacket)
         create.postPrint(createPacket, false)
->>>>>>> finished publish command for package manager
     }
 }
 
@@ -140,7 +134,7 @@ func (create Create) createStructure(directory string, delete bool) {
             "failure")
     }
 
-    if create.Context.Bool("tests") {
+    if create.Type == PKG || create.Context.Bool("tests") {
         commands.RecordError(os.MkdirAll(directory+io.Sep+"tests", os.ModePerm), "failure")
     }
 
@@ -189,9 +183,11 @@ func (create Create) updateProjectSetup(createPacket *PacketCreate) {
         // set the default board to be from the default target
         createPacket.board = projectConfig.TargetsTag.Targets[projectConfig.TargetsTag.Default_target].Board
 
-    if err != nil {
-        Norm.Red("[failure]\n")
-        Verb.Error(err.Error() + "\n")
+        // check framework and platform
+        checkFrameworkAndPlatform(&projectConfig.MainTag.Framework,
+            &projectConfig.MainTag.Platform, &defaults)
+
+        config = projectConfig
     } else {
         projectConfig := &types.PkgConfig{}
 

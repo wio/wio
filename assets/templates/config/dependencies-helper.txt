@@ -1,0 +1,14 @@
+# "dependencies" tag allows user to include other packages into their project. There is a package manager built into
+# wio and you can make use of that by specifying packages in this tag. Dependencies will be a list of packages and
+# you can specify different options for each of them. Following are some key points about this"
+# - url is where you specify the url of the package. So Far only "Git" supported urls are accepted.
+# - ref is where you can specify a branch to checkout the library from
+# - compile_flags are where you specify the compile flags for the dependency
+# Example:
+# dependencies:
+#   myLib:
+#       url: "URL1"
+#       ref: "REF1"
+#       compile_flags: ["HELLO", "NOO"]
+#   myLib2:
+#       url: "URL2"

@@ -2,12 +2,9 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
-
 // Part of commands package, which contains all the commands provided by the tool.
 // Builds, Tests, and Uploads the project to a device
 package run
-<<<<<<< HEAD
-=======
 
 import (
     "github.com/urfave/cli"
@@ -81,4 +78,3 @@ func (run Run) Execute() {
         log.Norm.Yellow(true, "Upload successful for target: \""+targetName+"\"")
     }
 }
->>>>>>> More commands and minor fixes (#37)

@@ -12,11 +12,10 @@ lib:
   board: [ALL]
   compile_flags: []
   ide: ide
-  default_target: test
 
-  targets:
+targets:
+  default: test
+  created:
     test:
       board: board
       compile_flags: []
-
-libraries:
