@@ -3,19 +3,7 @@
     {
       "id": "app-gen",
       "src": "templates/config/project-app.yml",
-      "des": "{{PRJ-ROOT}}/project.yml",
-      "override": false
-    },
-    {
-      "id": "app-gen",
-      "src": "templates/cmake/CMakeLists.txt-app.tpl",
-      "des": "{{PRJ-ROOT}}/.wio/CMakeLists.txt",
-      "override": true
-    },
-    {
-      "id": "app-gen",
-      "src": "templates/sample-program/app/main.cpp",
-      "des": "{{PRJ-ROOT}}/src/main.cpp",
+      "des": "{{PRJ-ROOT}}/wio.yml",
       "override": false
     },
     {
@@ -45,31 +33,7 @@
     {
       "id": "lib-gen",
       "src": "templates/config/project-lib.yml",
-      "des": "{{PRJ-ROOT}}/project.yml",
-      "override": false
-    },
-    {
-      "id": "lib-gen",
-      "src": "templates/cmake/CMakeLists.txt-lib.tpl",
-      "des": "{{PRJ-ROOT}}/.wio/CMakeLists.txt",
-      "override": true
-    },
-    {
-      "id": "lib-gen",
-      "src": "templates/sample-program/lib/lib.h",
-      "des": "{{PRJ-ROOT}}/src/lib.h",
-      "override": false
-    },
-    {
-      "id": "lib-gen",
-      "src": "templates/sample-program/lib/lib.cpp",
-      "des": "{{PRJ-ROOT}}/src/lib.cpp",
-      "override": false
-    },
-    {
-      "id": "lib-gen",
-      "src": "templates/sample-program/lib/main.cpp",
-      "des": "{{PRJ-ROOT}}/test/main.cpp",
+      "des": "{{PRJ-ROOT}}/wio.yml",
       "override": false
     },
     {

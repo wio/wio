@@ -3,11 +3,10 @@ app:
   ide: ide
   platform: platform
   framework: framework
-  default_target: main
 
-  targets:
+targets:
+  default: main
+  created:
     main:
       board: board
       compile_flags: []
-
-libraries:
