@@ -17,7 +17,6 @@
 // ../../../../assets/templates/ide/clion/app/CMakeListsPrivate.txt.tpl
 // ../../../../assets/templates/ide/clion/lib/CMakeLists.txt.tpl
 // ../../../../assets/templates/ide/clion/lib/CMakeListsPrivate.txt.tpl
-// ../../../../assets/templates/npm/package.json
 // ../../../../assets/templates/sample-program/app/main.cpp
 // ../../../../assets/templates/sample-program/lib/lib.cpp
 // ../../../../assets/templates/sample-program/lib/lib.h
@@ -27,66 +26,66 @@
 package io
 
 import (
-    "bytes"
-    "compress/gzip"
-    "fmt"
-    "io"
-    "io/ioutil"
-    "os"
-    "path/filepath"
-    "strings"
-    "time"
+	"bytes"
+	"compress/gzip"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
-    gz, err := gzip.NewReader(strings.NewReader(data))
-    if err != nil {
-        return nil, fmt.Errorf("Read %q: %v", name, err)
-    }
+	gz, err := gzip.NewReader(strings.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("Read %q: %v", name, err)
+	}
 
-    var buf bytes.Buffer
-    _, err = io.Copy(&buf, gz)
-    clErr := gz.Close()
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, gz)
+	clErr := gz.Close()
 
-    if err != nil {
-        return nil, fmt.Errorf("Read %q: %v", name, err)
-    }
-    if clErr != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, fmt.Errorf("Read %q: %v", name, err)
+	}
+	if clErr != nil {
+		return nil, err
+	}
 
-    return buf.Bytes(), nil
+	return buf.Bytes(), nil
 }
 
 type asset struct {
-    bytes []byte
-    info  os.FileInfo
+	bytes []byte
+	info  os.FileInfo
 }
 
 type bindataFileInfo struct {
-    name    string
-    size    int64
-    mode    os.FileMode
-    modTime time.Time
+	name    string
+	size    int64
+	mode    os.FileMode
+	modTime time.Time
 }
 
 func (fi bindataFileInfo) Name() string {
-    return fi.name
+	return fi.name
 }
 func (fi bindataFileInfo) Size() int64 {
-    return fi.size
+	return fi.size
 }
 func (fi bindataFileInfo) Mode() os.FileMode {
-    return fi.mode
+	return fi.mode
 }
 func (fi bindataFileInfo) ModTime() time.Time {
-    return fi.modTime
+	return fi.modTime
 }
 func (fi bindataFileInfo) IsDir() bool {
-    return false
+	return false
 }
 func (fi bindataFileInfo) Sys() interface{} {
-    return nil
+	return nil
 }
 
 <<<<<<< HEAD
@@ -95,39 +94,40 @@ var _assetsConfigDefaultsYml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x44\xd0
 var _assetsConfigCreate_pathsJson = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xcc\xd4\x3f\x6b\xf3\x30\x10\x06\xf0\xdd\x9f\xe2\xd0\x1c\x5b\x7b\xd6\x77\x7b\x69\x49\x08\xdd\x4a\x07\x45\xbe\x38\xd7\xca\xd6\x21\x5d\xd2\x16\xe3\xef\x5e\x6c\x68\xd3\xa4\x21\xce\x9f\x26\xee\x60\x63\xc4\x73\xe6\x87\x84\x9e\x3a\x01\x50\x6c\x64\x19\xd5\x18\x1e\x13\x00\x80\xba\x7b\x03\x28\xca\xd5\x18\x94\x61\x4e\x0b\xac\xd4\xe8\x73\x39\x06\xdb\xae\x0b\x96\xec\x8c\x60\xd4\xd6\x57\x0b\x2a\x34\x07\xff\x8c\x56\x52\xc3\x9c\xbd\x97\x6e\x33\x90\x63\xfb\x73\x55\xd7\xd3\xd9\xff\x74\x36\x99\x3c\x34\x8d\x7e\x25\xbf\x1d\xf2\x6b\x0c\x81\x72\x54\x63\x58\x18\x17\xb1\x5b\x6f\x46\xe7\x89\xa2\x29\xd9\x61\xca\xc1\x17\xc1\x94\xda\x30\xeb\xd2\x50\x95\x59\xe6\xc3\xac\x18\xec\x9e\xe4\xaf\xda\x0a\x12\x2a\x2a\x1f\x50\x67\x5f\x9f\xed\x08\x06\xd3\xb3\x67\x9b\xfc\xd9\x34\xeb\xc8\x9f\x8c\xdb\x19\x1a\x88\x46\x39\xea\x2e\xd3\x1d\xe7\xbf\x7b\xf3\x82\x77\x14\x25\x66\xf2\x26\x99\x70\xcf\xde\x6d\xe7\x6f\x8e\x9c\x06\x5a\x1b\xc1\x53\xad\xdf\xc6\xf6\x92\x25\xac\x0e\x89\x1d\xcd\x4f\xbb\xba\x8e\xe6\xd7\xbd\xba\xfd\xa2\x9d\xab\xeb\x68\xde\x3e\xd9\xf2\xb0\x89\x2a\xeb\x56\x39\xee\x46\x6f\x21\x3b\xaa\x53\x7e\x04\xaf\x2d\x3b\xae\xee\x04\xa3\x5c\xd6\x77\xfd\xb8\xc1\xfa\xae\xa5\xfd\xd1\xbe\x3b\x86\xb6\xa9\x92\xf6\x3c\x07\xe8\xbb\x4b\x90\x57\xef\xbb\x04\xe0\x29\x69\x92\x8f\x00\x00\x00\xff\xff\x0a\x01\x85\x67\xbf\x08\x00\x00"
 
 func assetsConfigCreate_pathsJsonBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsConfigCreate_pathsJson,
-        "assets/config/create_paths.json",
-    )
+	return bindataRead(
+		_assetsConfigCreate_pathsJson,
+		"assets/config/create_paths.json",
+	)
 }
 
 func assetsConfigCreate_pathsJson() (*asset, error) {
-    bytes, err := assetsConfigCreate_pathsJsonBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsConfigCreate_pathsJsonBytes()
+	if err != nil {
+		return nil, err
+	}
 
-    info := bindataFileInfo{name: "assets/config/create_paths.json", size: 2239, mode: os.FileMode(420), modTime: time.Unix(1523554059, 0)}
-    a := &asset{bytes: bytes, info: info}
-    return a, nil
+	info := bindataFileInfo{name: "assets/config/create_paths.json", size: 2239, mode: os.FileMode(420), modTime: time.Unix(1523554059, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
 }
 
 var _assetsConfigDefaultsYml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x6c\xcf\x31\x6e\xe4\x30\x0c\x85\xe1\x5e\xa7\x78\xa0\xfb\xc1\x6c\xeb\x53\x6c\x91\x0b\xd0\x12\x35\x16\x22\x91\x06\x25\x39\xc8\xed\x03\x27\x93\xa9\xc2\x96\x1f\x7e\xe0\x2d\x78\xdb\x4b\x47\x34\x1d\x5c\xb4\x83\x6b\xc5\xd8\x05\x49\x32\xcf\x3a\x70\x72\x9d\xd2\x91\xcd\x11\xad\x35\xd6\x54\x8b\x0a\xd8\x1f\xb3\x89\x8e\x1e\x16\xfc\xe7\xb1\xff\x3a\x76\x81\xda\x40\xd1\x58\x67\x92\x84\x4d\x22\xcf\x2e\x57\xf3\xf3\xfb\xdb\x38\xee\x57\xa1\x1f\x12\x4b\x2e\x31\x84\x92\x64\x05\xa9\xa9\x50\xc8\xce\x4d\x3e\xcc\xdf\x57\x50\xb4\xce\x14\x8e\xca\x23\x9b\xb7\x15\xc4\xa7\x53\x38\xcc\xc7\x8b\x9f\xe2\xbd\x98\xae\xa0\xfb\xed\x7e\xfb\x47\x61\x33\xf6\xb4\x82\xa6\x1a\x85\x6d\xb0\x3f\xe4\xd2\xcf\x35\x84\xe7\x2d\xd8\x66\xa9\x09\x3f\x20\xcc\x3f\xe1\x82\x79\x54\xe3\x97\xfa\x0a\x00\x00\xff\xff\x7f\xb1\x41\xe6\x2b\x01\x00\x00"
 >>>>>>> adding upload support
 
 func assetsConfigDefaultsYmlBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsConfigDefaultsYml,
-        "assets/config/defaults.yml",
-    )
+	return bindataRead(
+		_assetsConfigDefaultsYml,
+		"assets/config/defaults.yml",
+	)
 }
 
 func assetsConfigDefaultsYml() (*asset, error) {
-    bytes, err := assetsConfigDefaultsYmlBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsConfigDefaultsYmlBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -144,23 +144,29 @@ func assetsConfigDefaultsYml() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/config/defaults.yml", size: 299, mode: os.FileMode(420), modTime: time.Unix(1527305795, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsConfigPathsYml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4a\x2c\x4a\x29\xcd\xcc\xcb\xd7\x2d\x4e\xc9\xd6\x2d\x48\x2c\xc9\xb0\x52\x50\x52\xe2\x4a\xce\x2f\x4e\x44\x15\x49\x2c\x2b\x42\xe2\x14\xe5\x22\x38\xb9\x89\xd9\xa9\x48\x3a\x51\xb9\x80\x00\x00\x00\xff\xff\x60\xc2\x95\x1d\x5e\x00\x00\x00"
 
 func assetsConfigPathsYmlBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsConfigPathsYml,
-        "assets/config/paths.yml",
-    )
+	return bindataRead(
+		_assetsConfigPathsYml,
+		"assets/config/paths.yml",
+	)
 }
 
 func assetsConfigPathsYml() (*asset, error) {
-    bytes, err := assetsConfigPathsYmlBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsConfigPathsYmlBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/config/paths.yml", size: 100, mode: os.FileMode(438), modTime: time.Unix(1526246066, 0)}
@@ -175,6 +181,11 @@ func assetsConfigPathsYml() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/config/paths.yml", size: 94, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -206,22 +217,28 @@ func assetsConfigPathsJson() (*asset, error) {
 	return a, nil
 =======
 func assetsConfigUpdate_pathsJsonBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsConfigUpdate_pathsJson,
-        "assets/config/update_paths.json",
-    )
+	return bindataRead(
+		_assetsConfigUpdate_pathsJson,
+		"assets/config/update_paths.json",
+	)
 }
 
 func assetsConfigUpdate_pathsJson() (*asset, error) {
-    bytes, err := assetsConfigUpdate_pathsJsonBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsConfigUpdate_pathsJsonBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/config/update_paths.json", size: 1618, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/config/update_paths.json", size: 1618, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -265,22 +282,28 @@ func assetsConfigPathsYml() (*asset, error) {
 	return a, nil
 =======
 func assetsTemplatesCmakeCmakelistsappTxtTplBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesCmakeCmakelistsappTxtTpl,
-        "assets/templates/cmake/CMakeListsApp.txt.tpl",
-    )
+	return bindataRead(
+		_assetsTemplatesCmakeCmakelistsappTxtTpl,
+		"assets/templates/cmake/CMakeListsApp.txt.tpl",
+	)
 }
 
 func assetsTemplatesCmakeCmakelistsappTxtTpl() (*asset, error) {
-    bytes, err := assetsTemplatesCmakeCmakelistsappTxtTplBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesCmakeCmakelistsappTxtTplBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/cmake/CMakeListsApp.txt.tpl", size: 777, mode: os.FileMode(420), modTime: time.Unix(1527305796, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/cmake/CMakeListsApp.txt.tpl", size: 777, mode: os.FileMode(420), modTime: time.Unix(1527305796, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -316,22 +339,28 @@ func assetsTemplatesCmakeCmakelistsTxtAppTpl() (*asset, error) {
 	return a, nil
 =======
 func assetsTemplatesCmakeCmakelistspkgTxtTplBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesCmakeCmakelistspkgTxtTpl,
-        "assets/templates/cmake/CMakeListsPkg.txt.tpl",
-    )
+	return bindataRead(
+		_assetsTemplatesCmakeCmakelistspkgTxtTpl,
+		"assets/templates/cmake/CMakeListsPkg.txt.tpl",
+	)
 }
 
 func assetsTemplatesCmakeCmakelistspkgTxtTpl() (*asset, error) {
-    bytes, err := assetsTemplatesCmakeCmakelistspkgTxtTplBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesCmakeCmakelistspkgTxtTplBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/cmake/CMakeListsPkg.txt.tpl", size: 1093, mode: os.FileMode(420), modTime: time.Unix(1527305795, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/cmake/CMakeListsPkg.txt.tpl", size: 1093, mode: os.FileMode(420), modTime: time.Unix(1527305795, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -367,22 +396,28 @@ func assetsTemplatesCmakeCmakelistsTxtLibTpl() (*asset, error) {
 	return a, nil
 =======
 func assetsTemplatesCmakeDependenciesTxtBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesCmakeDependenciesTxt,
-        "assets/templates/cmake/dependencies.txt",
-    )
+	return bindataRead(
+		_assetsTemplatesCmakeDependenciesTxt,
+		"assets/templates/cmake/dependencies.txt",
+	)
 }
 
 func assetsTemplatesCmakeDependenciesTxt() (*asset, error) {
-    bytes, err := assetsTemplatesCmakeDependenciesTxtBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesCmakeDependenciesTxtBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/cmake/dependencies.txt", size: 475, mode: os.FileMode(420), modTime: time.Unix(1526224815, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/cmake/dependencies.txt", size: 475, mode: os.FileMode(420), modTime: time.Unix(1526224815, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -418,22 +453,28 @@ func assetsTemplatesCmakeCmaketargetCmakeAppTpl() (*asset, error) {
 	return a, nil
 =======
 func assetsTemplatesConfigAppHelperTxtBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesConfigAppHelperTxt,
-        "assets/templates/config/app-helper.txt",
-    )
+	return bindataRead(
+		_assetsTemplatesConfigAppHelperTxt,
+		"assets/templates/config/app-helper.txt",
+	)
 }
 
 func assetsTemplatesConfigAppHelperTxt() (*asset, error) {
-    bytes, err := assetsTemplatesConfigAppHelperTxtBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesConfigAppHelperTxtBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/config/app-helper.txt", size: 577, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/config/app-helper.txt", size: 577, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -469,22 +510,28 @@ func assetsTemplatesCmakeCmaketargetCmakeLibTpl() (*asset, error) {
 	return a, nil
 =======
 func assetsTemplatesConfigDependenciesHelperTxtBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesConfigDependenciesHelperTxt,
-        "assets/templates/config/dependencies-helper.txt",
-    )
+	return bindataRead(
+		_assetsTemplatesConfigDependenciesHelperTxt,
+		"assets/templates/config/dependencies-helper.txt",
+	)
 }
 
 func assetsTemplatesConfigDependenciesHelperTxt() (*asset, error) {
-    bytes, err := assetsTemplatesConfigDependenciesHelperTxtBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesConfigDependenciesHelperTxtBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/config/dependencies-helper.txt", size: 725, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/config/dependencies-helper.txt", size: 725, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -520,22 +567,28 @@ func assetsTemplatesConfigProjectAppHelp() (*asset, error) {
 	return a, nil
 =======
 func assetsTemplatesConfigPkgHelperTxtBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesConfigPkgHelperTxt,
-        "assets/templates/config/pkg-helper.txt",
-    )
+	return bindataRead(
+		_assetsTemplatesConfigPkgHelperTxt,
+		"assets/templates/config/pkg-helper.txt",
+	)
 }
 
 func assetsTemplatesConfigPkgHelperTxt() (*asset, error) {
-    bytes, err := assetsTemplatesConfigPkgHelperTxtBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesConfigPkgHelperTxtBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/config/pkg-helper.txt", size: 950, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/config/pkg-helper.txt", size: 950, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -545,18 +598,19 @@ var _assetsTemplatesConfigProjectAppYml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\
 >>>>>>> adding upload support
 
 func assetsTemplatesConfigProjectAppYmlBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesConfigProjectAppYml,
-        "assets/templates/config/project-app.yml",
-    )
+	return bindataRead(
+		_assetsTemplatesConfigProjectAppYml,
+		"assets/templates/config/project-app.yml",
+	)
 }
 
 func assetsTemplatesConfigProjectAppYml() (*asset, error) {
-    bytes, err := assetsTemplatesConfigProjectAppYmlBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesConfigProjectAppYmlBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/config/project-app.yml", size: 172, mode: os.FileMode(420), modTime: time.Unix(1522257594, 0)}
@@ -601,27 +655,38 @@ func assetsTemplatesConfigProjectLibHelp() (*asset, error) {
     info := bindataFileInfo{name: "assets/templates/config/project-app.yml", size: 163, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
+=======
+	info := bindataFileInfo{name: "assets/templates/config/project-app.yml", size: 163, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesConfigProjectPkgYml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\x8f\xb1\x6e\xc3\x30\x0c\x44\x77\x7d\xc5\x7d\x41\x90\xae\xdc\xba\xe7\x0f\x82\xa0\xa0\x25\x3a\x55\x23\x9b\x06\x45\xd5\xe8\xdf\x17\x52\x13\x2f\x5d\x28\xe2\xde\x1d\x4e\x2c\x79\xa2\x00\xac\xbc\x08\x8d\x19\x80\x24\x35\x5a\xde\x3c\xeb\x4a\x60\xec\x59\xb1\x99\x7e\x49\xf4\x00\x34\x2b\x3d\xf0\x2d\x56\x07\x3f\x9f\xce\xa7\xb7\x00\x70\xf3\x4f\xb5\x8e\xa2\xae\x6e\x79\x6a\xae\x56\x09\xd7\x5b\x00\x4a\x8e\xb2\x56\xe9\x74\x2b\xec\xb3\xda\x42\xc7\x16\x80\xd9\x78\x91\x5d\xed\xf1\xf4\x3f\xe4\x67\x57\x4b\xaf\xf8\xa4\x6c\x89\x70\x7d\xbf\x5c\x6e\xa3\x60\xd9\x72\x91\x8f\xb9\xf0\xfd\x65\xc9\x49\xa8\x8f\x10\x9c\xed\x2e\x5e\x69\x1c\x32\x73\x2b\x4e\x70\xa9\xfd\xef\xd1\x84\x5d\x52\x47\x18\xda\xdf\x76\x14\x8c\xe7\x29\xfd\x2f\xf9\x0d\x00\x00\xff\xff\xf5\x16\xeb\xff\x2b\x01\x00\x00"
 
 func assetsTemplatesConfigProjectPkgYmlBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesConfigProjectPkgYml,
-        "assets/templates/config/project-pkg.yml",
-    )
+	return bindataRead(
+		_assetsTemplatesConfigProjectPkgYml,
+		"assets/templates/config/project-pkg.yml",
+	)
 }
 
 func assetsTemplatesConfigProjectPkgYml() (*asset, error) {
-    bytes, err := assetsTemplatesConfigProjectPkgYmlBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesConfigProjectPkgYmlBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/config/project-pkg.yml", size: 299, mode: os.FileMode(420), modTime: time.Unix(1527360709, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/config/project-pkg.yml", size: 299, mode: os.FileMode(420), modTime: time.Unix(1527360709, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 <<<<<<< HEAD
@@ -657,39 +722,46 @@ func assetsTemplatesConfigProjectLibYml() (*asset, error) {
 	return a, nil
 =======
 func assetsTemplatesConfigTargetsHelperTxtBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesConfigTargetsHelperTxt,
-        "assets/templates/config/targets-helper.txt",
-    )
+	return bindataRead(
+		_assetsTemplatesConfigTargetsHelperTxt,
+		"assets/templates/config/targets-helper.txt",
+	)
 }
 
 func assetsTemplatesConfigTargetsHelperTxt() (*asset, error) {
-    bytes, err := assetsTemplatesConfigTargetsHelperTxtBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesConfigTargetsHelperTxtBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
     info := bindataFileInfo{name: "assets/templates/config/targets-helper.txt", size: 301, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/config/targets-helper.txt", size: 301, mode: os.FileMode(420), modTime: time.Unix(1526342491, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesGitignoreGitignoreClion = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xd2\x2b\xcf\xcc\xd7\xe7\x72\xf6\x4d\xcc\x4e\xf5\xc9\x2c\x2e\x29\x0e\x28\xca\x2c\x4b\x2c\x49\xd5\x2b\xa9\x28\xe1\xd2\xcb\x4c\x49\x4d\xd4\xe7\x4a\xce\x4d\xcc\x4e\xd5\x4d\x2a\xcd\xcc\x49\xd1\x4d\x49\x4d\x2a\x4d\xd7\xe7\x02\x04\x00\x00\xff\xff\x88\xc9\x2b\x5b\x36\x00\x00\x00"
 
 func assetsTemplatesGitignoreGitignoreClionBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesGitignoreGitignoreClion,
-        "assets/templates/gitignore/.gitignore-clion",
-    )
+	return bindataRead(
+		_assetsTemplatesGitignoreGitignoreClion,
+		"assets/templates/gitignore/.gitignore-clion",
+	)
 }
 
 func assetsTemplatesGitignoreGitignoreClion() (*asset, error) {
-    bytes, err := assetsTemplatesGitignoreGitignoreClionBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesGitignoreGitignoreClionBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/gitignore/.gitignore-clion", size: 54, mode: os.FileMode(420), modTime: time.Unix(1522260315, 0)}
@@ -703,23 +775,29 @@ func assetsTemplatesGitignoreGitignoreClion() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/gitignore/.gitignore-clion", size: 54, mode: os.FileMode(420), modTime: time.Unix(1526342483, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesGitignoreGitignoreGeneral = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xd2\x2b\xcf\xcc\xd7\xe7\x02\x04\x00\x00\xff\xff\xdd\x1c\xfa\x30\x06\x00\x00\x00"
 
 func assetsTemplatesGitignoreGitignoreGeneralBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesGitignoreGitignoreGeneral,
-        "assets/templates/gitignore/.gitignore-general",
-    )
+	return bindataRead(
+		_assetsTemplatesGitignoreGitignoreGeneral,
+		"assets/templates/gitignore/.gitignore-general",
+	)
 }
 
 func assetsTemplatesGitignoreGitignoreGeneral() (*asset, error) {
-    bytes, err := assetsTemplatesGitignoreGitignoreGeneralBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesGitignoreGitignoreGeneralBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/gitignore/.gitignore-general", size: 6, mode: os.FileMode(420), modTime: time.Unix(1522260325, 0)}
@@ -733,23 +811,29 @@ func assetsTemplatesGitignoreGitignoreGeneral() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/gitignore/.gitignore-general", size: 6, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesIdeClionAppCmakelistsTxtTpl = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xb4\x92\xbb\x6e\xf3\x20\x18\x86\x77\xae\x02\x45\x1e\xec\x21\xff\x3d\xf0\x63\x5a\xb9\x01\x13\x61\x3b\x4d\x27\x44\xec\x4f\x15\x8d\x0f\xa9\x0d\x51\x24\xe4\x7b\xaf\x9c\x74\x4e\x86\x2a\x2b\xef\xe1\x41\xaf\xbe\x09\x5c\xbc\x63\x0a\x87\x50\x77\xe6\x08\xeb\x33\x8c\x93\x1d\xfa\x79\x4e\xd0\x22\xe5\x44\x30\x1c\xc2\x69\x1c\xbe\xa0\x76\xeb\xde\x74\xb0\x48\xe8\x6a\xd6\x9d\xed\x6d\xe7\x3b\x3d\xc2\xb7\xb7\x23\x34\x4b\x53\x91\xc9\x1c\x47\x61\xc7\xd4\xe2\xfb\x0d\xc6\x51\x58\x9a\x66\x4c\x31\xdd\xef\x31\x29\x44\x82\x90\xed\xeb\xd6\x37\x10\xaf\xa8\x30\x47\xe0\x76\x72\xd3\x76\xb4\x67\xe3\xe0\x9f\xbb\xb8\x55\x82\x90\x69\x1a\x5d\xfb\xc9\x0d\x9d\x76\x66\xfc\x04\x17\x23\x8c\x31\x7e\xa7\xb2\x20\xfa\x7f\x95\xf1\x14\x13\xce\xaf\x6f\x54\x0a\x41\xf2\x14\x47\xe1\xa6\x52\x91\xce\xf8\xe0\x6d\xdb\xdc\x22\x52\x6d\xb2\xfc\x55\xa7\x99\x62\xb4\x94\xea\x03\x47\x81\x0a\xb2\x61\x9a\x56\x4a\xb1\xbc\xd4\x85\xac\x14\x65\x8b\x61\x46\x8f\xd0\x94\x33\x92\xdf\x47\xd7\x2d\x98\xfe\x09\xe8\x6a\x9b\x92\x92\x69\xc2\xf9\x7d\xbe\x3f\x35\xc6\xc1\x53\x3e\xc0\x25\x79\xb0\xbb\x3f\xb5\x83\xf9\xc3\xf0\x70\x81\xda\x3b\x73\x68\x21\x8e\xc2\x56\xc9\x37\x46\x4b\x7d\x3b\xa0\x28\x14\x8a\xea\x97\x8c\xb3\x62\x4e\xd0\x4f\x00\x00\x00\xff\xff\xf6\xa5\x23\x29\xbe\x02\x00\x00"
 
 func assetsTemplatesIdeClionAppCmakelistsTxtTplBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesIdeClionAppCmakelistsTxtTpl,
-        "assets/templates/ide/clion/app/CMakeLists.txt.tpl",
-    )
+	return bindataRead(
+		_assetsTemplatesIdeClionAppCmakelistsTxtTpl,
+		"assets/templates/ide/clion/app/CMakeLists.txt.tpl",
+	)
 }
 
 func assetsTemplatesIdeClionAppCmakelistsTxtTpl() (*asset, error) {
-    bytes, err := assetsTemplatesIdeClionAppCmakelistsTxtTplBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesIdeClionAppCmakelistsTxtTplBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/ide/clion/app/CMakeLists.txt.tpl", size: 702, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
@@ -763,23 +847,29 @@ func assetsTemplatesIdeClionAppCmakelistsTxtTpl() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/ide/clion/app/CMakeLists.txt.tpl", size: 702, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesIdeClionAppCmakelistsprivateTxtTpl = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x84\x52\xed\x6e\x9c\x30\x10\xfc\xef\xa7\x58\x51\x21\x01\x11\x97\x67\x20\x40\x22\x54\x2e\x54\x98\xa8\xf9\x67\x39\xb6\x39\xac\x52\x40\x36\xd7\xde\x09\xf9\xdd\x2b\xdf\xa9\x3d\x3e\xd4\xdc\x1f\xcb\xb3\xbb\xb3\x33\xbb\x5a\x2d\x46\xef\x7b\x5c\xe0\x88\xc4\xfb\x04\x86\xf3\xd8\xf4\x1d\x38\xd3\xf4\x9b\xf5\x9a\x86\x03\x1d\x1b\x63\x1e\x2f\xe0\xfa\xee\x86\xb3\xe3\x23\x84\xd3\xca\x8b\xf7\xd1\xd7\x94\xc4\x24\x2e\xf6\xdf\xb2\x3c\x2d\x81\xfe\x52\xe1\x81\x31\x7f\x9e\x7d\x7f\x5f\xe5\x1f\x1e\xd6\xf9\xe7\x3c\x7a\xc1\x24\xc9\x70\x55\x66\x4f\x6f\x55\x56\xbc\x5a\x03\xec\x27\xfd\x21\x42\x76\x3a\x85\x75\x4b\x0f\xda\x18\x67\xc1\xfb\x9c\x35\xe3\xd8\x01\x6f\x5a\xb8\x8a\x5e\x93\xa8\x4c\x60\x2e\xa0\x47\xda\x71\xaa\xb8\x31\x3e\x42\x2e\x70\x51\x87\x5a\x50\xc5\x1a\x34\x4d\x94\x73\xc2\x45\x2d\x3b\x39\xca\xbe\xd3\xde\x34\x1d\xb5\x50\xe1\x2d\x64\x8c\x6f\x0c\x72\x41\x74\x1c\xa1\x2f\x40\x39\x87\x2b\x19\xec\xf2\x34\xd4\xbd\x02\xbb\x38\x60\xbd\x12\xc8\xbd\xfc\x6f\xed\x65\xc7\xda\x23\x17\x84\x4b\x25\xd8\xd8\x2b\x29\xb4\xf7\x6f\xfb\x96\x61\x67\x30\xe6\x5e\xe5\x47\x7f\xb1\xef\xdc\xb7\x42\xdb\x16\xc6\x46\x80\x9d\x02\x5a\xf9\xa1\xa8\xed\x84\x5c\xfb\xff\x6b\xeb\xff\x6a\xb6\xe8\x7a\x13\x73\x29\x54\xcb\x56\x78\x2f\x79\xf1\x44\xca\x34\x7e\x2b\x71\x0a\xb8\x8c\xc9\x73\x96\xa7\x18\x01\x00\x38\x5a\xb1\xc7\x60\xc7\x86\xc1\x59\x60\xb6\x84\x73\x14\x6c\xeb\x83\x0d\x25\x58\xb3\x76\xcd\x12\xad\xe0\xb6\x5f\xb3\x09\x6c\x23\xc3\x60\x2f\xfe\x4f\x00\x00\x00\xff\xff\x38\x72\x86\x48\x29\x03\x00\x00"
 
 func assetsTemplatesIdeClionAppCmakelistsprivateTxtTplBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesIdeClionAppCmakelistsprivateTxtTpl,
-        "assets/templates/ide/clion/app/CMakeListsPrivate.txt.tpl",
-    )
+	return bindataRead(
+		_assetsTemplatesIdeClionAppCmakelistsprivateTxtTpl,
+		"assets/templates/ide/clion/app/CMakeListsPrivate.txt.tpl",
+	)
 }
 
 func assetsTemplatesIdeClionAppCmakelistsprivateTxtTpl() (*asset, error) {
-    bytes, err := assetsTemplatesIdeClionAppCmakelistsprivateTxtTplBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesIdeClionAppCmakelistsprivateTxtTplBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/ide/clion/app/CMakeListsPrivate.txt.tpl", size: 809, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
@@ -793,23 +883,29 @@ func assetsTemplatesIdeClionAppCmakelistsprivateTxtTpl() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/ide/clion/app/CMakeListsPrivate.txt.tpl", size: 809, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesIdeClionLibCmakelistsTxtTpl = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xb4\x92\xbb\x6e\xf3\x20\x18\x86\x77\xae\x02\x45\x1e\xec\x21\xff\x3d\xf0\x63\x5a\xb9\x01\x13\x61\x3b\x4d\x27\x44\xec\x4f\x15\x8d\x0f\xa9\x0d\x51\x24\xe4\x7b\xaf\x9c\x74\x4e\x86\x2a\x2b\xef\xe1\x41\xaf\xbe\x09\x5c\xbc\x63\x0a\x87\x50\x77\xe6\x08\xeb\x33\x8c\x93\x1d\xfa\x79\x4e\xd0\x22\xe5\x44\x30\x1c\xc2\x69\x1c\xbe\xa0\x76\xeb\xde\x74\xb0\x48\xe8\x6a\xd6\x9d\xed\x6d\xe7\x3b\x3d\xc2\xb7\xb7\x23\x34\x4b\x53\x91\xc9\x1c\x47\x61\xc7\xd4\xe2\xfb\x0d\xc6\x51\x58\x9a\x66\x4c\x31\xdd\xef\x31\x29\x44\x82\x90\xed\xeb\xd6\x37\x10\xaf\xa8\x30\x47\xe0\x76\x72\xd3\x76\xb4\x67\xe3\xe0\x9f\xbb\xb8\x55\x82\x90\x69\x1a\x5d\xfb\xc9\x0d\x9d\x76\x66\xfc\x04\x17\x23\x8c\x31\x7e\xa7\xb2\x20\xfa\x7f\x95\xf1\x14\x13\xce\xaf\x6f\x54\x0a\x41\xf2\x14\x47\xe1\xa6\x52\x91\xce\xf8\xe0\x6d\xdb\xdc\x22\x52\x6d\xb2\xfc\x55\xa7\x99\x62\xb4\x94\xea\x03\x47\x81\x0a\xb2\x61\x9a\x56\x4a\xb1\xbc\xd4\x85\xac\x14\x65\x8b\x61\x46\x8f\xd0\x94\x33\x92\xdf\x47\xd7\x2d\x98\xfe\x09\xe8\x6a\x9b\x92\x92\x69\xc2\xf9\x7d\xbe\x3f\x35\xc6\xc1\x53\x3e\xc0\x25\x79\xb0\xbb\x3f\xb5\x83\xf9\xc3\xf0\x70\x81\xda\x3b\x73\x68\x21\x8e\xc2\x56\xc9\x37\x46\x4b\x7d\x3b\xa0\x28\x14\x8a\xea\x97\x8c\xb3\x62\x4e\xd0\x4f\x00\x00\x00\xff\xff\xf6\xa5\x23\x29\xbe\x02\x00\x00"
 
 func assetsTemplatesIdeClionLibCmakelistsTxtTplBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesIdeClionLibCmakelistsTxtTpl,
-        "assets/templates/ide/clion/lib/CMakeLists.txt.tpl",
-    )
+	return bindataRead(
+		_assetsTemplatesIdeClionLibCmakelistsTxtTpl,
+		"assets/templates/ide/clion/lib/CMakeLists.txt.tpl",
+	)
 }
 
 func assetsTemplatesIdeClionLibCmakelistsTxtTpl() (*asset, error) {
-    bytes, err := assetsTemplatesIdeClionLibCmakelistsTxtTplBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesIdeClionLibCmakelistsTxtTplBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/ide/clion/lib/CMakeLists.txt.tpl", size: 702, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
@@ -823,23 +919,29 @@ func assetsTemplatesIdeClionLibCmakelistsTxtTpl() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/ide/clion/lib/CMakeLists.txt.tpl", size: 702, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesIdeClionLibCmakelistsprivateTxtTpl = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x84\x52\xed\x6e\x9c\x30\x10\xfc\xef\xa7\x58\x51\x21\x01\x11\x97\x67\x20\x40\x22\x54\x2e\x54\x98\xa8\xf9\x67\x39\xb6\x39\xac\x52\x40\x36\xd7\xde\x09\xf9\xdd\x2b\xdf\xa9\x3d\x3e\xd4\xdc\x1f\xcb\xb3\xbb\xb3\x33\xbb\x5a\x2d\x46\xef\x7b\x5c\xe0\x88\xc4\xfb\x04\x86\xf3\xd8\xf4\x1d\x38\xd3\xf4\x9b\xf5\x9a\x86\x03\x1d\x1b\x63\x1e\x2f\xe0\xfa\xee\x86\xb3\xe3\x23\x84\xd3\xca\x8b\xf7\xd1\xd7\x94\xc4\x24\x2e\xf6\xdf\xb2\x3c\x2d\x81\xfe\x52\xe1\x81\x31\x7f\x9e\x7d\x7f\x5f\xe5\x1f\x1e\xd6\xf9\xe7\x3c\x7a\xc1\x24\xc9\x70\x55\x66\x4f\x6f\x55\x56\xbc\x5a\x03\xec\x27\xfd\x21\x42\x76\x3a\x85\x75\x4b\x0f\xda\x18\x67\xc1\xfb\x9c\x35\xe3\xd8\x01\x6f\x5a\xb8\x8a\x5e\x93\xa8\x4c\x60\x2e\xa0\x47\xda\x71\xaa\xb8\x31\x3e\x42\x2e\x70\x51\x87\x5a\x50\xc5\x1a\x34\x4d\x94\x73\xc2\x45\x2d\x3b\x39\xca\xbe\xd3\xde\x34\x1d\xb5\x50\xe1\x2d\x64\x8c\x6f\x0c\x72\x41\x74\x1c\xa1\x2f\x40\x39\x87\x2b\x19\xec\xf2\x34\xd4\xbd\x02\xbb\x38\x60\xbd\x12\xc8\xbd\xfc\x6f\xed\x65\xc7\xda\x23\x17\x84\x4b\x25\xd8\xd8\x2b\x29\xb4\xf7\x6f\xfb\x96\x61\x67\x30\xe6\x5e\xe5\x47\x7f\xb1\xef\xdc\xb7\x42\xdb\x16\xc6\x46\x80\x9d\x02\x5a\xf9\xa1\xa8\xed\x84\x5c\xfb\xff\x6b\xeb\xff\x6a\xb6\xe8\x7a\x13\x73\x29\x54\xcb\x56\x78\x2f\x79\xf1\x44\xca\x34\x7e\x2b\x71\x0a\xb8\x8c\xc9\x73\x96\xa7\x18\x01\x00\x38\x5a\xb1\xc7\x60\xc7\x86\xc1\x59\x60\xb6\x84\x73\x14\x6c\xeb\x83\x0d\x25\x58\xb3\x76\xcd\x12\xad\xe0\xb6\x5f\xb3\x09\x6c\x23\xc3\x60\x2f\xfe\x4f\x00\x00\x00\xff\xff\x38\x72\x86\x48\x29\x03\x00\x00"
 
 func assetsTemplatesIdeClionLibCmakelistsprivateTxtTplBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesIdeClionLibCmakelistsprivateTxtTpl,
-        "assets/templates/ide/clion/lib/CMakeListsPrivate.txt.tpl",
-    )
+	return bindataRead(
+		_assetsTemplatesIdeClionLibCmakelistsprivateTxtTpl,
+		"assets/templates/ide/clion/lib/CMakeListsPrivate.txt.tpl",
+	)
 }
 
 func assetsTemplatesIdeClionLibCmakelistsprivateTxtTpl() (*asset, error) {
-    bytes, err := assetsTemplatesIdeClionLibCmakelistsprivateTxtTplBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesIdeClionLibCmakelistsprivateTxtTplBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/ide/clion/lib/CMakeListsPrivate.txt.tpl", size: 809, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
@@ -873,23 +975,29 @@ func assetsTemplatesNpmPackageJson() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/ide/clion/lib/CMakeListsPrivate.txt.tpl", size: 809, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesSampleProgramAppMainCpp = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\xce\xcc\x4b\xce\x29\x4d\x49\x55\x50\x72\xce\x2f\x4e\xd4\x0f\x0a\x09\xd1\xcb\xc8\x50\xe2\x42\x13\xf6\x2f\x2d\x29\x28\x2d\x09\xc8\xcc\x03\x4b\x72\xc1\xb9\x0a\x39\xa9\x29\x01\x99\x79\x1a\x4e\xf9\x89\x45\x29\x56\x56\x3e\xae\x2e\x9a\xd6\x5c\x5c\x65\xf9\x99\x29\x0a\xc5\xa9\x25\xa5\x05\x1a\x9a\x0a\xd5\x5c\x0a\x0a\x0a\x0a\x41\x21\x21\x56\x56\x49\xa9\xe9\x99\x79\x1a\x9a\xd6\x5c\xb5\x50\x35\x39\xf9\xf9\x08\x25\x10\xa3\xf4\xf2\xc1\x2a\x40\x02\x29\xa9\x39\x89\x95\x1a\xa6\x06\x50\x2e\x4c\x3e\x2d\x0d\x5d\x81\x01\xd8\x48\x40\x00\x00\x00\xff\xff\xae\x1c\x30\xf2\xca\x00\x00\x00"
 
 func assetsTemplatesSampleProgramAppMainCppBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesSampleProgramAppMainCpp,
-        "assets/templates/sample-program/app/main.cpp",
-    )
+	return bindataRead(
+		_assetsTemplatesSampleProgramAppMainCpp,
+		"assets/templates/sample-program/app/main.cpp",
+	)
 }
 
 func assetsTemplatesSampleProgramAppMainCpp() (*asset, error) {
-    bytes, err := assetsTemplatesSampleProgramAppMainCppBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesSampleProgramAppMainCppBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/sample-program/app/main.cpp", size: 202, mode: os.FileMode(420), modTime: time.Unix(1521752364, 0)}
@@ -903,23 +1011,29 @@ func assetsTemplatesSampleProgramAppMainCpp() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/sample-program/app/main.cpp", size: 202, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesSampleProgramLibLibCpp = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x01\x00\x00\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00"
 
 func assetsTemplatesSampleProgramLibLibCppBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesSampleProgramLibLibCpp,
-        "assets/templates/sample-program/lib/lib.cpp",
-    )
+	return bindataRead(
+		_assetsTemplatesSampleProgramLibLibCpp,
+		"assets/templates/sample-program/lib/lib.cpp",
+	)
 }
 
 func assetsTemplatesSampleProgramLibLibCpp() (*asset, error) {
-    bytes, err := assetsTemplatesSampleProgramLibLibCppBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesSampleProgramLibLibCppBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/sample-program/lib/lib.cpp", size: 0, mode: os.FileMode(420), modTime: time.Unix(1522258405, 0)}
@@ -933,23 +1047,29 @@ func assetsTemplatesSampleProgramLibLibCpp() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/sample-program/lib/lib.cpp", size: 0, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesSampleProgramLibLibH = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x01\x00\x00\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00"
 
 func assetsTemplatesSampleProgramLibLibHBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesSampleProgramLibLibH,
-        "assets/templates/sample-program/lib/lib.h",
-    )
+	return bindataRead(
+		_assetsTemplatesSampleProgramLibLibH,
+		"assets/templates/sample-program/lib/lib.h",
+	)
 }
 
 func assetsTemplatesSampleProgramLibLibH() (*asset, error) {
-    bytes, err := assetsTemplatesSampleProgramLibLibHBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesSampleProgramLibLibHBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/sample-program/lib/lib.h", size: 0, mode: os.FileMode(420), modTime: time.Unix(1522258398, 0)}
@@ -963,23 +1083,29 @@ func assetsTemplatesSampleProgramLibLibH() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/sample-program/lib/lib.h", size: 0, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 var _assetsTemplatesSampleProgramLibMainCpp = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x01\x00\x00\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00"
 
 func assetsTemplatesSampleProgramLibMainCppBytes() ([]byte, error) {
-    return bindataRead(
-        _assetsTemplatesSampleProgramLibMainCpp,
-        "assets/templates/sample-program/lib/main.cpp",
-    )
+	return bindataRead(
+		_assetsTemplatesSampleProgramLibMainCpp,
+		"assets/templates/sample-program/lib/main.cpp",
+	)
 }
 
 func assetsTemplatesSampleProgramLibMainCpp() (*asset, error) {
-    bytes, err := assetsTemplatesSampleProgramLibMainCppBytes()
-    if err != nil {
-        return nil, err
-    }
+	bytes, err := assetsTemplatesSampleProgramLibMainCppBytes()
+	if err != nil {
+		return nil, err
+	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	info := bindataFileInfo{name: "assets/templates/sample-program/lib/main.cpp", size: 0, mode: os.FileMode(420), modTime: time.Unix(1522258388, 0)}
@@ -993,60 +1119,66 @@ func assetsTemplatesSampleProgramLibMainCpp() (*asset, error) {
     a := &asset{bytes: bytes, info: info}
     return a, nil
 >>>>>>> finished publish command for package manager
+=======
+	info := bindataFileInfo{name: "assets/templates/sample-program/lib/main.cpp", size: 0, mode: os.FileMode(420), modTime: time.Unix(1523553906, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+>>>>>>> package manager get and publish commands work with build
 }
 
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
 func Asset(name string) ([]byte, error) {
-    cannonicalName := strings.Replace(name, "\\", "/", -1)
-    if f, ok := _bindata[cannonicalName]; ok {
-        a, err := f()
-        if err != nil {
-            return nil, fmt.Errorf("Asset %s can't read by error: %v", name, err)
-        }
-        return a.bytes, nil
-    }
-    return nil, fmt.Errorf("Asset %s not found", name)
+	cannonicalName := strings.Replace(name, "\\", "/", -1)
+	if f, ok := _bindata[cannonicalName]; ok {
+		a, err := f()
+		if err != nil {
+			return nil, fmt.Errorf("Asset %s can't read by error: %v", name, err)
+		}
+		return a.bytes, nil
+	}
+	return nil, fmt.Errorf("Asset %s not found", name)
 }
 
 // MustAsset is like Asset but panics when Asset would return an error.
 // It simplifies safe initialization of global variables.
 func MustAsset(name string) []byte {
-    a, err := Asset(name)
-    if err != nil {
-        panic("asset: Asset(" + name + "): " + err.Error())
-    }
+	a, err := Asset(name)
+	if err != nil {
+		panic("asset: Asset(" + name + "): " + err.Error())
+	}
 
-    return a
+	return a
 }
 
 // AssetInfo loads and returns the asset info for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
 func AssetInfo(name string) (os.FileInfo, error) {
-    cannonicalName := strings.Replace(name, "\\", "/", -1)
-    if f, ok := _bindata[cannonicalName]; ok {
-        a, err := f()
-        if err != nil {
-            return nil, fmt.Errorf("AssetInfo %s can't read by error: %v", name, err)
-        }
-        return a.info, nil
-    }
-    return nil, fmt.Errorf("AssetInfo %s not found", name)
+	cannonicalName := strings.Replace(name, "\\", "/", -1)
+	if f, ok := _bindata[cannonicalName]; ok {
+		a, err := f()
+		if err != nil {
+			return nil, fmt.Errorf("AssetInfo %s can't read by error: %v", name, err)
+		}
+		return a.info, nil
+	}
+	return nil, fmt.Errorf("AssetInfo %s not found", name)
 }
 
 // AssetNames returns the names of the assets.
 func AssetNames() []string {
-    names := make([]string, 0, len(_bindata))
-    for name := range _bindata {
-        names = append(names, name)
-    }
-    return names
+	names := make([]string, 0, len(_bindata))
+	for name := range _bindata {
+		names = append(names, name)
+	}
+	return names
 }
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
+<<<<<<< HEAD
 <<<<<<< HEAD
 	"assets/config/defaults.yml": assetsConfigDefaultsYml,
 	"assets/config/paths.json": assetsConfigPathsJson,
@@ -1059,6 +1191,21 @@ var _bindata = map[string]func() (*asset, error){
 	"assets/templates/config/project-app.yml": assetsTemplatesConfigProjectAppYml,
 	"assets/templates/config/project-lib-help": assetsTemplatesConfigProjectLibHelp,
 	"assets/templates/config/project-lib.yml": assetsTemplatesConfigProjectLibYml,
+=======
+	"assets/config/create_paths.json": assetsConfigCreate_pathsJson,
+	"assets/config/defaults.yml": assetsConfigDefaultsYml,
+	"assets/config/paths.yml": assetsConfigPathsYml,
+	"assets/config/update_paths.json": assetsConfigUpdate_pathsJson,
+	"assets/templates/cmake/CMakeListsApp.txt.tpl": assetsTemplatesCmakeCmakelistsappTxtTpl,
+	"assets/templates/cmake/CMakeListsPkg.txt.tpl": assetsTemplatesCmakeCmakelistspkgTxtTpl,
+	"assets/templates/cmake/dependencies.txt": assetsTemplatesCmakeDependenciesTxt,
+	"assets/templates/config/app-helper.txt": assetsTemplatesConfigAppHelperTxt,
+	"assets/templates/config/dependencies-helper.txt": assetsTemplatesConfigDependenciesHelperTxt,
+	"assets/templates/config/pkg-helper.txt": assetsTemplatesConfigPkgHelperTxt,
+	"assets/templates/config/project-app.yml": assetsTemplatesConfigProjectAppYml,
+	"assets/templates/config/project-pkg.yml": assetsTemplatesConfigProjectPkgYml,
+	"assets/templates/config/targets-helper.txt": assetsTemplatesConfigTargetsHelperTxt,
+>>>>>>> package manager get and publish commands work with build
 	"assets/templates/gitignore/.gitignore-clion": assetsTemplatesGitignoreGitignoreClion,
 	"assets/templates/gitignore/.gitignore-general": assetsTemplatesGitignoreGitignoreGeneral,
 	"assets/templates/ide/clion/app/CMakeLists.txt.tpl": assetsTemplatesIdeClionAppCmakelistsTxtTpl,
@@ -1069,6 +1216,7 @@ var _bindata = map[string]func() (*asset, error){
 	"assets/templates/sample-program/lib/lib.cpp": assetsTemplatesSampleProgramLibLibCpp,
 	"assets/templates/sample-program/lib/lib.h": assetsTemplatesSampleProgramLibLibH,
 	"assets/templates/sample-program/lib/main.cpp": assetsTemplatesSampleProgramLibMainCpp,
+<<<<<<< HEAD
 =======
     "assets/config/create_paths.json":                          assetsConfigCreate_pathsJson,
     "assets/config/defaults.yml":                               assetsConfigDefaultsYml,
@@ -1095,6 +1243,8 @@ var _bindata = map[string]func() (*asset, error){
     "assets/templates/sample-program/lib/lib.h":                assetsTemplatesSampleProgramLibLibH,
     "assets/templates/sample-program/lib/main.cpp":             assetsTemplatesSampleProgramLibMainCpp,
 >>>>>>> finished publish command for package manager
+=======
+>>>>>>> package manager get and publish commands work with build
 }
 
 // AssetDir returns the file names below a certain
@@ -1111,33 +1261,33 @@ var _bindata = map[string]func() (*asset, error){
 // AssetDir("foo.txt") and AssetDir("notexist") would return an error
 // AssetDir("") will return []string{"data"}.
 func AssetDir(name string) ([]string, error) {
-    node := _bintree
-    if len(name) != 0 {
-        cannonicalName := strings.Replace(name, "\\", "/", -1)
-        pathList := strings.Split(cannonicalName, "/")
-        for _, p := range pathList {
-            node = node.Children[p]
-            if node == nil {
-                return nil, fmt.Errorf("Asset %s not found", name)
-            }
-        }
-    }
-    if node.Func != nil {
-        return nil, fmt.Errorf("Asset %s not found", name)
-    }
-    rv := make([]string, 0, len(node.Children))
-    for childName := range node.Children {
-        rv = append(rv, childName)
-    }
-    return rv, nil
+	node := _bintree
+	if len(name) != 0 {
+		cannonicalName := strings.Replace(name, "\\", "/", -1)
+		pathList := strings.Split(cannonicalName, "/")
+		for _, p := range pathList {
+			node = node.Children[p]
+			if node == nil {
+				return nil, fmt.Errorf("Asset %s not found", name)
+			}
+		}
+	}
+	if node.Func != nil {
+		return nil, fmt.Errorf("Asset %s not found", name)
+	}
+	rv := make([]string, 0, len(node.Children))
+	for childName := range node.Children {
+		rv = append(rv, childName)
+	}
+	return rv, nil
 }
 
 type bintree struct {
-    Func     func() (*asset, error)
-    Children map[string]*bintree
+	Func     func() (*asset, error)
+	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
+<<<<<<< HEAD
 <<<<<<< HEAD
 	"assets": &bintree{nil, map[string]*bintree{
 		"config": &bintree{nil, map[string]*bintree{
@@ -1157,6 +1307,28 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"project-app.yml": &bintree{assetsTemplatesConfigProjectAppYml, map[string]*bintree{}},
 				"project-lib-help": &bintree{assetsTemplatesConfigProjectLibHelp, map[string]*bintree{}},
 				"project-lib.yml": &bintree{assetsTemplatesConfigProjectLibYml, map[string]*bintree{}},
+=======
+	"assets": &bintree{nil, map[string]*bintree{
+		"config": &bintree{nil, map[string]*bintree{
+			"create_paths.json": &bintree{assetsConfigCreate_pathsJson, map[string]*bintree{}},
+			"defaults.yml": &bintree{assetsConfigDefaultsYml, map[string]*bintree{}},
+			"paths.yml": &bintree{assetsConfigPathsYml, map[string]*bintree{}},
+			"update_paths.json": &bintree{assetsConfigUpdate_pathsJson, map[string]*bintree{}},
+		}},
+		"templates": &bintree{nil, map[string]*bintree{
+			"cmake": &bintree{nil, map[string]*bintree{
+				"CMakeListsApp.txt.tpl": &bintree{assetsTemplatesCmakeCmakelistsappTxtTpl, map[string]*bintree{}},
+				"CMakeListsPkg.txt.tpl": &bintree{assetsTemplatesCmakeCmakelistspkgTxtTpl, map[string]*bintree{}},
+				"dependencies.txt": &bintree{assetsTemplatesCmakeDependenciesTxt, map[string]*bintree{}},
+			}},
+			"config": &bintree{nil, map[string]*bintree{
+				"app-helper.txt": &bintree{assetsTemplatesConfigAppHelperTxt, map[string]*bintree{}},
+				"dependencies-helper.txt": &bintree{assetsTemplatesConfigDependenciesHelperTxt, map[string]*bintree{}},
+				"pkg-helper.txt": &bintree{assetsTemplatesConfigPkgHelperTxt, map[string]*bintree{}},
+				"project-app.yml": &bintree{assetsTemplatesConfigProjectAppYml, map[string]*bintree{}},
+				"project-pkg.yml": &bintree{assetsTemplatesConfigProjectPkgYml, map[string]*bintree{}},
+				"targets-helper.txt": &bintree{assetsTemplatesConfigTargetsHelperTxt, map[string]*bintree{}},
+>>>>>>> package manager get and publish commands work with build
 			}},
 			"gitignore": &bintree{nil, map[string]*bintree{
 				".gitignore-clion": &bintree{assetsTemplatesGitignoreGitignoreClion, map[string]*bintree{}},
@@ -1186,6 +1358,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			}},
 		}},
 	}},
+<<<<<<< HEAD
 =======
     "assets": &bintree{nil, map[string]*bintree{
         "config": &bintree{nil, map[string]*bintree{
@@ -1240,51 +1413,54 @@ var _bintree = &bintree{nil, map[string]*bintree{
         }},
     }},
 >>>>>>> finished publish command for package manager
+=======
+>>>>>>> package manager get and publish commands work with build
 }}
 
 // RestoreAsset restores an asset under the given directory
 func RestoreAsset(dir, name string) error {
-    data, err := Asset(name)
-    if err != nil {
-        return err
-    }
-    info, err := AssetInfo(name)
-    if err != nil {
-        return err
-    }
-    err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
-    if err != nil {
-        return err
-    }
-    err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
-    if err != nil {
-        return err
-    }
-    err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
-    if err != nil {
-        return err
-    }
-    return nil
+	data, err := Asset(name)
+	if err != nil {
+		return err
+	}
+	info, err := AssetInfo(name)
+	if err != nil {
+		return err
+	}
+	err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
+	if err != nil {
+		return err
+	}
+	err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // RestoreAssets restores an asset under the given directory recursively
 func RestoreAssets(dir, name string) error {
-    children, err := AssetDir(name)
-    // File
-    if err != nil {
-        return RestoreAsset(dir, name)
-    }
-    // Dir
-    for _, child := range children {
-        err = RestoreAssets(dir, filepath.Join(name, child))
-        if err != nil {
-            return err
-        }
-    }
-    return nil
+	children, err := AssetDir(name)
+	// File
+	if err != nil {
+		return RestoreAsset(dir, name)
+	}
+	// Dir
+	for _, child := range children {
+		err = RestoreAssets(dir, filepath.Join(name, child))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func _filePath(dir, name string) string {
-    cannonicalName := strings.Replace(name, "\\", "/", -1)
-    return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
+	cannonicalName := strings.Replace(name, "\\", "/", -1)
+	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+

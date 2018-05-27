@@ -85,6 +85,7 @@ type NpmConfig struct {
 // Structure to handle individual library inside libraries
 type DependencyTag struct {
     Version       string
+    Vendor        bool
     Compile_flags []string
 }
 

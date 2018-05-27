@@ -20,6 +20,7 @@ import (
     "wio/cmd/wio/utils/io/log"
     "errors"
     "net/http"
+    "regexp"
 )
 
 const (
@@ -49,7 +50,7 @@ func (pac Pac) Execute() {
     case PUBLISH:
         handlePublish(directory)
     case GET:
-        handleGet(directory)
+        handleGet(directory, pac.Context.Bool("clean"))
         break
     case UPDATE:
         handleUpdate(directory)
@@ -60,9 +61,43 @@ func (pac Pac) Execute() {
     }
 }
 
+// This package.json file will be used to check if dependencies are up to date
+func createPrivatePackageJson(directory string, name string, dependencies types.DependenciesTag) {
+    log.Norm.Cyan(false, "setting up packages environment ... ")
+
+    // wio path
+    wioPath := directory + io.Sep + ".wio"
+
+    // npm config
+    npmConfig := types.NpmConfig{}
+
+    // fill all the fields for package.json
+    npmConfig.Name = name
+    npmConfig.Version = "0.0.1"
+    npmConfig.Main = ".wio.js"
+
+    npmConfig.Dependencies = make(types.NpmDependencyTag)
+
+    log.Verb.Verbose(true, "")
+
+    // add dependencies to package.json
+    for dependencyName, dependencyValue := range dependencies {
+        if !dependencyValue.Vendor {
+            npmConfig.Dependencies[dependencyName] = "^" + dependencyValue.Version
+        }
+    }
+
+    // write package.json file
+    if err := io.NormalIO.WriteJson(wioPath+io.Sep+"package.json", &npmConfig); err != nil {
+        commands.RecordError(err, "failure")
+    }
+
+    log.Norm.Green(true, "success")
+}
+
 // publishes the package to npm backend
 func handlePublish(directory string) {
-    log.Norm.Yellow(true, "Publishing this package (we use npm backend)")
+    log.Norm.Yellow(true, "Publishing this package using npm server")
     log.Norm.Cyan(false, "verifying project structure ... ")
 
     // read wio.yml file
@@ -98,49 +133,11 @@ func handlePublish(directory string) {
 
     // add dependencies to package.json
     for dependencyName, dependencyValue := range pkgConfig.DependenciesTag {
+        if !dependencyValue.Vendor {
+            dependencyCheck(directory, dependencyName, dependencyValue.Version)
 
-        log.Verb.Verbose(false, "checking if "+dependencyName+" dependency exists ... ")
-
-        resp, err := http.Get("https://www.npmjs.com/package/" + dependencyName + "/v/" + dependencyValue.Version)
-        if err != nil {
-            commands.RecordError(err, "failure")
+            npmConfig.Dependencies[dependencyName] = "^" + dependencyValue.Version
         }
-
-        // dependency does not exist
-        if resp.StatusCode == 404 {
-            commands.RecordError(errors.New("dependency: \""+dependencyName+"\" package does not exist"),
-                "failure")
-        }
-        resp.Body.Close()
-
-        log.Verb.Verbose(true, "success")
-        log.Verb.Verbose(false, "checking if " + dependencyName + "@" + dependencyValue.Version+
-            " version exists ... ")
-
-        // verify the version by executing npm info command
-        npmInfoCommand := exec.Command("npm", "info", dependencyName+"@"+dependencyValue.Version)
-        npmInfoCommand.Dir = directory
-
-        // Stderr buffer
-        cmdErrOutput := &bytes.Buffer{}
-        cmdOutOutput := &bytes.Buffer{}
-        npmInfoCommand.Stderr = cmdErrOutput
-        npmInfoCommand.Stdout = cmdOutOutput
-
-        err = npmInfoCommand.Run()
-        if err != nil {
-            commands.RecordError(err, "failure", strings.Trim(cmdErrOutput.String(), "\n"))
-        }
-
-        // version does not exists
-        if cmdOutOutput.String() == "" {
-            commands.RecordError(errors.New("dependency: \"" + dependencyName + "@" + dependencyValue.Version+
-                "\" version does not exist"), "failure", )
-        } else {
-            log.Verb.Verbose(true, "success")
-        }
-
-        npmConfig.Dependencies[dependencyName] = "^" + dependencyValue.Version
     }
 
     // write package.json file
@@ -193,6 +190,65 @@ func handlePublish(directory string) {
     log.Norm.Yellow(true, pkgConfig.MainTag.Name+"@"+pkgConfig.MainTag.Version+" published!!")
 }
 
+// checks if dependencies are valid wio packages and if they are already pushed
+func dependencyCheck(directory string, dependencyName string, dependencyVersion string) {
+    log.Verb.Verbose(false, "dependency: checking if "+dependencyName+" package exists ... ")
+
+    resp, err := http.Get("https://www.npmjs.com/package/" + dependencyName + "/v/" + dependencyVersion)
+    if err != nil {
+        commands.RecordError(err, "failure")
+    }
+
+    // dependency does not exist
+    if resp.StatusCode == 404 {
+        commands.RecordError(errors.New("dependency: \""+dependencyName+"\" package does not exist"),
+            "failure")
+    }
+    resp.Body.Close()
+
+    log.Verb.Verbose(true, "success")
+    log.Verb.Verbose(false, "dependency: checking if " + dependencyName + "@" + dependencyVersion+
+        " version exists ... ")
+
+    // verify the version by executing npm info command
+    npmInfoCommand := exec.Command("npm", "info", dependencyName+"@"+dependencyVersion)
+    npmInfoCommand.Dir = directory
+
+    // Stderr buffer
+    cmdErrOutput := &bytes.Buffer{}
+    cmdOutOutput := &bytes.Buffer{}
+    npmInfoCommand.Stderr = cmdErrOutput
+    npmInfoCommand.Stdout = cmdOutOutput
+
+    err = npmInfoCommand.Run()
+    if err != nil {
+        commands.RecordError(err, "failure", strings.Trim(cmdErrOutput.String(), "\n"))
+    }
+
+    // version does not exists
+    if cmdOutOutput.String() == "" {
+        commands.RecordError(errors.New("dependency: \"" + dependencyName + "@" + dependencyVersion+
+            "\" version does not exist"), "failure", )
+    } else {
+        log.Verb.Verbose(true, "success")
+
+        log.Verb.Verbose(false, "dependency: checking if " + dependencyName + "@" + dependencyVersion+
+            " is a valid wio package ... ")
+
+        // check if the package is a wio package by checking C, C++ and wio flags
+        pat := regexp.MustCompile(`keywords: .*[\r\n]`)
+        s := pat.FindString(cmdOutOutput.String())
+
+        // if wio, c and c++ found, this package is a valid wio package
+        if strings.Contains(s, "wio") && strings.Contains(s, "c") && strings.Contains(s, "c++") {
+            log.Verb.Verbose(true, "success")
+        } else {
+            commands.RecordError(errors.New("dependency: \"" + dependencyName + "@" + dependencyVersion+
+                "\" is not a wio package"), "failure", )
+        }
+    }
+}
+
 // removes files used for npm publish
 func removeNpmFiles(directory string) {
     log.Verb.Verbose(false, "removing npm files ... ")
@@ -206,11 +262,69 @@ func removeNpmFiles(directory string) {
     }
 }
 
-func handleGet(directory string) {
+// gets and updates the packages to the versions specified in wio.yml file
+func handleGet(directory string, clean bool) {
+    log.Norm.Yellow(true, "Getting packages from npm server")
+
+    // clean npm_modules in .wio folder
+    if clean {
+        log.Norm.Cyan(false, "removing all the pulled packages ... ")
+
+        if err := os.RemoveAll(directory + io.Sep + ".wio" + io.Sep + "node_modules"); err != nil {
+            commands.RecordError(err, "failure")
+        } else {
+            log.Norm.Green(true, "success")
+        }
+    }
+
+    // read wio.yml file. We gonna use dependencies tag so it does not matter if this is app or pkg
+    pkgConfig := &types.PkgConfig{}
+
+    // create private json file
+    createPrivatePackageJson(directory, filepath.Base(directory), pkgConfig.DependenciesTag)
+
+    io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig)
+
+    // add dependencies to package.json
+    for dependencyName, dependencyValue := range pkgConfig.DependenciesTag {
+        if dependencyValue.Vendor {
+            continue
+        }
+
+        dependencyCheck(directory, dependencyName, dependencyValue.Version)
+
+        log.Norm.Cyan(false, "pulling " + dependencyName + "@" + dependencyValue.Version +
+            " package ... ")
+
+        // execute cmake command
+        npmInstallCommand := exec.Command("npm", "install", dependencyName + "@" + dependencyValue.Version)
+        npmInstallCommand.Dir = directory + io.Sep + ".wio"
+
+        // Stderr buffer
+        cmdErrOutput := &bytes.Buffer{}
+        npmInstallCommand.Stderr = cmdErrOutput
+
+        if log.Verb.IsVerbose() {
+            log.Norm.Verbose(true, "")
+            npmInstallCommand.Stdout = os.Stdout
+        }
+        err := npmInstallCommand.Run()
+        if err != nil {
+            commands.RecordError(err, "failure", strings.Trim(cmdErrOutput.String(), "\n"))
+        }
+
+        log.Norm.Green(true, "success")
+    }
+
+    log.Norm.Yellow(true, "All packages pulled successfully")
 }
 
 func handleUpdate(directory string) {
+    // TODO future versions
+    // do npm outdated and see if something needs to be updated
+    // then read package.json file and update the version of wio dependency
 }
 
 func handleCollect(directory string) {
+    // TODO future versions
 }
