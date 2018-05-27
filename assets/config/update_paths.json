@@ -31,31 +31,31 @@
       "override": true
     },
     {
-      "id": "lib-gen",
-      "src": "templates/config/project-lib.yml",
+      "id": "pkg-gen",
+      "src": "templates/config/project-pkg.yml",
       "des": "{{PRJ-ROOT}}/wio.yml",
       "override": false
     },
     {
-      "id": "lib-gen",
+      "id": "pkg-gen",
       "src": "templates/gitignore/.gitignore-general",
       "des": "{{PRJ-ROOT}}/.gitignore",
       "override": false
     },
     {
-      "id": "lib-clion",
+      "id": "pkg-clion",
       "src": "templates/gitignore/.gitignore-clion",
       "des": "{{PRJ-ROOT}}/.gitignore",
       "override": false
     },
     {
-      "id": "lib-clion",
+      "id": "pkg-clion",
       "src": "templates/ide/clion/lib/CMakeLists.txt.tpl",
       "des": "{{PRJ-ROOT}}/CMakeLists.txt",
       "override": false
     },
     {
-      "id": "lib-clion",
+      "id": "pkg-clion",
       "src": "templates/ide/clion/lib/CMakeListsPrivate.txt.tpl",
       "des": "{{PRJ-ROOT}}/CMakeListsPrivate.txt",
       "override": true
