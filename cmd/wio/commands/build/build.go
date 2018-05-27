@@ -111,7 +111,7 @@ func RunBuild(directoryCli string, targetCli string, cleanCli bool, port string)
     buildTarget(directory, targetToBuildName)
 
     // print the ending message
-    log.Norm.Yellow(true, "Build successful for \"" + name + "\" project!")
+    log.Norm.Yellow(true, "Build successful for \""+name+"\" project!")
 
     return targetToBuildName
 }
@@ -160,7 +160,7 @@ func buildTarget(directory string, targetName string) {
     targetsDirectory := directory + io.Sep + ".wio" + io.Sep + "build" + io.Sep + "targets"
     targetPath := targetsDirectory + io.Sep + targetName
 
-    log.Norm.Cyan(false, "creating build environment for target: \"" + targetName + "\" ... ")
+    log.Norm.Cyan(false, "creating build environment for target: \""+targetName+"\" ... ")
 
     // create a folder for the target
     if err := os.MkdirAll(targetPath, os.ModePerm); err != nil {

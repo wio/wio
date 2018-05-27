@@ -203,7 +203,7 @@ func (assetHandler AssetHandler) ParseYml(fileName string, out interface{}) (err
 
 // Writes JSON data to a file on filesystem
 func (normalHandler NormalHandler) WriteJson(fileName string, in interface{}) (error) {
-    data, err := json.Marshal(in)
+    data, err := json.MarshalIndent(in, "", "  ")
     if err != nil {
         return err
     }

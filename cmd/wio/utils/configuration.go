@@ -13,7 +13,6 @@ import (
     "wio/cmd/wio/utils/io"
 )
 
-
 // Write configuration for the project with information on top and nice spacing
 <<<<<<< HEAD
 func PrettyPrintConfig(projectType string, projectConfig interface{}, filePath string) (error) {

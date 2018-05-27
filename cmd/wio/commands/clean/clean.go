@@ -47,7 +47,7 @@ func RunClean(directoryCli string, targetCli string, targetProvided bool) {
         log.Norm.Cyan(false, "cleaning all the targets ... ")
 
         // clean everything
-        if err := os.RemoveAll(directory+io.Sep+".wio"+io.Sep+"build"+io.Sep+"targets"); err != nil {
+        if err := os.RemoveAll(directory + io.Sep + ".wio" + io.Sep + "build" + io.Sep + "targets"); err != nil {
             commands.RecordError(err, "failure")
         } else {
             log.Norm.Green(true, "success")
@@ -57,7 +57,7 @@ func RunClean(directoryCli string, targetCli string, targetProvided bool) {
         targetPath := directory + io.Sep + ".wio" + io.Sep + "build" + io.Sep + "targets" + io.Sep + targetToCleanName
 
         if utils.PathExists(targetPath) {
-            log.Norm.Cyan(false, "cleaning target: \"" + targetToCleanName + "\" ... ")
+            log.Norm.Cyan(false, "cleaning target: \""+targetToCleanName+"\" ... ")
 
             // delete the target
             if err := os.RemoveAll(targetPath); err != nil {
@@ -67,7 +67,7 @@ func RunClean(directoryCli string, targetCli string, targetProvided bool) {
             }
 
         } else {
-            log.Norm.Cyan(false, "No build files exists for target: \"" + targetToCleanName + "\" ... ")
+            log.Norm.Cyan(false, "No build files exists for target: \""+targetToCleanName+"\" ... ")
             log.Norm.Green(true, "skipped")
         }
     }
