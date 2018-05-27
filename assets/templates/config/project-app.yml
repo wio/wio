@@ -1,0 +1,12 @@
+app:
+  name: name
+  ide: ide
+  platform: platform
+  framework: framework
+
+targets:
+  default: main
+  created:
+    main:
+      board: board
+      compile_flags: []
