@@ -17,7 +17,7 @@ import (
 // project type of "pkg". This CMake file links the package with the target provided so that it can tested and run
 // before getting shipped
 func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port string, framework string, target string,
-    targetFlags []string, pkgFlags []string, depTree []*parsers.DependencyTree) (error) {
+    targetFlags []string, pkgFlags []string, depTree map[string]*parsers.DependencyTree) (error) {
 
     executablePath, err := io.NormalIO.GetRoot()
     if err != nil {
@@ -48,10 +48,10 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port 
         strings.Join(pkgFlags, " "), -1)
     templateDataStr += "\n"
 
-    for dep := range depTree {
+    for _, depValue := range depTree {
         currLinkString := "target_link_libraries({{TARGET_NAME}} PUBLIC {{DEP_NAME}})"
         currLinkString = strings.Replace(currLinkString, "{{TARGET_NAME}}", pkgName, -1)
-        currLinkString = strings.Replace(currLinkString, "{{DEP_NAME}}", depTree[dep].Config.Hash, -1)
+        currLinkString = strings.Replace(currLinkString, "{{DEP_NAME}}", depValue.Config.Hash, -1)
 
         templateDataStr += currLinkString + "\n"
     }
@@ -63,7 +63,7 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port 
 // This creates the main cmake file based on the target. This method is used for creating the main cmake for project
 // type of "app". In this it does not link any library but rather just populates a target that can be uploaded
 func CreateAppMainCMakeLists(appName string, appPath string, board string, port string, framework string, target string,
-    targetFlags []string, depTree []*parsers.DependencyTree) (error) {
+    targetFlags []string, depTree map[string]*parsers.DependencyTree) (error) {
 
     executablePath, err := io.NormalIO.GetRoot()
     if err != nil {
@@ -91,9 +91,9 @@ func CreateAppMainCMakeLists(appName string, appPath string, board string, port 
         strings.Join(targetFlags, " "), -1)
     templateDataStr += "\n"
 
-    for dep := range depTree {
+    for _, depValue := range depTree {
         currLinkString := "target_link_libraries(${TARGET_NAME} PUBLIC {{DEP_NAME}})"
-        currLinkString = strings.Replace(currLinkString, "{{DEP_NAME}}", depTree[dep].Config.Hash, -1)
+        currLinkString = strings.Replace(currLinkString, "{{DEP_NAME}}", depValue.Config.Hash, -1)
 
         templateDataStr += currLinkString + "\n"
     }

@@ -3,7 +3,7 @@ package parsers
 // Type for Dependency tree used for parsing libraries
 type DependencyTree struct {
     Config DependencyTag
-    Child  []*DependencyTree
+    Child  map[string]*DependencyTree
 }
 
 // Structure to handle individual dependency inside dependencies

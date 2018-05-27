@@ -15,28 +15,26 @@ import (
     "io/ioutil"
     "path/filepath"
     "strings"
+    "errors"
 )
 
 var configFileName = "wio.yml"
 var vendorPkgFolder = "vendor"
-var remotePkgFolder = "remote"
-var lockFileName = "pkg.lock"
-var executionWayFile = "executionWay.txt"
+var remotePkgFolder = "node_modules"
 
 // Parses Package based on the path provides and its dependencies and it modifies dependency tree to store the data
-func parsePackage(packagePath string, depTree *parsers.DependencyTree, dependencies types.DependenciesTag,
-    hash string) (error) {
+func parsePackage(rootPackagesPath string, currPackagePath string, depTree *parsers.DependencyTree,
+    parentDependencyData *types.DependencyTag, hash string) (error) {
 
-    configFile := packagePath + io.Sep + configFileName
-    dependenciesPath := packagePath
+    configFile := currPackagePath + io.Sep + configFileName
 
     var config types.PkgConfig
     var pkgName string
 
     dependencyTag := parsers.DependencyTag{}
+    dependencies := types.DependenciesTag{}
 
-    // check if wio.yml file exists for the dependency and based on that gather the name
-    // of the package
+    // check if wio.yml file exists for the dependency and based on that gather the name and its dependencies
     if utils.PathExists(configFile) {
         if err := io.NormalIO.ParseYml(configFile, &config); err != nil {
             return err
@@ -44,8 +42,10 @@ func parsePackage(packagePath string, depTree *parsers.DependencyTree, dependenc
 
         pkgName = config.MainTag.Name
         dependencyTag.Compile_flags = config.MainTag.Compile_flags
+        dependencies = config.DependenciesTag
     } else {
-        pkgName = filepath.Base(packagePath)
+        pkgName = filepath.Base(currPackagePath)
+        return errors.New(pkgName + " dependency is not a wio package")
     }
 
     if len(hash) <= 0 {
@@ -56,67 +56,75 @@ func parsePackage(packagePath string, depTree *parsers.DependencyTree, dependenc
 
     dependencyTag.Name = pkgName
     dependencyTag.Hash = hash
-    dependencyTag.Path = packagePath
+    dependencyTag.Path = currPackagePath
 
     depTree.Config = dependencyTag
-    depTree.Child = make([]*parsers.DependencyTree, 0)
+    depTree.Child = make(map[string]*parsers.DependencyTree, 0)
 
     // parse vendor dependencies
-    vendorPath := dependenciesPath + io.Sep + "vendor"
+    vendorPath := currPackagePath + io.Sep + "vendor"
     if utils.PathExists(vendorPath) {
         if dirs, err := ioutil.ReadDir(vendorPath); err != nil {
             return err
         } else if len(dirs) > 0 {
-            for dir := range dirs {
-                if dirs[dir].Name()[0] == '.' {
+            // parse vendor dependencies
+            for depName, depValue := range dependencies {
+                // only parse vendor packages
+                if !depValue.Vendor {
                     continue
                 }
 
+                depPath := vendorPath + io.Sep + depName
                 currTree := parsers.DependencyTree{}
 
-                if err := parsePackage(vendorPath+io.Sep+dirs[dir].Name(), &currTree, config.DependenciesTag, hash);
+                if err := parsePackage(vendorPath, depPath, &currTree, depValue, hash);
                     err != nil {
                     return err
                 }
-                depTree.Child = append(depTree.Child, &currTree)
+
+                if _, ok := depTree.Child[currTree.Config.Name]; ok {
+                    continue
+                } else {
+                    depTree.Child[currTree.Config.Name] = &currTree
+                }
             }
         }
     }
 
     // parse remote dependencies
-    remotePath := dependenciesPath + io.Sep + "remote"
-    if utils.PathExists(remotePath) {
-        if dirs, err := ioutil.ReadDir(remotePath); err != nil {
+    for depName, depValue := range dependencies {
+        // only parse non vendor packages
+        if depValue.Vendor {
+            continue
+        }
+
+        depPath := rootPackagesPath + io.Sep + depName
+        currTree := parsers.DependencyTree{}
+
+        if err := parsePackage(rootPackagesPath, depPath, &currTree, depValue, hash);
+            err != nil {
             return err
-        } else if len(dirs) > 0 {
-            for dir := range dirs {
-                if dirs[dir].Name()[0] == '.' {
-                    continue
-                }
+        }
 
-                currTree := parsers.DependencyTree{}
-
-                if err := parsePackage(remotePath+io.Sep+dirs[dir].Name(), &currTree, config.DependenciesTag, hash);
-                    err != nil {
-                    return err
-                }
-                depTree.Child = append(depTree.Child, &currTree)
-            }
+        if _, ok := depTree.Child[currTree.Config.Name]; ok {
+            continue
+        } else {
+            depTree.Child[currTree.Config.Name] = &currTree
         }
     }
 
-    if val, ok := dependencies[depTree.Config.Name]; ok {
-        allFlags := utils.AppendIfMissing(val.Compile_flags, depTree.Config.Compile_flags)
 
-        depTree.Config.Compile_flags = allFlags
+    if parentDependencyData != nil {
+        depTree.Config.Compile_flags = utils.AppendIfMissing(parentDependencyData.Compile_flags,
+            depTree.Config.Compile_flags)
     }
 
     return nil
 }
 
 // Parses all the packages recursively with the help of ParsePackage function
-func parsePackages(packagesPath string, depTrees []*parsers.DependencyTree, dependencies types.DependenciesTag,
-    hash string) ([]*parsers.DependencyTree, error) {
+func parsePackages(packagesPath string, depTrees map[string]*parsers.DependencyTree, dependencies types.DependenciesTag,
+    hash string, vendor bool) (map[string]*parsers.DependencyTree, error) {
 
     if !utils.PathExists(packagesPath) {
         return depTrees, nil
@@ -125,20 +133,31 @@ func parsePackages(packagesPath string, depTrees []*parsers.DependencyTree, depe
     if dirs, err := ioutil.ReadDir(packagesPath); err != nil {
         return depTrees, err
     } else if len(dirs) > 0 {
-        for dir := range dirs {
-            currTree := parsers.DependencyTree{}
-
-            // ignore hidden files
-            if dirs[dir].Name()[0] == '.' {
-                continue
+        for depName, depValue := range dependencies {
+            // only parse vendor packages
+            if vendor && depValue.Vendor {
+               continue
             }
 
-            if err := parsePackage(packagesPath+io.Sep+dirs[dir].Name(), &currTree, dependencies, hash);
+            depPath := packagesPath + io.Sep + depName
+
+            // check if dependency exists
+            if !utils.PathExists(depPath) {
+                return nil, errors.New(depName + " dependency does not exist. use wio pac get to pull the dependency")
+            }
+
+            currTree := parsers.DependencyTree{}
+
+            if err := parsePackage(packagesPath, depPath, &currTree, depValue, hash);
                 err != nil {
                 return depTrees, err
             }
 
-            depTrees = append(depTrees, &currTree)
+            if _, ok := depTrees[currTree.Config.Name]; ok {
+                continue
+            } else {
+                depTrees[currTree.Config.Name] = &currTree
+            }
         }
     }
 
@@ -146,21 +165,22 @@ func parsePackages(packagesPath string, depTrees []*parsers.DependencyTree, depe
 }
 
 // Parses all the packages and their dependencies and creates pkg.lock file
-func createDependencyTree(projectPath string, dependencies types.DependenciesTag) ([]*parsers.DependencyTree, error) {
+func createDependencyTree(projectPath string, dependencies types.DependenciesTag) (map[string]*parsers.DependencyTree, error) {
     wioPath := projectPath + io.Sep + ".wio"
-    librariesLocalPath := wioPath + io.Sep + "pkg" + io.Sep + vendorPkgFolder
-    librariesRemotePath := wioPath + io.Sep + "pkg" + io.Sep + remotePkgFolder
+    librariesLocalPath := projectPath + io.Sep + vendorPkgFolder
+    librariesRemotePath := wioPath + io.Sep + remotePkgFolder
 
-    dependencyTrees := make([]*parsers.DependencyTree, 0)
+
+    dependencyTrees := make(map[string]*parsers.DependencyTree, 0)
 
     // parse all the libraries and their dependencies in vendor folder
-    dependencyTrees, err := parsePackages(librariesLocalPath, dependencyTrees, dependencies, "")
+    dependencyTrees, err := parsePackages(librariesLocalPath, dependencyTrees, dependencies, "", true)
     if err != nil {
         return nil, err
     }
 
-    // parse all the libraries and their dependencies in remote folder
-    dependencyTrees, err = parsePackages(librariesRemotePath, dependencyTrees, dependencies, "")
+    // parse all the libraries and their dependencies in node_modules folder
+    dependencyTrees, err = parsePackages(librariesRemotePath, dependencyTrees, dependencies, "", false)
     if err != nil {
         return nil, err
     }
@@ -211,7 +231,7 @@ func createDependencyCMakeString(depTree *parsers.DependencyTree) (string, error
 
 // This parses dependencies and creates cmake files for all of these. It does this for a target that is provided
 // to it.
-func ParseDepsAndCreateCMake(projectPath string, dependencies types.DependenciesTag) ([]*parsers.DependencyTree, error) {
+func ParseDepsAndCreateCMake(projectPath string, dependencies types.DependenciesTag) (map[string]*parsers.DependencyTree, error) {
 
     // create dependency tree
     dependencyTree, err := createDependencyTree(projectPath, dependencies)
