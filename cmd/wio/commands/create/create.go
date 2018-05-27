@@ -52,18 +52,57 @@ func (create Create) GetContext() (*cli.Context) {
 
 // Executes the create command
 func (create Create) Execute() {
+    log.Norm.Cyan(false, "verifying project configuration ... ")
     commands.RecordError(create.error, "")
 
     if !create.Update && len(create.Context.Args()) < 2 {
         // When we are creating a project we need both directory and a board from args
-        commands.RecordError(errors.New("Project directory or Board not specified"), "")
+        commands.RecordError(errors.New("project directory or Board not specified"), "failure")
     } else if !create.Update && len(create.Context.Args()) < 1 {
         // When we are updating a project we only need directory from args
-        commands.RecordError(errors.New("Project directory not specified"), "")
+        commands.RecordError(errors.New("project directory not specified"), "failure")
     }
 
+<<<<<<< HEAD
     if args.AppType == "lib" {
         projectType = Lib{args:&args}
+=======
+    createPacket := &PacketCreate{}
+
+    // fetch directory based on the argument
+    directory, err := filepath.Abs(create.Context.Args()[0])
+    commands.RecordError(err, "failure")
+
+    // based on the command line context, get all the important fields
+    createPacket.directory = directory
+    createPacket.name = filepath.Base(directory)
+    createPacket.framework = create.Context.String("framework")
+    createPacket.platform = create.Context.String("platform")
+    createPacket.ide = create.Context.String("ide")
+    createPacket.tests = create.Context.Bool("tests")
+
+    log.Norm.Green(true, "success")
+
+    if create.Update {
+        // if update command is called
+        if create.checkUpdate(directory) {
+            // after check if an update can be performed
+            createPacket.board = create.Context.String("board")
+            create.updateProject(createPacket)
+        } else {
+            // project structure is invalid or too distorted for an update to be applied
+            message := `Based on your current project structure and wio.yml file, update cannot be performed.
+You can use: wio create <app type> DIRECTORY BOARD`
+            log.Norm.Cyan(true, message)
+        }
+    } else if create.createCheck(directory) {
+        // if create command is called and it's check is passed
+        createPacket.board = create.Context.Args()[1]
+
+        create.createStructure(createPacket.directory, true)
+        create.initialProjectSetup(createPacket)
+        create.postPrint(createPacket, false)
+>>>>>>> finished publish command for package manager
     }
 }
 
@@ -83,9 +122,9 @@ func (create Create) prePrint(createPacket *PacketCreate) {
 /// a check has been performed
 func (create Create) createStructure(directory string, delete bool) {
     if delete {
-        log.Norm.Yellow(false, "Creating project structure ... ")
+        log.Norm.Cyan(false, "creating project structure ... ")
     } else {
-        log.Norm.Yellow(false, "Updating project structure ... ")
+        log.Norm.Cyan(false, "updating project structure ... ")
     }
 
     if delete && utils.PathExists(directory) {
@@ -104,22 +143,22 @@ func (create Create) createStructure(directory string, delete bool) {
     if create.Context.Bool("tests") {
         commands.RecordError(os.MkdirAll(directory+io.Sep+"tests", os.ModePerm), "failure")
     }
+
+    log.Norm.Green(true, "success")
 }
 
 // This is a method that updates the created project. It will fix the structure and apply
 // updates. It also makes sure all the configurations are applied
 func (create Create) updateProject(createPacket *PacketCreate) {
-    create.prePrint(createPacket)
     create.createStructure(createPacket.directory, false)
     create.updateProjectSetup(createPacket)
-    create.postPrint()
+    create.postPrint(createPacket, true)
 }
 
 /// This is one of the most important step as this sets up the project when update command is used.
 /// This also updates the wio.yml file so that it can be fixed and current configurations can be applied.
 func (create Create) updateProjectSetup(createPacket *PacketCreate) {
-    log.Norm.Green(true, "success")
-    log.Norm.Yellow(false, "Updating the project ... ")
+    log.Norm.Cyan(false, "updating project files ... ")
 
     if createPacket.ide == "clion" {
         // copy gitignore file
@@ -166,6 +205,11 @@ func (create Create) updateProjectSetup(createPacket *PacketCreate) {
         // set the default board to be from the default target
         createPacket.board = projectConfig.TargetsTag.Targets[projectConfig.TargetsTag.Default_target].Board
 
+        // check project version
+        if projectConfig.MainTag.Version == "" {
+            projectConfig.MainTag.Version = "0.0.1"
+        }
+
         // make sure boards are updated in yml file
         if !utils.StringInSlice("ALL", projectConfig.MainTag.Board) {
             projectConfig.MainTag.Board = []string{"ALL"}
@@ -182,6 +226,8 @@ func (create Create) updateProjectSetup(createPacket *PacketCreate) {
 
     commands.RecordError(utils.PrettyPrintConfig(config, createPacket.directory+io.Sep+"wio.yml"),
         "failure")
+
+    log.Norm.Green(true, "success")
 }
 
 // This function checks if framework and platform are not empty. It future we can in force in valud
@@ -212,8 +258,7 @@ func checkFrameworkArrayAndPlatform(framework *[]string, platform *string, defau
 /// This also fills up the wio.yml file so that default configuration along with user choices
 /// are applied.
 func (create Create) initialProjectSetup(createPacket *PacketCreate) {
-    log.Norm.Green(true, "success")
-    log.Norm.Yellow(false, "Creating template project ... ")
+    log.Norm.Cyan(false, "creating template project ... ")
 
     defaultTarget := "main"
 
@@ -247,6 +292,7 @@ func (create Create) initialProjectSetup(createPacket *PacketCreate) {
         projectConfig.MainTag.Platform = createPacket.platform
         projectConfig.MainTag.Framework = []string{createPacket.framework}
         projectConfig.MainTag.Name = createPacket.name
+        projectConfig.MainTag.Version = "0.0.1"
         projectConfig.TargetsTag.Default_target = defaultTarget
         targets := make(map[string]*types.TargetTag, 0)
         projectConfig.TargetsTag.Targets = targets
@@ -260,6 +306,8 @@ func (create Create) initialProjectSetup(createPacket *PacketCreate) {
 
     commands.RecordError(utils.PrettyPrintConfig(config, createPacket.directory+io.Sep+"wio.yml"),
         "failure")
+
+    log.Norm.Green(true, "success")
 }
 
 /// This method handles the targets that a user can create and what these targets are
@@ -280,14 +328,25 @@ func (create Create) handleTargets(targetsTag *types.TargetsTag, board string) {
 
 /// This method prints next steps for any type of create/update command. This will help user
 /// decide what they can do next
-func (create Create) postPrint() {
-    log.Norm.Green(true, "success")
-    log.Norm.Yellow(true, "Project has been successfully created/updated and initialized!!")
+func (create Create) postPrint(createPacket *PacketCreate, update bool) {
+    if !update {
+        log.Norm.Yellow(true, "Project Creation finished!! Summary: ")
+    } else {
+        log.Norm.Yellow(true, "Project Update finished!! Summary: ")
+    }
+
+    log.Norm.Cyan(false, "Project Name: ")
+    log.Norm.Cyan(true, createPacket.name)
+    log.Norm.Cyan(false, "Project Type: ")
+    log.Norm.Cyan(true, create.Type)
+    log.Norm.Cyan(false, "Project Path: ")
+    log.Norm.Cyan(true, createPacket.directory)
+
     log.Norm.Yellow(true, "Check following commands:")
 
     log.Norm.Cyan(true, "`wio build -h`")
     log.Norm.Cyan(true, "`wio run -h`")
-    log.Norm.Cyan(true, "`wio upload -h`")
+    log.Norm.Cyan(true, "`wio pac -h`")
 
     if create.Context.Bool("tests") {
         log.Norm.Cyan(true, "`wio test -h`")

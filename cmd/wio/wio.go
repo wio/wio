@@ -452,6 +452,7 @@ Run "wio help" to see global options.
         {
             Name:      "run",
 <<<<<<< HEAD
+<<<<<<< HEAD
             Usage:     "Builds, Tests, and Uploads the project to a device",
 =======
             Usage:     "Builds and Uploads the project to a device.",
@@ -461,6 +462,9 @@ Run "wio help" to see global options.
             Usage:     "Builds and Uploads the project to a device. \n" +
                 "In order to trigger upload specify port flag.",
 >>>>>>> build, upload, clean and run commands finished
+=======
+            Usage:     "Builds and Uploads the project to a device (provide port flag to trigger upload)",
+>>>>>>> finished publish command for package manager
             UsageText: "wio run [command options]",
             Flags: []cli.Flag{
                 cli.BoolFlag{Name: "clean",
@@ -502,6 +506,7 @@ Run "wio help" to see global options.
 >>>>>>> More commands and minor fixes (#37)
             },
         },
+        /*
         {
             Name:      "test",
 <<<<<<< HEAD
@@ -533,6 +538,7 @@ Run "wio help" to see global options.
                 return nil
             },
         },
+
         {
             Name:      "monitor",
 <<<<<<< HEAD
@@ -625,6 +631,7 @@ Run "wio help" to see global options.
                 return nil
             },
         },
+        */
         {
 <<<<<<< HEAD
             Name:  "packager",
@@ -638,14 +645,38 @@ Run "wio help" to see global options.
             Usage: "Package manager for Wio projects.",
             Subcommands: cli.Commands{
                 cli.Command{
+                    Name:      "publish",
+                    Usage:     "Publish the wio package to the package manager site (npm site)",
+                    UsageText: "wio pac publish [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        command = pac.Pac{Context: c, Type: pac.PUBLISH}
+                    },
+                },
+                cli.Command{
                     Name:      "get",
+<<<<<<< HEAD
                     Usage:     "Gets all the libraries mentioned in wio.yml file and vendor folder",
                     UsageText: "wio libraries get [command options]",
 >>>>>>> More commands and minor fixes (#37)
+=======
+                    Usage:     "Gets all the packages mentioned in wio.yml file and vendor folder.",
+                    UsageText: "wio pac get [command options]",
+>>>>>>> finished publish command for package manager
                     Flags: []cli.Flag{
-                        cli.BoolFlag{Name: "clean",
-                            Usage: "Cleans all the current packages and re get all of them",
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
                         },
+<<<<<<< HEAD
 <<<<<<< HEAD
                     },
                     Action: func(c *cli.Context) error {
@@ -689,9 +720,13 @@ Run "wio help" to see global options.
                         cli.StringFlag{Name: "version_control",
                             Usage: "Specify the version control tool to usage",
                             Value: "git",
+=======
+                        cli.BoolFlag{Name: "clean",
+                            Usage: "Cleans all the current packages and re get all of them.",
+>>>>>>> finished publish command for package manager
                         },
                         cli.BoolFlag{Name: "verbose",
-                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
                         },
                     },
                     Action: func(c *cli.Context) {
@@ -700,15 +735,15 @@ Run "wio help" to see global options.
                 },
                 cli.Command{
                     Name:      "update",
-                    Usage:     "Updates all the libraries mentioned in wio.yml file and vendor folder.",
-                    UsageText: "wio libraries update [command options]",
+                    Usage:     "Updates all the packages mentioned in wio.yml file and vendor folder.",
+                    UsageText: "wio pac update [command options]",
                     Flags: []cli.Flag{
-                        cli.StringFlag{Name: "version_control",
-                            Usage: "Specify the version control tool to usage",
-                            Value: "git",
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
                         },
                         cli.BoolFlag{Name: "verbose",
-                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
                         },
                     },
                     Action: func(c *cli.Context) {
@@ -717,15 +752,19 @@ Run "wio help" to see global options.
                 },
                 cli.Command{
                     Name:      "collect",
-                    Usage:     "Creates vendor folder and puts all the libraries in that folder",
-                    UsageText: "wio libraries collect [command options]",
+                    Usage:     "Creates vendor folder and puts all the packages in that folder.",
+                    UsageText: "wio pac collect [command options]",
                     Flags: []cli.Flag{
-                        cli.StringFlag{Name: "path",
-                            Usage: "Path to collect a library instead of collecting all of them",
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.StringFlag{Name: "pkg",
+                            Usage: "Packages to collect instead of collecting all of the packages.",
                             Value: "none",
                         },
                         cli.BoolFlag{Name: "verbose",
-                            Usage: "Turns verbose mode on to show detailed errors and commands being executed",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
                         },
                     },
                     Action: func(c *cli.Context) {
@@ -771,6 +810,7 @@ func turnVerbose(value bool) {
     }
 }
 
+// returns the current directory from where wio is being called
 func getCurrDir() (string) {
     directory, err := os.Getwd()
     commands.RecordError(err, "")

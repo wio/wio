@@ -41,9 +41,13 @@ type AppTag struct {
 // Structure to hold information about project type: lib
 type PkgTag struct {
     Name          string
+    Description   string
+    Url           string
     Version       string
-    Authors       []string
-    License       []string
+    Author        string
+    Contributors  []string
+    Keywords      []string
+    License       string
     Platform      string
     Framework     []string
     Board         []string
@@ -63,10 +67,24 @@ type PkgConfig struct {
     DependenciesTag DependenciesTag `yaml:"dependencies"`
 }
 
+type NpmDependencyTag map[string]string
+
+type NpmConfig struct {
+    Name         string           `json:"name"`
+    Version      string           `json:"version"`
+    Description  string           `json:"description"`
+    Repository   string           `json:"repository"`
+    Main         string           `json:"main"`
+    Keywords     []string         `json:"keywords"`
+    Author       string           `json:"author"`
+    License      string           `json:"license"`
+    Contributors []string         `json:"contributors"`
+    Dependencies NpmDependencyTag `json:"dependencies"`
+}
+
 // Structure to handle individual library inside libraries
 type DependencyTag struct {
-    Url           string
-    Ref           string
+    Version       string
     Compile_flags []string
 }
 

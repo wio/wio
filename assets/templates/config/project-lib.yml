@@ -1,10 +1,14 @@
 lib:
   name: name
+  description: a wio project
+  url:
   version: 0.0.1
-  authors: []
-  license: []
+  author:
+  contributors: []
+  license:
   platform: platform
   framework: []
+  keywords: []
   board: [ALL]
   compile_flags: []
   ide: ide

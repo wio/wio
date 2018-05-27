@@ -41,7 +41,7 @@ func (run Run) Execute() {
     var targetName string
 
     if run.Context.IsSet("port") {
-        log.Norm.Cyan(true, "Including port: \"" + port + "\" in the build process\n")
+        log.Norm.Cyan(true, "Including port: \""+port+"\" in the build process\n")
 
         // run the build so that port can be included in the build process
         targetName = build.RunBuild(directory, run.Context.String("target"), false, port)
@@ -78,7 +78,7 @@ func (run Run) Execute() {
         }
 
         // print the ending message
-        log.Norm.Yellow(true, "Upload successful for target: \"" + targetName + "\"")
+        log.Norm.Yellow(true, "Upload successful for target: \""+targetName+"\"")
     }
 }
 >>>>>>> More commands and minor fixes (#37)

@@ -6,3 +6,7 @@
 // Part of commands package, which contains all the commands provided by the tool.
 // Analyzes C/C++ code statically
 package analyze
+
+/*
+Will implement in upcoming version
+ */
