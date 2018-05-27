@@ -1,0 +1,21 @@
+lib:
+  name: name
+  description: a wio project
+  url:
+  version: 0.0.1
+  author:
+  contributors: []
+  license:
+  platform: platform
+  framework: []
+  keywords: []
+  board: [ALL]
+  compile_flags: []
+  ide: ide
+
+targets:
+  default: test
+  created:
+    test:
+      board: board
+      compile_flags: []
