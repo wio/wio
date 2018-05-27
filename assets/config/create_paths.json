@@ -37,49 +37,49 @@
       "override": true
     },
     {
-      "id": "lib-gen",
-      "src": "templates/config/project-lib.yml",
+      "id": "pkg-gen",
+      "src": "templates/config/project-pkg.yml",
       "des": "{{PRJ-ROOT}}/wio.yml",
       "override": false
     },
     {
-      "id": "lib-gen",
-      "src": "templates/sample-program/lib/lib.h",
-      "des": "{{PRJ-ROOT}}/include/lib.h",
+      "id": "pkg-gen",
+      "src": "templates/sample-program/pkg/output.h",
+      "des": "{{PRJ-ROOT}}/include/output.h",
       "override": false
     },
     {
-      "id": "lib-gen",
-      "src": "templates/sample-program/lib/lib.cpp",
-      "des": "{{PRJ-ROOT}}/src/lib.cpp",
+      "id": "pkg-gen",
+      "src": "templates/sample-program/pkg/output.cpp",
+      "des": "{{PRJ-ROOT}}/src/output.cpp",
       "override": false
     },
     {
-      "id": "lib-gen",
-      "src": "templates/sample-program/lib/main.cpp",
-      "des": "{{PRJ-ROOT}}/test/main.cpp",
+      "id": "pkg-gen",
+      "src": "templates/sample-program/pkg/main.cpp",
+      "des": "{{PRJ-ROOT}}/tests/main.cpp",
       "override": false
     },
     {
-      "id": "lib-gen",
+      "id": "pkg-gen",
       "src": "templates/gitignore/.gitignore-general",
       "des": "{{PRJ-ROOT}}/.gitignore",
       "override": false
     },
     {
-      "id": "lib-clion",
+      "id": "pkg-clion",
       "src": "templates/gitignore/.gitignore-clion",
       "des": "{{PRJ-ROOT}}/.gitignore",
       "override": false
     },
     {
-      "id": "lib-clion",
+      "id": "pkg-clion",
       "src": "templates/ide/clion/lib/CMakeLists.txt.tpl",
       "des": "{{PRJ-ROOT}}/CMakeLists.txt",
       "override": false
     },
     {
-      "id": "lib-clion",
+      "id": "pkg-clion",
       "src": "templates/ide/clion/lib/CMakeListsPrivate.txt.tpl",
       "des": "{{PRJ-ROOT}}/CMakeListsPrivate.txt",
       "override": true
