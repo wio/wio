@@ -76,12 +76,15 @@ nfpm:
   - npm
   - cmake
   - make
+  - gcc-avr
+  - binutils-avr
+  - avr-libc
+  - avrdude
 
   # Packages your package suggests installing.
   # For RPM packages rpmbuild >= 4.13 is required
   suggests:
   - git
-  - node
 
   # Override default /usr/local/bin destination for binaries
   bindir: /usr/bin
