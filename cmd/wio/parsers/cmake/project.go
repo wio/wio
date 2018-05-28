@@ -24,7 +24,7 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port 
         return err
     }
 
-    toolChainPath := executablePath + io.Sep + "toolchain/cmake/CosaToolchain.cmake"
+    toolChainPath := "toolchain/cmake/CosaToolchain.cmake"
 
     // read the CMakeLists.txt file template
     templateData, err := io.AssetIO.ReadFile("templates/cmake/CMakeListsPkg.txt.tpl")
@@ -33,7 +33,9 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port 
         return err
     }
 
-    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_FILE}}",
+    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_PATH}}",
+        filepath.ToSlash(executablePath), -1)
+    templateDataStr = strings.Replace(templateDataStr, "{{TOOLCHAIN_FILE_REL}}",
         filepath.ToSlash(toolChainPath), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_PATH}}", filepath.ToSlash(pkgPath), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_NAME}}", pkgName, -1)
@@ -70,7 +72,7 @@ func CreateAppMainCMakeLists(appName string, appPath string, board string, port 
         return err
     }
 
-    toolChainPath := executablePath + io.Sep + "toolchain/cmake/CosaToolchain.cmake"
+    toolChainPath := "toolchain/cmake/CosaToolchain.cmake"
 
     // read the CMakeLists.txt file template
     templateData, err := io.AssetIO.ReadFile("templates/cmake/CMakeListsApp.txt.tpl")
@@ -78,7 +80,9 @@ func CreateAppMainCMakeLists(appName string, appPath string, board string, port 
         return err
     }
 
-    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_FILE}}",
+    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_PATH}}",
+        filepath.ToSlash(executablePath), -1)
+    templateDataStr = strings.Replace(templateDataStr, "{{TOOLCHAIN_FILE_REL}}",
         filepath.ToSlash(toolChainPath), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_PATH}}", filepath.ToSlash(appPath), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_NAME}}", appName, -1)

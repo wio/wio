@@ -9,6 +9,11 @@ Table of contents
 =================
 
 <!--ts-->
+   * [Install](#install)
+        * [Ubuntu](#ubuntu)
+        * [Arch](#arch)
+        * [MacOs](#macos)
+        * [Windows](#windows)
    * [Create and Update](#create-and-update)
         * [App and Pkg](#app-and-pkg)
             * [Pkg](#pkg)
@@ -23,6 +28,124 @@ Table of contents
         * [Vendor](#vendor)
    * [Toolchain](#toolchain)
 <!--te-->
+
+## Install
+Wio is available on all popular platforms. You can check a guide specific to your operating system below.
+
+### Ubuntu
+Best way to install wio on ubuntu is to use `NPM`. NPM is a node package manager and can be downloaded using:
+```bash
+sudo apt-get install npm
+```
+Then to install wio, you have to do:
+```bash
+npm install -g wio
+```
+\
+Alternatively, all the versions are pushed to Github Releases and can be downloaded from [Github Releases site](https://github.com/dhillondeep/wio/releases).
+
+\
+Since Wio is an embedded development environment, you have to install compilers and build tools. So far Wio only supports `AVR` development and hence `AVR` toolchain is needed. In order to install that, you can do:
+* Download [Arduino](https://www.arduino.cc/en/Main/Software) or:
+```bash
+sudo apt-get install gcc-avr avr-libc avrdude
+```
+* CMake and Make
+```bash
+sudo apt-get install cmake make
+```
+All the framework files (SDK) are already included with wio and you do not have to worry about them.
+
+### Arch
+Best way to install wio on Arch is to use `NPM`. NPM is a node package manager and can be downloaded using:
+```bash
+sudo pacman -S nodejs
+```
+Then to install wio, you have to do:
+```bash
+npm install -g wio
+```
+\
+Alternatively, all the versions are pushed to Github Releases and can be downloaded from [Github Releases site](https://github.com/dhillondeep/wio/releases).
+
+\
+Since Wio is an embedded development environment, you have to install compilers and build tools. So far Wio only supports `AVR` development and hence `AVR` toolchain is needed. In order to install that, you can do:
+* Download [Arduino](https://www.arduino.cc/en/Main/Software) or:
+```bash
+sudo pacman -S avr-gcc avr-libc avrdude
+```
+* CMake and Make
+```bash
+sudo pacman -S cmake make
+```
+All the framework files (SDK) are already included with wio and you do not have to worry about them.
+
+### MacOs
+There are two good ways to install wio on MacOS. You can use `NPM` or `Homebrew`.
+
+**NPM**
+
+NPM is a node package manager and can be downloaded using:
+```bash
+brew install node
+```
+Then to install wio, you have to do:
+```bash
+npm install -g wio
+```
+
+**Homebrew**
+
+Homebrew is a package manager for macOS. In order to install wio, you have to do:
+```bash
+brew tap dhillondeep/wio
+brew install dhillondeep/wio/wio
+```
+If you are planning on using [wio package manager](#package-manager), you will need `npm` installed. To install `npm`, you have to do:
+```bash
+brew install node
+```
+\
+Alternatively, all the versions are pushed to Github Releases and can be downloaded from [Github Releases site](https://github.com/dhillondeep/wio/releases).
+
+\
+Since Wio is an embedded development environment, you have to install compilers and build tools. So far Wio only supports `AVR` development and hence `AVR` toolchain is needed. In order to install that, you can do:
+* Download [Arduino](https://www.arduino.cc/en/Main/Software) or:
+```bash
+# Keep in mind that building avr-gcc may take some time
+xcode-select --install
+brew tap osx-cross/avr
+brew install avr-gcc
+brew install avrdude
+```
+* CMake and Make
+```bash
+brew install cmake make
+```
+All the framework files (SDK) are already included with wio and you do not have to worry about them.
+
+### Windows
+Best way to install wio on windows is to use `NPM`. NPM is a node package manager and can be downloaded through [nodejs website](https://nodejs.org/en/download/)
+
+Then to install wio, you have to do:
+```bash
+npm install -g wio
+```
+\
+Alternatively, all the versions are pushed to Github Releases and can be downloaded from [Github Releases site](https://github.com/dhillondeep/wio/releases).
+
+\
+Since Wio is an embedded development environment, you have to install compilers and build tools. So far Wio only supports `AVR` development and hence `AVR` toolchain is needed. In order to install that, you follow the steps below:
+* Download [Core Arduino](https://www.arduino.cc/en/Main/Software). This will contains all the compilers and tools needed for building and uploading the binaries
+  * You have to add the **bin** folder (folder that contains all the compiler binaries) to PATH
+* Wio uses `CMake` for build files generation. Install it from [CMake website](https://cmake.org/download/)
+  * Make sure to add `CMake` to your Environment Variables PATH
+* Wio uses `Make` for building the project. There are multiple ways to get this:
+  * If you have MinGW, you can add the `bin` folder to Environment PATH and this give you mingw32-make.exe
+  * If you want a standalone `Make`, install it from [GNU32 Website](http://gnuwin32.sourceforge.net/packages/make.htm)
+    * Make sure to add this to your PATH
+
+All the framework files (SDK) are already included with wio and you do not have to worry about them.
 
 ## Create and Update
 `Wio` enforces a strict project structure so that development is organized and easier to build. This project structure will be created by `create` and `update` commands provided. To create a wio project:
