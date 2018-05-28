@@ -5,6 +5,10 @@ set(CMAKE_TOOLCHAIN_FILE "{{TOOLCHAIN_FILE}}")
 set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 set(DEPENDENCY_FILE dependencies)
 
+if(NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
+    set(CMAKE_TOOLCHAIN_FILE "/etc/wio/toolchain/cmake/CosaToolchain.cmake")
+endif()
+
 # properties
 set(TARGET_NAME {{TARGET_NAME}})
 set(BOARD {{BOARD}})
