@@ -13,6 +13,14 @@ builds:
 # Archive customization
 archive:
   format: tar.gz
+
+  # Can be used to change the archive formats for specific GOOSs.
+  # Most common use case is to archive as zip on Windows.
+  # Default is empty.
+  format_overrides:
+    - goos: windows
+      format: zip
+
   replacements:
     windows: windows
     darwin: darwin
@@ -21,7 +29,7 @@ archive:
     amd64: 64-bit
   files:
     - toolchain/**/*/
-  
+
 nfpm:
   # You can change the name of the package.
   # This is parsed with the Go template engine and the following variables
@@ -94,3 +102,57 @@ nfpm:
   # Values are the destination locations of the files in the package.
   files:
     "toolchain/**/*": "/etc/wio/toolchain"
+
+brew:
+  # Name of the recipe
+  # Default to project name
+  name: wio
+
+  # Reporitory to push the tap to.
+  github:
+    owner: dhillondeep
+    name: homebrew-wio
+
+  # Git author used to commit to the repository.
+  # Defaults are shown.
+  commit_author:
+    name: dhillondeep
+    email: deep@deepdhillon.ca
+
+  # Folder inside the repository to put the formula.
+  # Default is the root folder.
+  folder: Formula
+
+  # Your app's homepage.
+  # Default is empty.
+  homepage: "https://github.com/dhillondeep/wio"
+
+  # Your app's description.
+  # Default is empty.
+  description: "Embedded development environment"
+
+  # Setting this will prevent goreleaser to actually try to commit the updated
+  # formula - instead, the formula file will be stored on the dist folder only,
+  # leaving the responsibility of publishing it to the user.
+  # Default is false.
+  skip_upload: false
+
+  # Packages your package depends on.
+  dependencies:
+    - make
+    - cmake
+    - node
+    - avr-gcc
+    - avrdude
+
+  # So you can `brew test` your formula.
+  # Default is empty.
+  test: |
+    system "#{bin}/wio --version"
+
+  # Custom install script for brew.
+  # Default is 'bin.install "program"'.
+  install: |
+    prefix.install Dir["toolchain"]
+    bin.install "wio"
+  

@@ -97,7 +97,7 @@ Run "wio help" to see global options.
     defaults := types.DConfig{}
     err := io.AssetIO.ParseYml("config/defaults.yml", &defaults)
     if err != nil {
-        log.Error(false, err.Error())
+        commands.RecordError(err, "")
     }
 
     // command that will be executed
