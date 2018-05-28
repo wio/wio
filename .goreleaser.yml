@@ -1,0 +1,24 @@
+# .goreleaser.yml
+# Build customization
+builds:
+  - main: cmd/wio/wio.go
+    binary: wio
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - 386
+      - amd64
+# Archive customization
+archive:
+  format: tar.gz
+  replacements:
+    windows: Windows
+    darwin: Darwin
+    linux: Linux
+    386: i386
+    amd64: x86_64
+  files:
+    - toolchain/**/*/
+  
