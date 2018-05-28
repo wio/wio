@@ -29,8 +29,13 @@ var Sep = string(filepath.Separator) // separator based on the OS
 
 // Returns the root path to the files in terms of this executable
 func (normalHandler NormalHandler) GetRoot() (string, error) {
-    _, configFileName, _, _ := runtime.Caller(0)
-    return filepath.Abs(configFileName + "/../../../../../")
+    ex, err := os.Executable()
+
+    if err != nil {
+        return "", err
+    }
+
+    return filepath.Dir(ex), nil
 }
 
 // Returns the root path to the asset files in terms of assets folder

@@ -1,6 +1,6 @@
-[submodule "assets/toolchain/arduino-cmake"]
-	path = assets/toolchain/arduino-cmake
+[submodule "toolchain/arduino-cmake"]
+	path = toolchain/arduino-cmake
 	url = https://github.com/arduino-cmake/arduino-cmake.git
-[submodule "assets/toolchain/cosa"]
-	path = assets/toolchain/cosa
+[submodule "toolchain/cosa"]
+	path = toolchain/cosa
 	url = https://github.com/waterloop/cosa.git
