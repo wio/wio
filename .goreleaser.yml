@@ -153,5 +153,6 @@ brew:
   # Custom install script for brew.
   # Default is 'bin.install "program"'.
   install: |
+    prefix.install Dir["toolchain"]
     bin.install "wio"
   
