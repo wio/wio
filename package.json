@@ -1,12 +1,12 @@
 {
   "name": "wio",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Embedded development environment",
   "main": "index.js",
   "scripts": {
-    "postinstall": "go-npm install",
-    "preuninstall": "go-npm uninstall"
+    "preinstall": "node npm-go/preinstall.js"
   },
+  "bin": "./bin/wio",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dhillondeep/wio.git"
@@ -28,9 +28,11 @@
   "goBinary": {
     "name": "wio",
     "path": "./bin",
-    "url": "https://github.com/dhillondeep/wio/releases/download/v{{version}}/wio{{version}}_{{platform}}_{{arch}}.tar.gz"
+    "url": "https://github.com/dhillondeep/wio/releases/download/v{{version}}/wio_{{version}}_{{platform}}_{{arch}}.tar.gz"
   },
   "dependencies": {
-    "go-npm": "^0.1.9"
+    "mkdirp": "^0.5.1",
+    "request": "^2.81.0",
+    "tar": "^2.2.1"
   }
 }

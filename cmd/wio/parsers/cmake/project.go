@@ -11,8 +11,6 @@ import (
     "wio/cmd/wio/parsers"
     "wio/cmd/wio/utils/io"
     "path/filepath"
-    "wio/cmd/wio/types"
-    "wio/cmd/wio/commands"
 )
 
 // This creates the main cmake file based on the target provided. This method is used for creating the main cmake for
@@ -21,19 +19,12 @@ import (
 func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port string, framework string, target string,
     targetFlags []string, pkgFlags []string, depTree map[string]*parsers.DependencyTree) (error) {
 
-    // get default configuration values (used for wio version)
-    defaults := types.DConfig{}
-    err := io.AssetIO.ParseYml("config/defaults.yml", &defaults)
-    if err != nil {
-        commands.RecordError(err, "")
-    }
-
     executablePath, err := io.NormalIO.GetRoot()
     if err != nil {
         return err
     }
 
-    toolChainPath := executablePath + io.Sep + "toolchain/cmake/CosaToolchain.cmake"
+    toolChainPath := "toolchain/cmake/CosaToolchain.cmake"
 
     // read the CMakeLists.txt file template
     templateData, err := io.AssetIO.ReadFile("templates/cmake/CMakeListsPkg.txt.tpl")
@@ -42,9 +33,10 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port 
         return err
     }
 
-    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_FILE}}",
+    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_PATH}}",
+        filepath.ToSlash(executablePath), -1)
+    templateDataStr = strings.Replace(templateDataStr, "{{TOOLCHAIN_FILE_REL}}",
         filepath.ToSlash(toolChainPath), -1)
-    templateDataStr = strings.Replace(templateDataStr, "{{WIO_VERSION}}", defaults.Version, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_PATH}}", filepath.ToSlash(pkgPath), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_NAME}}", pkgName, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{TARGET_NAME}}", target, -1)
@@ -75,19 +67,12 @@ func CreatePkgMainCMakeLists(pkgName string, pkgPath string, board string, port 
 func CreateAppMainCMakeLists(appName string, appPath string, board string, port string, framework string, target string,
     targetFlags []string, depTree map[string]*parsers.DependencyTree) (error) {
 
-    // get default configuration values (used for wio version)
-    defaults := types.DConfig{}
-    err := io.AssetIO.ParseYml("config/defaults.yml", &defaults)
-    if err != nil {
-        commands.RecordError(err, "")
-    }
-
     executablePath, err := io.NormalIO.GetRoot()
     if err != nil {
         return err
     }
 
-    toolChainPath := executablePath + io.Sep + "toolchain/cmake/CosaToolchain.cmake"
+    toolChainPath := "toolchain/cmake/CosaToolchain.cmake"
 
     // read the CMakeLists.txt file template
     templateData, err := io.AssetIO.ReadFile("templates/cmake/CMakeListsApp.txt.tpl")
@@ -95,9 +80,10 @@ func CreateAppMainCMakeLists(appName string, appPath string, board string, port 
         return err
     }
 
-    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_FILE}}",
+    templateDataStr := strings.Replace(string(templateData), "{{TOOLCHAIN_PATH}}",
+        filepath.ToSlash(executablePath), -1)
+    templateDataStr = strings.Replace(templateDataStr, "{{TOOLCHAIN_FILE_REL}}",
         filepath.ToSlash(toolChainPath), -1)
-    templateDataStr = strings.Replace(templateDataStr, "{{WIO_VERSION}}", defaults.Version, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_PATH}}", filepath.ToSlash(appPath), -1)
     templateDataStr = strings.Replace(templateDataStr, "{{PROJECT_NAME}}", appName, -1)
     templateDataStr = strings.Replace(templateDataStr, "{{TARGET_NAME}}", target, -1)

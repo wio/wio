@@ -5,7 +5,7 @@ ide: "none"
 framework: "cosa"
 platform: "avr"
 port: "none"
-version: "0.1.0"
+version: "0.1.3"
 board: "uno"
 btarget: "default"        # build target
 utarget: "default"        # upload target
