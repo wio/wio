@@ -9,6 +9,7 @@ Table of contents
 =================
 
 <!--ts-->
+   * [Install](#install)
    * [Create and Update](#create-and-update)
         * [App and Pkg](#app-and-pkg)
             * [Pkg](#pkg)
@@ -23,6 +24,28 @@ Table of contents
         * [Vendor](#vendor)
    * [Toolchain](#toolchain)
 <!--te-->
+
+## Install
+Wio is stable but is in testing mode. If you want to use it and test it, follow the following ways:
+
+### Github Releases
+All the executables for every platform are published to Github Releases and can be downloaded from https://github.com/dhillondeep/wio/releases
+
+### MacOS
+**Homebrew**
+
+```bash
+brew tap osx-cross/avr  # needed for wio dependency
+brew tap dhillondeep/wio
+brew install dhillondeep/wio/wio
+```
+### Linux
+**Debian Package**
+
+```bash
+wget https://github.com/dhillondeep/wio/releases/download/v0.1.0/wio_0.1.0_linux_64-bit.deb
+sudo apt install ./wio_0.1.0_linux_64-bit.deb
+```
 
 ## Create and Update
 `Wio` enforces a strict project structure so that development is organized and easier to build. This project structure will be created by `create` and `update` commands provided. To create a wio project:
