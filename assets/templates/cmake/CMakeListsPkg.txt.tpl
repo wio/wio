@@ -5,14 +5,19 @@ set(CMAKE_TOOLCHAIN_FILE "{{TOOLCHAIN_FILE}}")
 set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 set(DEPENDENCY_FILE dependencies)
 
-# for debian package (linux)
-if(NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
-    set(CMAKE_TOOLCHAIN_FILE "/etc/wio/toolchain/cmake/CosaToolchain.cmake")
+# toolchain path for macos
+if(APPLE AND NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
+    # brew install dependencis here
+    set(CMAKE_TOOLCHAIN_FILE "/usr/local/Cellar/wio/{{WIO_VERSION}}/toolchain/cmake/CosaToolchain.cmake")
 endif()
 
-# for brew install
-if(NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
-    set(CMAKE_TOOLCHAIN_FILE "/usr/local/Cellar/wio/{{WIO_VERSION}}/toolchain/cmake/CosaToolchain.cmake")
+# toolchain path for linux
+if(UNIX AND NOT APPLE AND NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
+    # debian apt install toolchain here
+    set(CMAKE_TOOLCHAIN_FILE "/etc/wio/toolchain/cmake/CosaToolchain.cmake")
+
+    # linuxbrew
+    set(CMAKE_TOOLCHAIN_FILE "/home/linuxbrew/.linuxbrew/Cellar/wio/{{WIO_VERSION}}/toolchain/cmake/CosaToolchain.cmake")
 endif()
 
 # properties

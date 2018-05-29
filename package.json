@@ -1,0 +1,36 @@
+{
+  "name": "wio",
+  "version": "0.1.0",
+  "description": "Embedded development environment",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "go-npm install",
+    "preuninstall": "go-npm uninstall"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhillondeep/wio.git"
+  },
+  "keywords": [
+    "wio",
+    "c",
+    "c++",
+    "avr",
+    "arduino",
+    "cosa"
+  ],
+  "author": "Deep Dhillon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dhillondeep/wio/issues"
+  },
+  "homepage": "https://github.com/dhillondeep/wio#readme",
+  "goBinary": {
+    "name": "wio",
+    "path": "./bin",
+    "url": "https://github.com/dhillondeep/wio/releases/download/v{{version}}/wio{{version}}_{{platform}}_{{arch}}.tar.gz"
+  },
+  "dependencies": {
+    "go-npm": "^0.1.9"
+  }
+}
