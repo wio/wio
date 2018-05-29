@@ -14,6 +14,10 @@ builds:
 archive:
   format: tar.gz
 
+  replacements:
+    amd64: 64-bit
+    386: 32-bit
+
   # Can be used to change the archive formats for specific GOOSs.
   # Most common use case is to archive as zip on Windows.
   # Default is empty.
@@ -21,12 +25,6 @@ archive:
     - goos: windows
       format: zip
 
-  replacements:
-    windows: windows
-    darwin: darwin
-    linux: linux
-    386: 32-bit
-    amd64: 64-bit
   files:
     - toolchain/**/*/
 
@@ -68,7 +66,7 @@ nfpm:
 
   # Your app's description.
   # Default is empty.
-  description: Embedded Development environment
+  description: An Embedded Development Environment
 
   # Your app's license.
   # Default is empty.
@@ -94,14 +92,11 @@ nfpm:
   suggests:
   - git
 
-  # Override default /usr/local/bin destination for binaries
-  bindir: /usr/bin
-
   # Files or directories to add to your package (beyond the binary).
   # Keys are source paths/globs to get the files from.
   # Values are the destination locations of the files in the package.
   files:
-    "toolchain/**/*": "/etc/wio/toolchain"
+    "toolchain/**/*": "/usr/share/wio/toolchain"
 
 brew:
   # Name of the recipe

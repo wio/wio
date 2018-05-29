@@ -1,0 +1,13 @@
+assets/
+cmd/
+vendor/
+toolchain/
+bin/
+npm-go/prepack.js
+npm-go/postpack.js
+dist/
+.idea/
+.gitmodules
+.goreleaser.yml
+Makefile
+CONTRIBUTING.md

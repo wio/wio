@@ -31,11 +31,16 @@ Wio is stable but is in testing mode. If you want to use it and test it, follow 
 ### Github Releases
 All the executables for every platform are published to Github Releases and can be downloaded from https://github.com/dhillondeep/wio/releases
 
+### NPM
+```bash
+npm install -g wio
+```
+
 ### MacOS
 **Homebrew**
 
 ```bash
-brew tap osx-cross/avr  # needed for wio dependency
+brew tap osx-cross/avr  # needed for wio dependencies
 brew tap dhillondeep/wio
 brew install dhillondeep/wio/wio
 ```
@@ -43,8 +48,8 @@ brew install dhillondeep/wio/wio
 **Debian Package**
 
 ```bash
-wget https://github.com/dhillondeep/wio/releases/download/v0.1.0/wio_0.1.0_linux_64-bit.deb
-sudo apt install ./wio_0.1.0_linux_64-bit.deb
+wget https://github.com/dhillondeep/wio/releases/download/v<version>/wio_<version>_linux_64-bit.deb
+sudo apt install ./wio_<version>_linux_64-bit.deb
 ```
 
 ## Create and Update
