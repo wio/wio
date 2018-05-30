@@ -155,22 +155,6 @@ function install(callback) {
     });
 }
 
-function uninstall(callback) {
-
-    let opts = parsePackageJson();
-    getInstallationPath(function(err, installationPath) {
-        if (err) callback("Error finding binary installation directory");
-
-        try {
-            fs.unlinkSync(path.join(installationPath, opts.binName));
-        } catch(ex) {
-            // Ignore errors when deleting the file.
-        }
-
-        return callback(null);
-    });
-}
-
 var myCallback = function(data) {
     console.log(data);
     process.exit(1)

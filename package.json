@@ -1,7 +1,7 @@
 {
   "name": "wio",
   "version": "0.1.3",
-  "description": "Embedded development environment",
+  "description": "An Embedded Development Environment",
   "main": "index.js",
   "scripts": {
     "preinstall": "node npm-go/preinstall.js"

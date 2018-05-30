@@ -79,18 +79,14 @@ nfpm:
 
   # Packages your package depends on.
   dependencies:
-  - npm
   - cmake
   - make
-  - gcc-avr
-  - binutils-avr
-  - avr-libc
-  - avrdude
 
   # Packages your package suggests installing.
   # For RPM packages rpmbuild >= 4.13 is required
   suggests:
   - git
+  - node
 
   # Files or directories to add to your package (beyond the binary).
   # Keys are source paths/globs to get the files from.
@@ -132,14 +128,6 @@ brew:
   # Default is false.
   skip_upload: false
 
-  # Packages your package depends on.
-  dependencies:
-    - make
-    - cmake
-    - node
-    - avr-gcc
-    - avrdude
-
   # So you can `brew test` your formula.
   # Default is empty.
   test: |
@@ -150,4 +138,27 @@ brew:
   install: |
     prefix.install Dir["toolchain"]
     bin.install "wio"
-  
+
+scoop:
+  # Repository to push the app manifest to.
+  bucket:
+    owner: dhillondeep
+    name: wio-bucket
+
+  # Git author used to commit to the repository.
+  # Defaults are shown.
+  commit_author:
+    name: Deep Dhillon
+    email: deep@deepdhillon.ca
+
+  # Your app's homepage.
+  # Default is empty.
+  homepage: "https://github.com/dhillondeep/wio"
+
+  # Your app's description.
+  # Default is empty.
+  description: "An Embedded Development Environment"
+
+  # Your app's license
+  # Default is empty.
+  license: MIT
