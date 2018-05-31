@@ -1,6 +1,6 @@
 {
   "name": "wio",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "description": "An Embedded Development Environment",
   "main": "index.js",
   "scripts": {

@@ -21,9 +21,14 @@ import (
     "errors"
     "net/http"
     "regexp"
+    "strconv"
 )
 
 const (
+    ADD     = "add"
+    RM      = "rm"
+    LIST    = "list"
+    INFO    = "info"
     PUBLISH = "publish"
     GET     = "get"
     UPDATE  = "update"
@@ -47,6 +52,24 @@ func (pac Pac) Execute() {
     commands.RecordError(err, "")
 
     switch pac.Type {
+    case ADD:
+        if len(pac.Context.Args()) == 0 {
+            commands.RecordError(errors.New("you need to provide at least one package"), "")
+        }
+
+        handleAdd(directory, pac.Context.Args(), pac.Context.Bool("vendor"))
+    case RM:
+        handleRemove(directory, pac.Context.Args(), pac.Context.Bool("A"))
+    case LIST:
+        handleList(directory)
+    case INFO:
+        if len(pac.Context.Args()) == 0 {
+            commands.RecordError(errors.New("you need to provide a package name"), "")
+        } else if len(pac.Context.Args()) > 1 {
+            commands.RecordError(errors.New("only one package name is accepted"), "")
+        }
+
+        handleInfo(directory, pac.Context.Args()[0])
     case PUBLISH:
         handlePublish(directory)
     case GET:
@@ -201,8 +224,9 @@ func dependencyCheck(directory string, dependencyName string, dependencyVersion 
 
     // dependency does not exist
     if resp.StatusCode == 404 {
-        commands.RecordError(errors.New("dependency: \""+dependencyName+"\" package does not exist"),
-            "failure")
+        log.Verb.Verbose(true, "failure")
+        commands.RecordError(errors.New("dependency: \"" + dependencyName + "\" package does not exist on remote "+
+            "server"), "")
     }
     resp.Body.Close()
 
@@ -283,7 +307,7 @@ func handleGet(directory string, clean bool) {
     // create private json file
     createPrivatePackageJson(directory, filepath.Base(directory), pkgConfig.DependenciesTag)
 
-    io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig)
+    commands.RecordError(io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig), "")
 
     // add dependencies to package.json
     for dependencyName, dependencyValue := range pkgConfig.DependenciesTag {
@@ -293,11 +317,11 @@ func handleGet(directory string, clean bool) {
 
         dependencyCheck(directory, dependencyName, dependencyValue.Version)
 
-        log.Norm.Cyan(false, "pulling " + dependencyName + "@" + dependencyValue.Version +
+        log.Norm.Cyan(false, "pulling " + dependencyName + "@" + dependencyValue.Version+
             " package ... ")
 
         // execute cmake command
-        npmInstallCommand := exec.Command("npm", "install", dependencyName + "@" + dependencyValue.Version)
+        npmInstallCommand := exec.Command("npm", "install", dependencyName+"@"+dependencyValue.Version)
         npmInstallCommand.Dir = directory + io.Sep + ".wio"
 
         // Stderr buffer
@@ -317,6 +341,199 @@ func handleGet(directory string, clean bool) {
     }
 
     log.Norm.Yellow(true, "All packages pulled successfully")
+}
+
+// add and update dependencies from cli
+func handleAdd(directory string, args []string, vendor bool) {
+    log.Norm.Yellow(true, "Adding/Updating dependencies")
+
+    // read wio.yml file. We gonna use dependencies tag so it does not matter if this is app or pkg
+    pkgConfig := &types.PkgConfig{}
+
+    commands.RecordError(io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig), "")
+
+    changed := false
+
+    for _, addArg := range args {
+        newDependency := strings.Split(addArg, "@")
+
+        depName := newDependency[0]
+        depVersion := "latest"
+
+        if len(newDependency) > 1 {
+            depVersion = newDependency[1]
+        }
+
+        // check if this dependency exists and check it's version
+        if val, ok := pkgConfig.DependenciesTag[depName]; ok {
+            // override with vendor
+            if !val.Vendor && vendor {
+                pkgConfig.DependenciesTag[depName].Vendor = true
+                pkgConfig.DependenciesTag[depName].Version = ""
+
+                log.Norm.Cyan(true, "overridden remote dependency by vendor dependency: "+depName)
+                changed = true
+            } else if vendor {
+                log.Norm.Cyan(true, "unchanged vendor dependency: "+depName)
+            } else if val.Version != depVersion {
+                if val.Vendor {
+                    log.Norm.Cyan(true, "delete vendor dependency before updating to remote")
+                } else {
+                    // change the version since it already exists
+                    pkgConfig.DependenciesTag[depName].Version = depVersion
+
+                    log.Norm.Cyan(true, "updated remote dependency: " + depName + "@" + val.Version+
+                        "   ->   "+ depName+ "@"+ depVersion)
+
+                    changed = true
+                }
+            } else {
+                log.Norm.Cyan(true, "unchanged remote dependency: "+depName+"@"+val.Version)
+            }
+        } else {
+            if vendor {
+                pkgConfig.DependenciesTag[depName] = &types.DependencyTag{Vendor: true}
+
+                log.Norm.Cyan(true, "added vendor dependency: "+depName)
+            } else {
+                pkgConfig.DependenciesTag[depName] = &types.DependencyTag{Version: depVersion}
+
+                log.Norm.Cyan(true, "added remote dependency: "+depName+"@"+depVersion)
+            }
+
+            changed = true
+        }
+    }
+
+    if !changed {
+        log.Norm.Yellow(true, "Dependencies remained unchanged!")
+    } else {
+        // check if the configuration is app
+        if data, err := io.NormalIO.ReadFile(directory + io.Sep + "wio.yml"); err != nil {
+            commands.RecordError(err, "")
+        } else {
+            // if there is "app:" tag use app configuration
+            if strings.Contains(string(data), "app:") {
+                appConfig := &types.AppConfig{}
+
+                appConfig.DependenciesTag = pkgConfig.DependenciesTag
+
+                if err = io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", appConfig); err != nil {
+                    commands.RecordError(err, "")
+                }
+
+                commands.RecordError(utils.PrettyPrintConfig(appConfig, directory+io.Sep+"wio.yml"), "")
+            } else {
+                commands.RecordError(utils.PrettyPrintConfig(pkgConfig, directory+io.Sep+"wio.yml"), "")
+            }
+        }
+
+        log.Norm.Yellow(true, "Provides dependencies added/updated successfully")
+    }
+}
+
+// remove dependencies from cli
+func handleRemove(directory string, args []string, all bool) {
+    log.Norm.Yellow(true, "Removing dependencies")
+
+    // read wio.yml file. We gonna use dependencies tag so it does not matter if this is app or pkg
+    pkgConfig := &types.PkgConfig{}
+
+    commands.RecordError(io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig), "")
+
+    changed := false
+
+    if len(pkgConfig.DependenciesTag) == 0 {
+        log.Norm.Cyan(true, "project has No dependencies")
+    } else if all {
+        pkgConfig.DependenciesTag = make(map[string]*types.DependencyTag)
+
+        log.Norm.Cyan(true, "deleted All the dependencies")
+        changed = true
+    } else {
+        for _, depName := range args {
+            // check if this dependency exists and check it's version
+            if _, ok := pkgConfig.DependenciesTag[depName]; ok {
+                delete(pkgConfig.DependenciesTag, depName)
+
+                log.Norm.Cyan(true, "deleted "+depName)
+                changed = true
+            } else {
+                log.Norm.Cyan(true, "no such dependency of name: \""+depName+"\", skipping!")
+            }
+        }
+    }
+
+    if !changed {
+        log.Norm.Yellow(true, "Dependencies remained unchanged!")
+    } else {
+        // check if the configuration is app
+        if data, err := io.NormalIO.ReadFile(directory + io.Sep + "wio.yml"); err != nil {
+            commands.RecordError(err, "")
+        } else {
+            // if there is "app:" tag use app configuration
+            if strings.Contains(string(data), "app:") {
+                appConfig := &types.AppConfig{}
+
+                if err = io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", appConfig); err != nil {
+                    commands.RecordError(err, "")
+                }
+
+                appConfig.DependenciesTag = pkgConfig.DependenciesTag
+
+                commands.RecordError(utils.PrettyPrintConfig(appConfig, directory+io.Sep+"wio.yml"), "")
+            } else {
+                commands.RecordError(utils.PrettyPrintConfig(pkgConfig, directory+io.Sep+"wio.yml"), "")
+            }
+        }
+
+        log.Norm.Yellow(true, "Provided dependencies removed successfully")
+    }
+}
+
+// list all the project dependencies
+func handleList(directory string) {
+    // read wio.yml file. We gonna use dependencies tag so it does not matter if this is app or pkg
+    pkgConfig := &types.PkgConfig{}
+
+    commands.RecordError(io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig), "")
+
+    if len(pkgConfig.DependenciesTag) == 0 {
+        log.Norm.Yellow(true, "This project has no dependencies")
+    } else {
+        log.Norm.Yellow(true, "Project dependencies: ")
+        for key, value := range pkgConfig.DependenciesTag {
+            if value.Vendor {
+                log.Norm.Cyan(false, "vendor: ")
+                log.Norm.Cyan(true, key)
+            } else {
+                log.Norm.Cyan(false, "remote: ")
+                log.Norm.Cyan(true, key+"@"+value.Version)
+            }
+        }
+    }
+}
+
+// provide information about one individual package
+func handleInfo(directory string, depName string) {
+    // read wio.yml file. We gonna use dependencies tag so it does not matter if this is app or pkg
+    pkgConfig := &types.PkgConfig{}
+
+    commands.RecordError(io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig), "")
+
+    if len(pkgConfig.DependenciesTag) == 0 {
+        log.Norm.Yellow(true, "This project has no dependencies")
+    } else {
+        if val, ok := pkgConfig.DependenciesTag[depName]; ok {
+            log.Norm.Yellow(true, depName+": ")
+            log.Norm.Cyan(true, "is vendor: "+strconv.FormatBool(val.Vendor))
+
+            if !val.Vendor {
+                log.Norm.Cyan(true, "version: "+val.Version)
+            }
+            log.Norm.Cyan(true, "compile flags: ["+strings.Join(val.Compile_flags, ",")+"]")
+        }
+    }
 }
 
 func handleUpdate(directory string) {

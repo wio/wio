@@ -154,19 +154,15 @@ func (create Create) updateProject(createPacket *PacketCreate) {
 func (create Create) updateProjectSetup(createPacket *PacketCreate) {
     log.Norm.Cyan(false, "updating project files ... ")
 
-    if createPacket.ide == "clion" {
-        // copy gitignore file
-        io.AssetIO.CopyFile("templates/gitignore/.gitignore-clion", createPacket.directory+"/.gitignore",
-            false)
-    } else {
-        // copy gitignore file
-        io.AssetIO.CopyFile("templates/gitignore/.gitignore-general", createPacket.directory+"/.gitignore",
-            false)
-    }
+    commands.RecordError(copyTemplates(createPacket.directory, create.Type, createPacket.ide,
+        "config"+io.Sep+"update_paths.json"), "failure")
 
     // get default configuration values
     defaults := types.DConfig{}
     commands.RecordError(io.AssetIO.ParseYml("config/defaults.yml", &defaults), "failure")
+
+    // we have to copy README file
+    var readmeStr string
 
     var config interface{}
 
@@ -188,6 +184,9 @@ func (create Create) updateProjectSetup(createPacket *PacketCreate) {
             &projectConfig.MainTag.Platform, &defaults)
 
         config = projectConfig
+
+        // update readme app content
+        readmeStr = getReadmeApp(createPacket.name, projectConfig.MainTag.Platform, projectConfig.MainTag.Framework)
     } else {
         projectConfig := &types.PkgConfig{}
 
@@ -218,10 +217,28 @@ func (create Create) updateProjectSetup(createPacket *PacketCreate) {
             &projectConfig.MainTag.Platform, &defaults)
 
         config = projectConfig
+
+        // update readme pkg content
+        readmeStr = getReadmePkg(createPacket.name, projectConfig.MainTag.Platform,
+            projectConfig.MainTag.Framework, projectConfig.MainTag.Board)
     }
 
     commands.RecordError(utils.PrettyPrintConfig(config, createPacket.directory+io.Sep+"wio.yml"),
         "failure")
+
+    if utils.PathExists(createPacket.directory + io.Sep + "README.md") {
+        content, err := io.NormalIO.ReadFile(createPacket.directory + io.Sep + "README.md")
+        commands.RecordError(err, "failure")
+
+        // only write if README is empty
+        if string(content) == "" || string(content) == "\n" {
+            // write readme file
+            io.NormalIO.WriteFile(createPacket.directory+io.Sep+"README.md", []byte(readmeStr))
+        }
+    } else {
+        // readme does not exist so write it
+        io.NormalIO.WriteFile(createPacket.directory+io.Sep+"README.md", []byte(readmeStr))
+    }
 
     log.Norm.Green(true, "success")
 }
@@ -261,6 +278,9 @@ func (create Create) initialProjectSetup(createPacket *PacketCreate) {
     commands.RecordError(copyTemplates(createPacket.directory, create.Type, createPacket.ide,
         "config"+io.Sep+"create_paths.json"), "failure")
 
+    // we have to copy README file
+    var readmeStr string
+
     var config interface{}
 
     if create.Type == APP {
@@ -279,6 +299,9 @@ func (create Create) initialProjectSetup(createPacket *PacketCreate) {
         create.handleTargets(&targetsTag, createPacket.board)
 
         config = projectConfig
+
+        // update readme app content
+        readmeStr = getReadmeApp(createPacket.name, projectConfig.MainTag.Platform, projectConfig.MainTag.Framework)
     } else {
         projectConfig := &types.PkgConfig{}
         defaultTarget = "tests"
@@ -298,12 +321,46 @@ func (create Create) initialProjectSetup(createPacket *PacketCreate) {
         create.handleTargets(&targetsTag, createPacket.board)
 
         config = projectConfig
+
+        // update readme pkg content
+        readmeStr = getReadmePkg(createPacket.name, projectConfig.MainTag.Platform,
+            projectConfig.MainTag.Framework, projectConfig.MainTag.Board)
     }
 
     commands.RecordError(utils.PrettyPrintConfig(config, createPacket.directory+io.Sep+"wio.yml"),
         "failure")
 
+    // write readme file
+    io.NormalIO.WriteFile(createPacket.directory+io.Sep+"README.md", []byte(readmeStr))
+
     log.Norm.Green(true, "success")
+}
+
+// returns README string for wio application
+func getReadmeApp(name string, platform string, framework string) (string) {
+    readmeContent, err := io.AssetIO.ReadFile("templates/readme/APP_README.md")
+    commands.RecordError(err, "failure")
+
+    readmeStr := strings.Replace(string(readmeContent), "{{PROJECT_NAME}}", name, -1)
+    readmeStr = strings.Replace(readmeStr, "{{PLATFORM}}", strings.ToUpper(platform), -1)
+    readmeStr = strings.Replace(readmeStr, "{{FRAMEWORK}}", framework, -1)
+
+    return readmeStr
+}
+
+// returns README string for wio package
+func getReadmePkg(name string, platform string, framework []string, board []string) (string) {
+    readmeContent, err := io.AssetIO.ReadFile("templates/readme/PKG_README.md")
+    commands.RecordError(err, "failure")
+
+    readmeStr := strings.Replace(string(readmeContent), "{{PROJECT_NAME}}", name, -1)
+    readmeStr = strings.Replace(readmeStr, "{{PLATFORM}}", strings.ToUpper(platform), -1)
+    readmeStr = strings.Replace(readmeStr, "{{FRAMEWORKS}}",
+        strings.Join(framework, ","), -1)
+    readmeStr = strings.Replace(readmeStr, "{{BOARDS}}",
+        strings.Join(board, ","), -1)
+
+    return readmeStr
 }
 
 /// This method handles the targets that a user can create and what these targets are
@@ -311,6 +368,10 @@ func (create Create) initialProjectSetup(createPacket *PacketCreate) {
 /// it will keep the targets that are already there
 func (create Create) handleTargets(targetsTag *types.TargetsTag, board string) {
     defaultTarget := &types.TargetTag{}
+
+    if targetsTag.Targets == nil {
+        targetsTag.Targets = make(map[string]*types.TargetTag)
+    }
 
     if target, ok := targetsTag.Targets[targetsTag.Default_target]; ok {
         defaultTarget.Board = target.Board
@@ -331,11 +392,11 @@ func (create Create) postPrint(createPacket *PacketCreate, update bool) {
         log.Norm.Yellow(true, "Project Update finished!! Summary: ")
     }
 
-    log.Norm.Cyan(false, "Project Name: ")
+    log.Norm.Cyan(false, "project name: ")
     log.Norm.Cyan(true, createPacket.name)
-    log.Norm.Cyan(false, "Project Type: ")
+    log.Norm.Cyan(false, "project type: ")
     log.Norm.Cyan(true, create.Type)
-    log.Norm.Cyan(false, "Project Path: ")
+    log.Norm.Cyan(false, "project path: ")
     log.Norm.Cyan(true, createPacket.directory)
 
     log.Norm.Yellow(true, "Check following commands:")
@@ -403,6 +464,18 @@ func (create Create) checkUpdate(directory string) (bool) {
             config := &types.AppConfig{}
             if err := io.NormalIO.ParseYml(wioPath, config); err != nil {
                 // can't parse wio.yml file for app type
+
+                // check if it contains "app:" tag
+                if appContent, err := io.NormalIO.ReadFile(wioPath); err != nil {
+                    return false
+                } else {
+                    // if it does make a new one and return true
+                    if strings.Contains(string(appContent), "app:") {
+                        commands.RecordError(os.Remove(wioPath), "")
+                        return true
+                    }
+                }
+
                 return false
             } else if config.MainTag.Name == "" {
                 // type of the project is wrong compared to the one specified
@@ -414,7 +487,19 @@ func (create Create) checkUpdate(directory string) (bool) {
         } else {
             config := &types.PkgConfig{}
             if err := io.NormalIO.ParseYml(wioPath, config); err != nil {
-                // can't parse wio.yml file for lib type
+                // can't parse wio.yml file for pkg type
+
+                // check if it contains "pkg:" tag
+                if pkgContent, err := io.NormalIO.ReadFile(wioPath); err != nil {
+                    return false
+                } else {
+                    // if it does make a new one and return true
+                    if strings.Contains(string(pkgContent), "pkg:") {
+                        commands.RecordError(os.Remove(wioPath), "")
+                        return true
+                    }
+                }
+
                 return false
             } else if config.MainTag.Name == "" {
                 // type of the project is wrong compared to the one specified
