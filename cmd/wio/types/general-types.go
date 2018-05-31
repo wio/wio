@@ -46,6 +46,7 @@ type PkgTag struct {
     Version       string
     Author        string
     Contributors  []string
+    Organization  string
     Keywords      []string
     License       string
     Platform      string

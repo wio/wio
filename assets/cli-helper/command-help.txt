@@ -1,0 +1,14 @@
+{{.Usage}}
+
+Usage: {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Category}}
+
+Category:
+   {{.Category}}{{end}}{{if .Description}}
+
+Description:
+   {{.Description}}{{end}}{{if .VisibleFlags}}
+
+Available commands:
+   {{range .VisibleFlags}}{{.}}
+   {{end}}{{end}}
+Run "wio help" to see global options.

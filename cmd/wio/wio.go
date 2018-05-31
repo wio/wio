@@ -20,85 +20,30 @@ import (
     "wio/cmd/wio/commands/build"
     "wio/cmd/wio/commands/clean"
     "wio/cmd/wio/commands/run"
+    "path/filepath"
+    "wio/cmd/wio/utils"
 )
 
 func main() {
-    // override help template
-    cli.AppHelpTemplate =
-        `Wio a simplified development process for embedded applications.
-Create, Build, Test, and Upload AVR projects from Commandline.
+    // read help templates
+    appHelpText, err := io.AssetIO.ReadFile("cli-helper/app-help.txt")
+    commands.RecordError(err, "")
 
-Common Commands:
-    
-    wio create <project type> [options] <output directory>
-        Create a new Wio project in the specified directory.
-    
-    wio build [options]
-        Build the Wio project based on all the configurations defined
-    
-    wio upload [options]
-        Upload the Wio project to an attached embedded device
-    
-    wio run [options]
-        Builds, Tests, and Uploads the Wio projects
+    commandHelpText, err := io.AssetIO.ReadFile("cli-helper/command-help.txt")
+    commands.RecordError(err, "")
 
-Usage: {{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}
-   {{if len .Authors}}
-Global options:
-   {{range .VisibleFlags}}{{.}}
-   {{end}}{{end}}{{if .Copyright }}
-Available commands:
-{{range .Commands}}{{if not .HideHelp}}   {{join .Names ", "}}{{ "\t"}}{{.Usage}}{{ "\n" }}{{end}}{{end}}{{end}}{{if .VisibleFlags}}
-Global options:
-   {{range $index, $option := .VisibleFlags}}{{if $index}}
-   {{end}}{{$option}}{{end}}{{end}}{{if .Copyright}}
+    subCommandHelpText, err := io.AssetIO.ReadFile("cli-helper/subcommand-help.txt")
+    commands.RecordError(err, "")
 
-Copyright:
-   {{.Copyright}}
-   {{end}}{{if .Version}}
-Vesrion:
-   {{.Version}}
-   {{end}}
-Run "wio command <help>" for more information about a command.
-`
+    // override help templates
+    cli.AppHelpTemplate = string(appHelpText)
+    cli.CommandHelpTemplate = string(commandHelpText)
+    cli.SubcommandHelpTemplate = string(subCommandHelpText)
 
-    cli.CommandHelpTemplate =
-        `{{.Usage}}
-
-Usage: {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Category}}
-
-Category:
-   {{.Category}}{{end}}{{if .Description}}
-
-Description:
-   {{.Description}}{{end}}{{if .VisibleFlags}}
-
-Available commands:
-   {{range .VisibleFlags}}{{.}}
-   {{end}}{{end}}
-Run "wio help" to see global options.
-`
-
-    cli.SubcommandHelpTemplate =
-        `{{.Usage}}
-
-Usage: {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
-
-Available commands:{{range .VisibleCategories}}{{if .Name}}
-   {{.Name}}:{{end}}{{range .VisibleCommands}}
-     {{join .Names ", "}}{{"\t"}}{{.Usage}}{{end}}
-{{end}}{{if .VisibleFlags}}
-Options:
-   {{range .VisibleFlags}}{{.}}
-   {{end}}{{end}}
-Run "wio help" to see global options.
-`
     // get default configuration values
     defaults := types.DConfig{}
-    err := io.AssetIO.ParseYml("config/defaults.yml", &defaults)
-    if err != nil {
-        commands.RecordError(err, "")
-    }
+    err = io.AssetIO.ParseYml("config/defaults.yml", &defaults)
+    commands.RecordError(err, "")
 
     // command that will be executed
     var command commands.Command
@@ -177,6 +122,9 @@ Run "wio help" to see global options.
                         cli.StringFlag{Name: "board",
                             Usage: "Board being used for this project. This will use this board for the update",
                             Value: defaults.Board},
+                        cli.StringFlag{Name: "ide",
+                            Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
+                            Value: defaults.Ide},
                         cli.BoolFlag{Name: "verbose",
                             Usage: "Turns verbose mode on to show detailed errors and commands being executed",
                         },
@@ -236,6 +184,7 @@ Run "wio help" to see global options.
                 },
             },
             Action: func(c *cli.Context) {
+                validateWioProject(c.String("dir"))
                 command = build.Build{Context: c}
             },
         },
@@ -257,6 +206,7 @@ Run "wio help" to see global options.
                 },
             },
             Action: func(c *cli.Context) {
+                validateWioProject(c.String("dir"))
                 command = clean.Clean{Context: c}
             },
         },
@@ -285,6 +235,7 @@ Run "wio help" to see global options.
                 },
             },
             Action: func(c *cli.Context) {
+                validateWioProject(c.String("dir"))
                 command = run.Run{Context: c}
             },
         },
@@ -364,6 +315,84 @@ Run "wio help" to see global options.
             Usage: "Package manager for Wio projects.",
             Subcommands: cli.Commands{
                 cli.Command{
+                    Name:      "add",
+                    Usage:     "Add/Update dependencies.",
+                    UsageText: "wio pac add [command options]",
+                    Flags: []cli.Flag{
+                        cli.BoolFlag{Name: "vendor",
+                            Usage: "Adds the dependency as vendor",
+                        },
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
+                        command = pac.Pac{Context: c, Type: pac.ADD}
+                    },
+                },
+                cli.Command{
+                    Name:      "rm",
+                    Usage:     "Remove dependencies.",
+                    UsageText: "wio pac rm [command options]",
+                    Flags: []cli.Flag{
+                        cli.BoolFlag{Name: "A",
+                            Usage: "Delete all the dependencies",
+                        },
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
+                        command = pac.Pac{Context: c, Type: pac.RM}
+                    },
+                },
+                cli.Command{
+                    Name:      "list",
+                    Usage:     "List all the dependencies",
+                    UsageText: "wio pac list [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
+                        command = pac.Pac{Context: c, Type: pac.LIST}
+                    },
+                },
+                cli.Command{
+                    Name:      "info",
+                    Usage:     "Get information about a dependency being used",
+                    UsageText: "wio pac info [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
+                        command = pac.Pac{Context: c, Type: pac.INFO}
+                    },
+                },
+                cli.Command{
                     Name:      "publish",
                     Usage:     "Publish the wio package to the package manager site (npm site)",
                     UsageText: "wio pac publish [command options]",
@@ -377,6 +406,7 @@ Run "wio help" to see global options.
                         },
                     },
                     Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
                         command = pac.Pac{Context: c, Type: pac.PUBLISH}
                     },
                 },
@@ -397,9 +427,11 @@ Run "wio help" to see global options.
                         },
                     },
                     Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
                         command = pac.Pac{Context: c, Type: pac.GET}
                     },
                 },
+                /*
                 cli.Command{
                     Name:      "update",
                     Usage:     "Updates all the packages mentioned in wio.yml file and vendor folder.",
@@ -437,7 +469,7 @@ Run "wio help" to see global options.
                     Action: func(c *cli.Context) {
                         command = pac.Pac{Context: c, Type: pac.COLLECT}
                     },
-                },
+                },*/
             },
         },
     }
@@ -459,6 +491,21 @@ Run "wio help" to see global options.
         }
 
         command.Execute()
+    }
+}
+
+func validateWioProject(directory string) {
+    directory, err := filepath.Abs(directory)
+    commands.RecordError(err, "")
+
+    if !utils.PathExists(directory) {
+        log.Norm.Yellow(true, directory+" : no such path exists")
+        os.Exit(3)
+    }
+
+    if !utils.PathExists(directory + io.Sep + "wio.yml") {
+        log.Norm.Yellow(true, "Not a valid wio project: wio.yml file missing")
+        os.Exit(3)
     }
 }
 

@@ -113,7 +113,6 @@ func parsePackage(rootPackagesPath string, currPackagePath string, depTree *pars
         }
     }
 
-
     if parentDependencyData != nil {
         depTree.Config.Compile_flags = utils.AppendIfMissing(parentDependencyData.Compile_flags,
             depTree.Config.Compile_flags)
@@ -136,7 +135,7 @@ func parsePackages(packagesPath string, depTrees map[string]*parsers.DependencyT
         for depName, depValue := range dependencies {
             // only parse vendor packages
             if vendor && depValue.Vendor {
-               continue
+                continue
             }
 
             depPath := packagesPath + io.Sep + depName
@@ -169,7 +168,6 @@ func createDependencyTree(projectPath string, dependencies types.DependenciesTag
     wioPath := projectPath + io.Sep + ".wio"
     librariesLocalPath := projectPath + io.Sep + vendorPkgFolder
     librariesRemotePath := wioPath + io.Sep + remotePkgFolder
-
 
     dependencyTrees := make(map[string]*parsers.DependencyTree, 0)
 

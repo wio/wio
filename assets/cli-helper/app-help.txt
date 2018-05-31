@@ -1,0 +1,35 @@
+Wio a simplified development process for embedded applications.
+Create, Build, Test, and Upload AVR projects from Commandline.
+
+Common Commands:
+
+    wio create <project type> [options] <output directory>
+        Create a new Wio project in the specified directory.
+
+    wio build [options]
+        Build the Wio project based on all the configurations defined
+
+    wio upload [options]
+        Upload the Wio project to an attached embedded device
+
+    wio run [options]
+        Builds, Tests, and Uploads the Wio projects
+
+Usage: {{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}
+   {{if len .Authors}}
+Global options:
+   {{range .VisibleFlags}}{{.}}
+   {{end}}{{end}}{{if .Copyright }}
+Available commands:
+{{range .Commands}}{{if not .HideHelp}}   {{join .Names ", "}}{{ "\t"}}{{.Usage}}{{ "\n" }}{{end}}{{end}}{{end}}{{if .VisibleFlags}}
+Global options:
+   {{range $index, $option := .VisibleFlags}}{{if $index}}
+   {{end}}{{$option}}{{end}}{{end}}{{if .Copyright}}
+
+Copyright:
+   {{.Copyright}}
+   {{end}}{{if .Version}}
+Vesrion:
+   {{.Version}}
+   {{end}}
+Run "wio command <help>" for more information about a command.

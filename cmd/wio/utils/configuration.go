@@ -49,6 +49,7 @@ func PrettyPrintConfig(projectConfig interface{}, filePath string) (error) {
 
     beautify := false
     first := false
+    create := true
 
     for line := range currentString {
         currLine := currentString[line]
@@ -57,10 +58,12 @@ func PrettyPrintConfig(projectConfig interface{}, filePath string) (error) {
             continue
         }
 
-        if strings.Contains(currLine, "app:") {
+        if strings.Contains(currLine, "app:") && create {
             finalString += string(appInfoData) + "\n"
-        } else if strings.Contains(currLine, "pkg:") {
+            create = false
+        } else if strings.Contains(currLine, "pkg:") && create {
             finalString += string(pkgInfoData) + "\n"
+            create = false
         } else if strings.Contains(currLine, "targets:") {
             finalString += "\n" + string(targetsInfoData) + "\n"
         } else if strings.Contains(currLine, "create:") {
