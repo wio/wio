@@ -20,6 +20,8 @@ import (
     "wio/cmd/wio/commands/build"
     "wio/cmd/wio/commands/clean"
     "wio/cmd/wio/commands/run"
+    "path/filepath"
+    "wio/cmd/wio/utils"
 )
 
 func main() {
@@ -120,6 +122,9 @@ func main() {
                         cli.StringFlag{Name: "board",
                             Usage: "Board being used for this project. This will use this board for the update",
                             Value: defaults.Board},
+                        cli.StringFlag{Name: "ide",
+                            Usage: "Creates the project for a specified IDE (CLion, Eclipse, VS Code)",
+                            Value: defaults.Ide},
                         cli.BoolFlag{Name: "verbose",
                             Usage: "Turns verbose mode on to show detailed errors and commands being executed",
                         },
@@ -179,6 +184,7 @@ func main() {
                 },
             },
             Action: func(c *cli.Context) {
+                validateWioProject(c.String("dir"))
                 command = build.Build{Context: c}
             },
         },
@@ -200,6 +206,7 @@ func main() {
                 },
             },
             Action: func(c *cli.Context) {
+                validateWioProject(c.String("dir"))
                 command = clean.Clean{Context: c}
             },
         },
@@ -228,6 +235,7 @@ func main() {
                 },
             },
             Action: func(c *cli.Context) {
+                validateWioProject(c.String("dir"))
                 command = run.Run{Context: c}
             },
         },
@@ -311,6 +319,9 @@ func main() {
                     Usage:     "Add/Update dependencies.",
                     UsageText: "wio pac add [command options]",
                     Flags: []cli.Flag{
+                        cli.BoolFlag{Name: "vendor",
+                            Usage: "Adds the dependency as vendor",
+                        },
                         cli.StringFlag{Name: "dir",
                             Usage: "Directory for the project (default: current working directory)",
                             Value: getCurrDir(),
@@ -320,7 +331,65 @@ func main() {
                         },
                     },
                     Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
                         command = pac.Pac{Context: c, Type: pac.ADD}
+                    },
+                },
+                cli.Command{
+                    Name:      "rm",
+                    Usage:     "Remove dependencies.",
+                    UsageText: "wio pac rm [command options]",
+                    Flags: []cli.Flag{
+                        cli.BoolFlag{Name: "A",
+                            Usage: "Delete all the dependencies",
+                        },
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
+                        command = pac.Pac{Context: c, Type: pac.RM}
+                    },
+                },
+                cli.Command{
+                    Name:      "list",
+                    Usage:     "List all the dependencies",
+                    UsageText: "wio pac list [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
+                        command = pac.Pac{Context: c, Type: pac.LIST}
+                    },
+                },
+                cli.Command{
+                    Name:      "info",
+                    Usage:     "Get information about a dependency being used",
+                    UsageText: "wio pac info [command options]",
+                    Flags: []cli.Flag{
+                        cli.StringFlag{Name: "dir",
+                            Usage: "Directory for the project (default: current working directory)",
+                            Value: getCurrDir(),
+                        },
+                        cli.BoolFlag{Name: "verbose",
+                            Usage: "Turns verbose mode on to show detailed errors and commands being executed.",
+                        },
+                    },
+                    Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
+                        command = pac.Pac{Context: c, Type: pac.INFO}
                     },
                 },
                 cli.Command{
@@ -337,6 +406,7 @@ func main() {
                         },
                     },
                     Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
                         command = pac.Pac{Context: c, Type: pac.PUBLISH}
                     },
                 },
@@ -357,6 +427,7 @@ func main() {
                         },
                     },
                     Action: func(c *cli.Context) {
+                        validateWioProject(c.String("dir"))
                         command = pac.Pac{Context: c, Type: pac.GET}
                     },
                 },
@@ -420,6 +491,21 @@ func main() {
         }
 
         command.Execute()
+    }
+}
+
+func validateWioProject(directory string) {
+    directory, err := filepath.Abs(directory)
+    commands.RecordError(err, "")
+
+    if !utils.PathExists(directory) {
+        log.Norm.Yellow(true, directory+" : no such path exists")
+        os.Exit(3)
+    }
+
+    if !utils.PathExists(directory + io.Sep + "wio.yml") {
+        log.Norm.Yellow(true, "Not a valid wio project: wio.yml file missing")
+        os.Exit(3)
     }
 }
 

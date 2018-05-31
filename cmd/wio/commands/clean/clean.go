@@ -66,7 +66,7 @@ func RunClean(directoryCli string, targetCli string, targetProvided bool) {
             }
 
         } else {
-            log.Norm.Cyan(false, "No build files exists for target: \""+targetToCleanName+"\" ... ")
+            log.Norm.Cyan(false, "no build files exists for target: \""+targetToCleanName+"\" ... ")
             log.Norm.Green(true, "skipped")
         }
     }

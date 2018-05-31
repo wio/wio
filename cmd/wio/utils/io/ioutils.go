@@ -40,7 +40,7 @@ func (normalHandler NormalHandler) GetRoot() (string, error) {
         return "", err
     }
 
-    if fileInfo.Mode() & os.ModeSymlink != 0 {
+    if fileInfo.Mode()&os.ModeSymlink != 0 {
         newPath, err := os.Readlink(ex)
         if err != nil {
             return "", nil

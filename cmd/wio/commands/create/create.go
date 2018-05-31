@@ -233,11 +233,11 @@ func (create Create) updateProjectSetup(createPacket *PacketCreate) {
         // only write if README is empty
         if string(content) == "" || string(content) == "\n" {
             // write readme file
-            io.NormalIO.WriteFile(createPacket.directory + io.Sep + "README.md", []byte(readmeStr))
+            io.NormalIO.WriteFile(createPacket.directory+io.Sep+"README.md", []byte(readmeStr))
         }
     } else {
         // readme does not exist so write it
-        io.NormalIO.WriteFile(createPacket.directory + io.Sep + "README.md", []byte(readmeStr))
+        io.NormalIO.WriteFile(createPacket.directory+io.Sep+"README.md", []byte(readmeStr))
     }
 
     log.Norm.Green(true, "success")
@@ -331,7 +331,7 @@ func (create Create) initialProjectSetup(createPacket *PacketCreate) {
         "failure")
 
     // write readme file
-    io.NormalIO.WriteFile(createPacket.directory + io.Sep + "README.md", []byte(readmeStr))
+    io.NormalIO.WriteFile(createPacket.directory+io.Sep+"README.md", []byte(readmeStr))
 
     log.Norm.Green(true, "success")
 }
@@ -392,11 +392,11 @@ func (create Create) postPrint(createPacket *PacketCreate, update bool) {
         log.Norm.Yellow(true, "Project Update finished!! Summary: ")
     }
 
-    log.Norm.Cyan(false, "Project Name: ")
+    log.Norm.Cyan(false, "project name: ")
     log.Norm.Cyan(true, createPacket.name)
-    log.Norm.Cyan(false, "Project Type: ")
+    log.Norm.Cyan(false, "project type: ")
     log.Norm.Cyan(true, create.Type)
-    log.Norm.Cyan(false, "Project Path: ")
+    log.Norm.Cyan(false, "project path: ")
     log.Norm.Cyan(true, createPacket.directory)
 
     log.Norm.Yellow(true, "Check following commands:")

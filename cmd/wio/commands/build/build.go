@@ -119,7 +119,7 @@ func RunBuild(directoryCli string, targetCli string, cleanCli bool, port string)
 func createTarget(name string, directory string, board string, port string, framework string, target string,
     targetFlags []string, pkgFlags []string, dependencies types.DependenciesTag) {
 
-    log.Norm.Cyan(false, "Scanning dependency tree for changes ... ")
+    log.Norm.Cyan(false, "scanning dependency tree for changes ... ")
 
     // parse dependencies and create a dependencies.cmake file
     dependencyTree, err := cmake.ParseDepsAndCreateCMake(directory, dependencies)
