@@ -1,12 +1,13 @@
 lib:
-  name: name
-  description: a wio project
+  name:
+  description:
   url:
   version: 0.0.1
   author:
   contributors: []
+  organization:
   license:
-  platform: platform
+  platform:
   framework: []
   keywords: []
   board: [ALL]
@@ -17,5 +18,5 @@ targets:
   default: test
   created:
     test:
-      board: board
+      board:
       compile_flags: []

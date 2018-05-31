@@ -1,12 +1,12 @@
 app:
-  name: name
-  ide: ide
-  platform: platform
-  framework: framework
+  name:
+  ide:
+  platform:
+  framework:
 
 targets:
   default: main
   created:
     main:
-      board: board
+      board:
       compile_flags: []

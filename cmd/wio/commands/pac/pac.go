@@ -24,6 +24,7 @@ import (
 )
 
 const (
+    ADD = "add"
     PUBLISH = "publish"
     GET     = "get"
     UPDATE  = "update"
@@ -47,6 +48,8 @@ func (pac Pac) Execute() {
     commands.RecordError(err, "")
 
     switch pac.Type {
+    case ADD:
+        handleAdd(directory, pac.Context.Args())
     case PUBLISH:
         handlePublish(directory)
     case GET:
@@ -201,8 +204,8 @@ func dependencyCheck(directory string, dependencyName string, dependencyVersion 
 
     // dependency does not exist
     if resp.StatusCode == 404 {
-        commands.RecordError(errors.New("dependency: \""+dependencyName+"\" package does not exist"),
-            "failure")
+        log.Verb.Verbose(true, "failure")
+        commands.RecordError(errors.New("dependency: \""+dependencyName+"\" package does not exist"), "")
     }
     resp.Body.Close()
 
@@ -317,6 +320,56 @@ func handleGet(directory string, clean bool) {
     }
 
     log.Norm.Yellow(true, "All packages pulled successfully")
+}
+
+// add and update dependencies from cli
+func handleAdd(directory string, args []string) {
+    log.Norm.Yellow(true, "Adding/Updating dependencies")
+
+    // read wio.yml file. We gonna use dependencies tag so it does not matter if this is app or pkg
+    pkgConfig := &types.PkgConfig{}
+
+    io.NormalIO.ParseYml(directory+io.Sep+"wio.yml", pkgConfig)
+
+    changed := false
+
+    for _, addArg := range args {
+        newDependency := strings.Split(addArg, "@")
+
+        depName := newDependency[0]
+        depVersion := "latest"
+
+        if len(newDependency) > 1 {
+            depVersion = newDependency[1]
+        }
+
+        // check if this dependency exists and check it's version
+        if val, ok := pkgConfig.DependenciesTag[depName]; ok {
+            // change the version since it already exists
+            if val.Version != depVersion {
+                log.Norm.Cyan(true, "Updated " + depName + "@" + val.Version + "   ->   " +  depName + "@" +
+                    depVersion)
+
+                pkgConfig.DependenciesTag[depName].Version = depVersion
+                changed = true
+            } else {
+                log.Norm.Cyan(true, "Unchanged " + depName + "@" + val.Version)
+            }
+        } else {
+            log.Norm.Cyan(true, "Added " + depName + "@" + depVersion)
+
+            pkgConfig.DependenciesTag[depName] = &types.DependencyTag{Version: depVersion}
+            changed = true
+        }
+    }
+
+    if !changed {
+        log.Norm.Yellow(true,"Dependencies remained unchanged!")
+    } else {
+        io.NormalIO.WriteYml(directory+io.Sep+"wio.yml", pkgConfig)
+
+        log.Norm.Yellow(true,"Provides dependencies added/updated successfully")
+    }
 }
 
 func handleUpdate(directory string) {
