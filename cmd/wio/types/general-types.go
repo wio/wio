@@ -58,11 +58,11 @@ type AppTargetsTag struct {
     Targets       map[string]AppTargetTag `yaml:"create"`
 }
 
-func (appTargetsTag AppTargetsTag) GetDefaultTarget() (string) {
+func (appTargetsTag AppTargetsTag) GetDefaultTarget() string {
     return appTargetsTag.DefaultTarget
 }
 
-func (appTargetsTag AppTargetsTag) GetTargets() (map[string]Target) {
+func (appTargetsTag AppTargetsTag) GetTargets() map[string]Target {
     targets := make(map[string]Target)
 
     for key, val := range appTargetsTag.Targets {
@@ -100,11 +100,11 @@ type PkgTargetsTag struct {
     Targets       map[string]PkgTargetTag `yaml:"create"`
 }
 
-func (pkgTargetsTag PkgTargetsTag) GetDefaultTarget() (string) {
+func (pkgTargetsTag PkgTargetsTag) GetDefaultTarget() string {
     return pkgTargetsTag.DefaultTarget
 }
 
-func (pkgTargetsTag PkgTargetsTag) GetTargets() (map[string]Target) {
+func (pkgTargetsTag PkgTargetsTag) GetTargets() map[string]Target {
     targets := make(map[string]Target)
 
     for key, val := range pkgTargetsTag.Targets {
