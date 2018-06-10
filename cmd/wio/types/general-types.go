@@ -36,8 +36,9 @@ type Targets interface {
 
 // Structure to handle individual target inside targets for project of app type
 type AppTargetTag struct {
-    Board              string
-    TargetCompileFlags []string `yaml:"compile_flags"`
+    Board       string
+    GlobalFlags []string `yaml:"global_flags"`
+    TargetFlags []string `yaml:"target_flags"`
 }
 
 func (appTargetTag AppTargetTag) GetBoard() string {
@@ -46,7 +47,8 @@ func (appTargetTag AppTargetTag) GetBoard() string {
 
 func (appTargetTag AppTargetTag) GetFlags() map[string][]string {
     flags := make(map[string][]string)
-    flags["target_compile_flags"] = appTargetTag.TargetCompileFlags
+    flags["target_flags"] = appTargetTag.TargetFlags
+    flags["global_flags"] = appTargetTag.GlobalFlags
     return flags
 }
 
@@ -74,9 +76,10 @@ func (appTargetsTag AppTargetsTag) GetTargets() (map[string]Target) {
 
 // Structure to handle individual target inside targets for project of pkg type
 type PkgTargetTag struct {
-    Board              string
-    TargetCompileFlags []string `yaml:"target_compile_flags"`
-    PkgCompileFlags    []string `yaml:"pkg_compile_flags"`
+    Board       string
+    TargetFlags []string `yaml:"target_flags"`
+    GlobalFlags []string `yaml:"global_flags"`
+    PkgFlags    []string `yaml:"pkg_flags"`
 }
 
 func (pkgTargetTag PkgTargetTag) GetBoard() string {
@@ -85,8 +88,9 @@ func (pkgTargetTag PkgTargetTag) GetBoard() string {
 
 func (pkgTargetTag PkgTargetTag) GetFlags() map[string][]string {
     flags := make(map[string][]string)
-    flags["target_compile_flags"] = pkgTargetTag.TargetCompileFlags
-    flags["pkg_compile_flags"] = pkgTargetTag.PkgCompileFlags
+    flags["target_flags"] = pkgTargetTag.TargetFlags
+    flags["pkg_flags"] = pkgTargetTag.PkgFlags
+    flags["global_flags"] = pkgTargetTag.GlobalFlags
     return flags
 }
 
@@ -114,9 +118,9 @@ func (pkgTargetsTag PkgTargetsTag) GetTargets() (map[string]Target) {
 
 // Structure to handle individual library inside libraries
 type DependencyTag struct {
-    Version      string
-    Vendor       bool
-    CompileFlags []string `yaml:"compile_flags"`
+    Version         string
+    Vendor          bool
+    DependencyFlags []string `yaml:"dependency_flags"`
 }
 
 // type for the libraries tag in the main wio.yml file
@@ -166,21 +170,25 @@ func (appTag AppTag) IsHeaderOnly() bool {
 
 // Structure to hold information about project type: lib
 type PkgTag struct {
-    Name         string
-    Description  string
-    Repository   string
-    Version      string
-    Author       string
-    Contributors []string
-    Organization string
-    Keywords     []string
-    License      string
-    HeaderOnly   bool     `yaml:"header_only"`
-    Platform     string
-    Framework    []string
-    Board        []string
-    CompileFlags []string `yaml:"compile_flags"`
-    Ide          string
+    Name                   string
+    Description            string
+    Repository             string
+    Version                string
+    Author                 string
+    Contributors           []string
+    Organization           string
+    Keywords               []string
+    License                string
+    HeaderOnly             bool     `yaml:"header_only"`
+    Platform               string
+    Framework              []string
+    Board                  []string
+    AllowOnlyGlobalFlags   bool     `yaml:"allow_only_global_flags"`
+    AllowOnlyRequiredFlags bool     `yaml:"allow_only_required_flags"`
+    GlobalFlags            []string `yaml:"global_flags"`
+    RequiredFlags          []string `yaml:"required_flags"`
+    IncludedFlags          []string `yaml:"included_flags"`
+    Ide                    string
 }
 
 func (pkgTag PkgTag) GetName() string {
