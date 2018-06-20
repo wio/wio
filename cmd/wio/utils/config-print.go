@@ -8,13 +8,18 @@
 package utils
 
 import (
+    "bufio"
     "gopkg.in/yaml.v2"
+    "regexp"
     "strings"
+    "wio/cmd/wio/errors"
+    "wio/cmd/wio/types"
     "wio/cmd/wio/utils/io"
+    "wio/cmd/wio/constants"
 )
 
-// Write configuration for the project with information on top and nice spacing
-func PrettyPrintConfigHelp(projectConfig interface{}, filePath string) error {
+// Write configuration with nice spacing and information
+func PrettyPrintConfig(projectConfig types.Config, filePath string, showHelp bool) error {
     appInfoPath := "templates" + io.Sep + "config" + io.Sep + "app-helper.txt"
     pkgInfoPath := "templates" + io.Sep + "config" + io.Sep + "pkg-helper.txt"
     targetsInfoPath := "templates" + io.Sep + "config" + io.Sep + "targets-helper.txt"
@@ -27,119 +32,123 @@ func PrettyPrintConfigHelp(projectConfig interface{}, filePath string) error {
     var dependenciesInfoData []byte
     var err error
 
-    // get data
-    if ymlData, err = yaml.Marshal(projectConfig); err != nil {
-        return err
-    }
     if appInfoData, err = io.AssetIO.ReadFile(appInfoPath); err != nil {
-        return err
+        return errors.ReadFileError{
+            FileName: appInfoPath,
+            Err:      err,
+        }
     }
     if pkgInfoData, err = io.AssetIO.ReadFile(pkgInfoPath); err != nil {
-        return err
+        return errors.ReadFileError{
+            FileName: pkgInfoPath,
+            Err:      err,
+        }
     }
     if targetsInfoData, err = io.AssetIO.ReadFile(targetsInfoPath); err != nil {
-        return err
+        return errors.ReadFileError{
+            FileName: targetsInfoPath,
+            Err:      err,
+        }
     }
     if dependenciesInfoData, err = io.AssetIO.ReadFile(dependenciesInfoPath); err != nil {
-        return err
+        return errors.ReadFileError{
+            FileName: dependenciesInfoPath,
+            Err:      err,
+        }
     }
 
-    finalString := ""
-    currentString := strings.Split(string(ymlData), "\n")
-
-    beautify := false
-    first := false
-    create := true
-
-    for line := range currentString {
-        currLine := currentString[line]
-
-        if len(currLine) <= 1 {
-            continue
-        }
-
-        if strings.Contains(currLine, "app:") && create {
-            finalString += string(appInfoData) + "\n"
-            create = false
-        } else if strings.Contains(currLine, "pkg:") && create {
-            finalString += string(pkgInfoData) + "\n"
-            create = false
-        } else if strings.Contains(currLine, "targets:") {
-            finalString += "\n" + string(targetsInfoData) + "\n"
-        } else if strings.Contains(currLine, "create:") {
-            beautify = true
-        } else if strings.Contains(currLine, "dependencies:") {
-            beautify = true
-            first = false
-            finalString += "\n" + string(dependenciesInfoData) + "\n"
-        } else if beautify && !first {
-            first = true
-        } else if !strings.Contains(currLine, "compile_flags:") && beautify {
-            simpleString := strings.Trim(currLine, " ")
-
-            if simpleString[len(simpleString)-1] == ':' {
-                finalString += "\n"
-            }
-        }
-
-        finalString += currLine + "\n"
-    }
-
-    err = io.NormalIO.WriteFile(filePath, []byte(finalString))
-
-    return err
-}
-
-// Write configuration with nice spacing
-func PrettyPrintConfigSpacing(projectConfig interface{}, filePath string) error {
-    var ymlData []byte
-    var err error
-
-    // get data
+    // marshall yml data
     if ymlData, err = yaml.Marshal(projectConfig); err != nil {
-        return err
+        marshallError := errors.YamlMarshallError{
+            Err: err,
+        }
+        return marshallError
     }
 
-    finalString := ""
-    currentString := strings.Split(string(ymlData), "\n")
+    finalStr := ""
 
-    beautify := false
-    first := false
-    create := true
+    // configuration tags
+    appTagPat := regexp.MustCompile(`(^app:)|((\s| |^\w)app:(\s+|))`)
+    pkgTagPat := regexp.MustCompile(`(^pkg:)|((\s| |^\w)pkg:(\s+|))`)
+    targetsTagPat := regexp.MustCompile(`(^targets:)|((\s| |^\w)targets:(\s+|))`)
+    dependenciesTagPat := regexp.MustCompile(`(^dependencies:)|((\s| |^\w)dependencies:(\s+|))`)
+    configTagPat := regexp.MustCompile(`(^config:)|((\s| |^\w)config:(\s+|))`)
+    compileOptionsTagPat := regexp.MustCompile(`(^compile_options:)|((\s| |^\w)compile_options:(\s+|))`)
+    metaTagPat := regexp.MustCompile(`(^meta:)|((\s| |^\w)meta:(\s+|))`)
 
-    for line := range currentString {
-        currLine := currentString[line]
+    // empty array
+    emptyArrayPat := regexp.MustCompile(`:\s+\[\]`)
+    // empty object
+    emptyMapPat := regexp.MustCompile(`:\s+\{\}`)
+    // empty tag
+    emptyTagPat := regexp.MustCompile(`:\s+\n+|:\s+"\s+"|:\s+""|:"\s+"|:""`)
+    // board
+    boardPat := regexp.MustCompile(`board`)
 
-        if len(currLine) <= 1 {
-            continue
-        }
+    scanner := bufio.NewScanner(strings.NewReader(string(ymlData)))
+    for scanner.Scan() {
+        line := scanner.Text()
 
-        if strings.Contains(currLine, "app:") && create {
-            create = false
-        } else if strings.Contains(currLine, "pkg:") && create {
-            create = false
-        } else if strings.Contains(currLine, "targets:") {
-            finalString += "\n"
-        } else if strings.Contains(currLine, "create:") {
-            beautify = true
-        } else if strings.Contains(currLine, "dependencies:") {
-            finalString += "\n"
-            beautify = true
-            first = false
-        } else if beautify && !first {
-            first = true
-        } else if !strings.Contains(currLine, "compile_flags:") && beautify {
-            simpleString := strings.Trim(currLine, " ")
-
-            if simpleString[len(simpleString)-1] == ':' {
-                finalString += "\n"
+        if projectConfig.GetMainTag().GetCompileOptions().GetPlatform() == constants.DESKTOP {
+            // skip board tags for desktop platform
+            if boardPat.MatchString(line) {
+                continue
             }
         }
 
-        finalString += currLine + "\n"
+        // ignore empty arrays, objects and tags
+        if emptyArrayPat.MatchString(line) || emptyMapPat.MatchString(line) || emptyTagPat.MatchString(line) {
+            if !(strings.Contains(line, "global_flags: []") ||
+                strings.Contains(line, "target_flags: []") ||
+                strings.Contains(line, "pkg_flags: []") ||
+                strings.Contains(line, "global_definitions: []") ||
+                strings.Contains(line, "target_definitions: []") ||
+                strings.Contains(line, "pkg_definitions: []")) {
+                continue
+            }
+        }
+
+        if appTagPat.MatchString(line) {
+            if showHelp {
+                finalStr += string(appInfoData) + "\n"
+            }
+
+            finalStr += line
+        } else if pkgTagPat.MatchString(line) {
+            if showHelp {
+                finalStr += string(pkgInfoData) + "\n"
+            }
+
+            finalStr += line
+        } else if targetsTagPat.MatchString(line) {
+            finalStr += "\n"
+            if showHelp {
+                finalStr += string(targetsInfoData) + "\n"
+            }
+            finalStr += line
+        } else if dependenciesTagPat.MatchString(line) {
+            finalStr += "\n"
+            if showHelp {
+                finalStr += string(dependenciesInfoData) + "\n"
+            }
+            finalStr += line
+        } else if configTagPat.MatchString(line) || compileOptionsTagPat.MatchString(line) ||
+            metaTagPat.MatchString(line) {
+            finalStr += "\n"
+            finalStr += line
+        } else {
+            finalStr += line
+        }
+
+        finalStr += "\n"
     }
 
-    err = io.NormalIO.WriteFile(filePath, []byte(finalString))
+    if err = io.NormalIO.WriteFile(filePath, []byte(finalStr)); err != nil {
+        return errors.WriteFileError{
+            FileName: filePath,
+            Err:      err,
+        }
+    }
 
-    return err
+    return nil
 }

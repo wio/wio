@@ -1,0 +1,156 @@
+{
+  "app": {
+    "paths": [
+      {
+        "constrains": [],
+        "entry": "/",
+        "files": [
+          {
+            "constrains": ["extra"],
+            "from": "templates/gitignore/.gitignore-general",
+            "to": ".gitignore",
+            "override": false,
+            "update": true
+          },
+          {
+            "constrains": ["extra"],
+            "from": "templates/readme/APP_README.md",
+            "to": "README.md",
+            "override": false,
+            "update": true
+          },
+          {
+            "constrains": ["ide=clion"],
+            "from": "templates/ide/clion/app/CMakeLists.txt.tpl",
+            "to": "CMakeLists.txt",
+            "override": false,
+            "update": true
+          },
+          {
+            "constrains": ["ide=clion"],
+            "from": "templates/ide/clion/app/CMakeListsPrivate.txt.tpl",
+            "to": "CMakeListsPrivate.txt",
+            "override": true,
+            "update": true
+          }
+        ]
+      },
+      {
+        "constrains": [],
+        "entry": "/src",
+        "files": [
+          {
+            "constrains": ["example"],
+            "from": "templates/sample-program/app/main.cpp",
+            "to": "main.cpp",
+            "override": false,
+            "update": false
+          }
+        ]
+      },
+      {
+        "constrains": [],
+        "entry": ".wio/build",
+        "override": false,
+        "update": true
+      }
+    ]
+  },
+  "pkg": {
+    "paths": [
+      {
+        "constrains": [],
+        "entry": "/",
+        "files": [
+          {
+            "constrains": ["extra"],
+            "from": "templates/gitignore/.gitignore-general",
+            "to": ".gitignore",
+            "override": false,
+            "update": true
+          },
+          {
+            "constrains": ["extra"],
+            "from": "templates/readme/PKG_README.md",
+            "to": "README.md",
+            "override": false,
+            "update": true
+          },
+          {
+            "constrains": ["ide=clion"],
+            "from": "templates/ide/clion/app/CMakeLists.txt.tpl",
+            "to": "CMakeLists.txt",
+            "override": false,
+            "update": true
+          },
+          {
+            "constrains": ["ide=clion"],
+            "from": "templates/ide/clion/app/CMakeListsPrivate.txt.tpl",
+            "to": "CMakeListsPrivate.txt",
+            "override": true,
+            "update": true
+          }
+        ]
+      },
+      {
+        "constrains": ["no-header-only"],
+        "entry": "/src",
+        "files": [
+          {
+            "constrains": ["example"],
+            "from": "templates/sample-program/pkg/output.cpp",
+            "to": "output.cpp",
+            "override": false,
+            "update": false
+          }
+        ]
+      },
+      {
+        "constrains": [],
+        "entry": "/include",
+        "files": [
+          {
+            "constrains": ["example", "no-header-only"],
+            "from": "templates/sample-program/pkg/output.h",
+            "to": "output.h",
+            "override": false,
+            "update": false
+          },
+          {
+            "constrains": ["example", "header-only"],
+            "from": "templates/sample-program/pkg-header-only/printer.h",
+            "to": "printer.h",
+            "override": false,
+            "update": false
+          }
+        ]
+      },
+      {
+        "constrains": [],
+        "entry": "/tests",
+        "files": [
+          {
+            "constrains": ["example", "no-header-only"],
+            "from": "templates/sample-program/pkg/main.cpp",
+            "to": "main.cpp",
+            "override": false,
+            "update": false
+          },
+          {
+            "constrains": ["example", "header-only"],
+            "from": "templates/sample-program/pkg-header-only/main.cpp",
+            "to": "main.cpp",
+            "override": false,
+            "update": false
+          }
+        ]
+      },
+      {
+        "constrains": [],
+        "entry": ".wio/build",
+        "override": false,
+        "update": true
+      }
+    ]
+  }
+}

@@ -8,6 +8,10 @@ import (
     "path/filepath"
     "regexp"
 
+    goerr "errors"
+    "wio/cmd/wio/errors"
+    "wio/cmd/wio/log"
+    "wio/cmd/wio/types"
     wio "wio/cmd/wio/utils/io"
 )
 
@@ -43,16 +47,6 @@ func IsEmpty(name string) (bool, error) {
         return true, nil
     }
     return false, err // Either not empty or error, suits both cases
-}
-
-// This checks if a string is in the slice
-func StringInSlice(a string, list []string) bool {
-    for _, b := range list {
-        if b == a {
-            return true
-        }
-    }
-    return false
 }
 
 // It takes in a slice and an element and then ut appends that element to the slice only
@@ -192,6 +186,7 @@ func CopyDir(src string, dst string) (err error) {
     return
 }
 
+// Checks if the config file is of App type or Pkg type
 func IsAppType(wioPath string) (bool, error) {
     // read wio.yml file to see which project type we are building
     data, err := wio.NormalIO.ReadFile(wioPath)
@@ -206,7 +201,7 @@ func IsAppType(wioPath string) (bool, error) {
     return s != "", nil
 }
 
-// difference returns the elements in a that aren't in b
+//  Eeturns elements in a that aren't in b
 func Difference(a, b []string) []string {
     mb := map[string]bool{}
     for _, x := range b {
@@ -219,4 +214,50 @@ func Difference(a, b []string) []string {
         }
     }
     return ab
+}
+
+// Read config file and return config object
+func ReadWioConfig(path string) (types.Config, error) {
+    defer func() {
+        if r := recover(); r != nil {
+            configError := errors.ConfigParsingError{
+                Err: goerr.New("fatal error occurred while parsing wio.yml file"),
+            }
+
+            log.WriteErrorlnExit(configError)
+        }
+    }()
+
+    isApp, err := IsAppType(path)
+    if err != nil {
+        return nil, err
+    }
+
+    if !isApp {
+        pkgConfig := &types.PkgConfig{}
+
+        // try to read pkg config file
+        if err := wio.NormalIO.ParseYml(path, pkgConfig); err != nil {
+            configError := errors.ConfigParsingError{
+                Err: goerr.New("wio.yml file could not be parsed for project of type: project"),
+            }
+
+            return nil, configError
+        }
+
+        return pkgConfig, nil
+    } else {
+        appConfig := &types.AppConfig{}
+
+        // try to read pkg config file
+        if err := wio.NormalIO.ParseYml(path, appConfig); err != nil {
+            configError := errors.ConfigParsingError{
+                Err: goerr.New("wio.yml file could not be parsed for project of type: application"),
+            }
+
+            return nil, configError
+        }
+
+        return appConfig, nil
+    }
 }
