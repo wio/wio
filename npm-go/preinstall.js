@@ -13,7 +13,7 @@ const fs = require('fs')
 const ARCH_MAPPING = {
     "ia32": "i386",
     "x64": "x86_64",
-    "arm": "arm",
+    "arm": "arm6",
     "arm64": "arm64"
 };
 
