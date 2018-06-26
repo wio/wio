@@ -14,6 +14,7 @@ builds:
       - arm64
 
 archive:
+  name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}{{ .Arm }}{{ end }}'
   format: tar.gz
 
   replacements:
@@ -28,7 +29,7 @@ archive:
     - toolchain/**/*/
 
 nfpm:
-  name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}{{ .Arm }}{{ end }}'
   vendor: Wio
   homepage: https://github.com/wio/wio
   maintainer: Deep Dhillon <deep@deepdhillon.com>
