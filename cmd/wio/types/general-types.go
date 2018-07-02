@@ -7,17 +7,29 @@
 
 package types
 
-import "wio/cmd/wio/constants"
+import (
+    "wio/cmd/wio/constants"
+    "bufio"
+    "strings"
+    "wio/cmd/wio/utils/io"
+    "wio/cmd/wio/errors"
+    "gopkg.in/yaml.v2"
+    "regexp"
+)
 
 // ############################################### Targets ##################################################
 
 // Abstraction of a Target
 type Target interface {
     GetSrc() string
+    GetName() string
     GetBoard() string
     GetFramework() string
+    GetPlatform() string
     GetFlags() TargetFlags
     GetDefinitions() TargetDefinitions
+
+    SetName(name string)
 }
 
 // Abstraction of targets that have been created
@@ -42,173 +54,203 @@ type TargetDefinitions interface {
 
 // ############################################# APP Targets ###############################################
 type AppTargetFlags struct {
-    GlobalFlags []string `yaml:"global_flags"`
+    GlobalFlags []string `yaml:"global_flags,omitempty"`
     TargetFlags []string `yaml:"target_flags"`
 }
 
-func (appTargetFlags AppTargetFlags) GetGlobalFlags() []string {
-    return appTargetFlags.GlobalFlags
+func (flags *AppTargetFlags) GetGlobalFlags() []string {
+    return flags.GlobalFlags
 }
 
-func (appTargetFlags AppTargetFlags) GetTargetFlags() []string {
-    return appTargetFlags.TargetFlags
+func (flags *AppTargetFlags) GetTargetFlags() []string {
+    return flags.TargetFlags
 }
 
-func (appTargetFlags AppTargetFlags) GetPkgFlags() []string {
+func (flags *AppTargetFlags) GetPkgFlags() []string {
     return nil
 }
 
 type AppTargetDefinitions struct {
-    GlobalFlags []string `yaml:"global_definitions"`
+    GlobalFlags []string `yaml:"global_definitions,omitempty"`
     TargetFlags []string `yaml:"target_definitions"`
 }
 
-func (appTargetDefinitions AppTargetDefinitions) GetGlobalDefinitions() []string {
-    return appTargetDefinitions.GlobalFlags
+func (definitions *AppTargetDefinitions) GetGlobalDefinitions() []string {
+    return definitions.GlobalFlags
 }
 
-func (appTargetDefinitions AppTargetDefinitions) GetTargetDefinitions() []string {
-    return appTargetDefinitions.TargetFlags
+func (definitions *AppTargetDefinitions) GetTargetDefinitions() []string {
+    return definitions.TargetFlags
 }
 
-func (appTargetDefinitions AppTargetDefinitions) GetPkgDefinitions() []string {
+func (definitions *AppTargetDefinitions) GetPkgDefinitions() []string {
     return nil
 }
 
 // Structure to handle individual target inside targets for project of app AVR type
-type AppAVRTarget struct {
+type AppTarget struct {
     Src         string
+    Platform    string
     Framework   string
     Board       string
-    Flags       AppTargetFlags
-    Definitions AppTargetDefinitions
+    Flags       AppTargetFlags       `yaml:"flags,omitempty"`
+    Definitions AppTargetDefinitions `yaml:"definitions,omitempty"`
+
+    name string
 }
 
-func (appTargetTag AppAVRTarget) GetSrc() string {
-    return appTargetTag.Src
+func (target *AppTarget) GetSrc() string {
+    return target.Src
 }
 
-func (appTargetTag AppAVRTarget) GetBoard() string {
-    return appTargetTag.Board
+func (target *AppTarget) GetName() string {
+    return target.name
 }
 
-func (appTargetTag AppAVRTarget) GetFramework() string {
-    return appTargetTag.Framework
+func (target *AppTarget) GetBoard() string {
+    return target.Board
 }
 
-func (appTargetTag AppAVRTarget) GetFlags() TargetFlags {
-    return appTargetTag.Flags
+func (target *AppTarget) GetFramework() string {
+    return target.Framework
 }
 
-func (appTargetTag AppAVRTarget) GetDefinitions() TargetDefinitions {
-    return appTargetTag.Definitions
+func (target *AppTarget) GetPlatform() string {
+    return target.Platform
+}
+
+func (target *AppTarget) GetFlags() TargetFlags {
+    return &target.Flags
+}
+
+func (target *AppTarget) GetDefinitions() TargetDefinitions {
+    return &target.Definitions
+}
+
+func (target *AppTarget) SetName(name string) {
+    target.name = name
 }
 
 // type for the targets tag in the configuration file for project of app AVR type
-type AppAVRTargets struct {
-    DefaultTarget string                  `yaml:"default"`
-    Targets       map[string]AppAVRTarget `yaml:"create"`
+type AppTargets struct {
+    DefaultTarget string                `yaml:"default"`
+    Targets       map[string]*AppTarget `yaml:"create"`
 }
 
-func (appTargetsTag AppAVRTargets) GetDefaultTarget() string {
-    return appTargetsTag.DefaultTarget
+func (targets *AppTargets) GetDefaultTarget() string {
+    return targets.DefaultTarget
 }
 
-func (appTargetsTag AppAVRTargets) GetTargets() map[string]Target {
-    targets := make(map[string]Target)
+func (targets *AppTargets) GetTargets() map[string]Target {
+    ret := make(map[string]Target)
 
-    for key, val := range appTargetsTag.Targets {
-        targets[key] = val
+    for key, val := range targets.Targets {
+        ret[key] = val
     }
 
-    return targets
+    return ret
 }
 
 // ######################################### PKG Targets #######################################################
 
 type PkgTargetFlags struct {
-    GlobalFlags []string `yaml:"global_flags"`
-    TargetFlags []string `yaml:"target_flags"`
+    GlobalFlags []string `yaml:"global_flags,omitempty"`
+    TargetFlags []string `yaml:"target_flags,omitempty"`
     PkgFlags    []string `yaml:"pkg_flags"`
 }
 
-func (pkgTargetFlags PkgTargetFlags) GetGlobalFlags() []string {
-    return pkgTargetFlags.GlobalFlags
+func (flags *PkgTargetFlags) GetGlobalFlags() []string {
+    return flags.GlobalFlags
 }
 
-func (pkgTargetFlags PkgTargetFlags) GetTargetFlags() []string {
-    return pkgTargetFlags.TargetFlags
+func (flags *PkgTargetFlags) GetTargetFlags() []string {
+    return flags.TargetFlags
 }
 
-func (pkgTargetFlags PkgTargetFlags) GetPkgFlags() []string {
-    return pkgTargetFlags.PkgFlags
+func (flags *PkgTargetFlags) GetPkgFlags() []string {
+    return flags.PkgFlags
 }
 
 type PkgTargetDefinitions struct {
-    GlobalDefinitions []string `yaml:"global_definitions"`
-    TargetDefinitions []string `yaml:"target_definitions"`
+    GlobalDefinitions []string `yaml:"global_definitions,omitempty"`
+    TargetDefinitions []string `yaml:"target_definitions,omitempty"`
     PkgDefinitions    []string `yaml:"pkg_definitions"`
 }
 
-func (pkgTargetDefinitions PkgTargetDefinitions) GetGlobalDefinitions() []string {
-    return pkgTargetDefinitions.GlobalDefinitions
+func (definitions *PkgTargetDefinitions) GetGlobalDefinitions() []string {
+    return definitions.GlobalDefinitions
 }
 
-func (pkgTargetDefinitions PkgTargetDefinitions) GetTargetDefinitions() []string {
-    return pkgTargetDefinitions.TargetDefinitions
+func (definitions *PkgTargetDefinitions) GetTargetDefinitions() []string {
+    return definitions.TargetDefinitions
 }
 
-func (pkgTargetDefinitions PkgTargetDefinitions) GetPkgDefinitions() []string {
-    return pkgTargetDefinitions.PkgDefinitions
+func (definitions *PkgTargetDefinitions) GetPkgDefinitions() []string {
+    return definitions.PkgDefinitions
 }
 
 // Structure to handle individual target inside targets for project of pkg type
-type PkgAVRTarget struct {
+type PkgTarget struct {
     Src         string
-    Framework   string
-    Board       string
-    Flags       PkgTargetFlags
-    Definitions PkgTargetDefinitions
+    Platform    string
+    Framework   string               `yaml:"framework,omitempty"`
+    Board       string               `yaml:"board,omitempty"`
+    Flags       PkgTargetFlags       `yaml:"flags,omitempty"`
+    Definitions PkgTargetDefinitions `yaml:"definitions,omitempty"`
+
+    name string
 }
 
-func (pkgAVRTarget PkgAVRTarget) GetSrc() string {
-    return pkgAVRTarget.Src
+func (target *PkgTarget) GetSrc() string {
+    return target.Src
 }
 
-func (pkgAVRTarget PkgAVRTarget) GetBoard() string {
-    return pkgAVRTarget.Board
+func (target *PkgTarget) GetName() string {
+    return target.name
 }
 
-func (pkgAVRTarget PkgAVRTarget) GetFlags() TargetFlags {
-    return pkgAVRTarget.Flags
+func (target *PkgTarget) GetBoard() string {
+    return target.Board
 }
 
-func (pkgAVRTarget PkgAVRTarget) GetFramework() string {
-    return pkgAVRTarget.Framework
+func (target *PkgTarget) GetFlags() TargetFlags {
+    return &target.Flags
 }
 
-func (pkgAVRTarget PkgAVRTarget) GetDefinitions() TargetDefinitions {
-    return pkgAVRTarget.Definitions
+func (target *PkgTarget) GetPlatform() string {
+    return target.Platform
+}
+
+func (target *PkgTarget) GetFramework() string {
+    return target.Framework
+}
+
+func (target *PkgTarget) GetDefinitions() TargetDefinitions {
+    return &target.Definitions
+}
+
+func (target *PkgTarget) SetName(name string) {
+    target.name = name
 }
 
 // type for the targets tag in the configuration file for project of pkg type
 type PkgAVRTargets struct {
-    DefaultTarget string                  `yaml:"default"`
-    Targets       map[string]PkgAVRTarget `yaml:"create"`
+    DefaultTarget string                `yaml:"default"`
+    Targets       map[string]*PkgTarget `yaml:"create"`
 }
 
-func (pkgAVRTargets PkgAVRTargets) GetDefaultTarget() string {
-    return pkgAVRTargets.DefaultTarget
+func (targets *PkgAVRTargets) GetDefaultTarget() string {
+    return targets.DefaultTarget
 }
 
-func (pkgAVRTargets PkgAVRTargets) GetTargets() map[string]Target {
-    targets := make(map[string]Target)
+func (targets *PkgAVRTargets) GetTargets() map[string]Target {
+    ret := make(map[string]Target)
 
-    for key, val := range pkgAVRTargets.Targets {
-        targets[key] = val
+    for key, val := range targets.Targets {
+        ret[key] = val
     }
 
-    return targets
+    return ret
 }
 
 // ##########################################  Dependencies ################################################
@@ -218,9 +260,9 @@ type DependencyTag struct {
     Version               string
     Vendor                bool
     LinkVisibility        string              `yaml:"link_visibility"`
-    Flags                 []string            `yaml:"flags"`
+    Flags                 []string            `yaml:"flags,omitempty"`
     Definitions           []string            `yaml:"definitions"`
-    DependencyFlags       map[string][]string `yaml:"dependency_flags"`
+    DependencyFlags       map[string][]string `yaml:"dependency_flags,omitempty"`
     DependencyDefinitions map[string][]string `yaml:"dependency_definitions"`
 }
 
@@ -245,11 +287,11 @@ type CompileOptions interface {
 type Configurations struct {
     WioVersion            string   `yaml:"minimum_wio_version"`
     SupportedPlatforms    []string `yaml:"supported_platforms"`
-    UnSupportedPlatforms  []string `yaml:"unsupported_platforms"`
+    UnSupportedPlatforms  []string `yaml:"unsupported_platforms,omitempty"`
     SupportedFrameworks   []string `yaml:"supported_frameworks"`
-    UnSupportedFrameworks []string `yaml:"unsupported_frameworks"`
+    UnSupportedFrameworks []string `yaml:"unsupported_frameworks,omitempty"`
     SupportedBoards       []string `yaml:"supported_boards"`
-    UnSupportedBoards     []string `yaml:"unsupported_boards"`
+    UnSupportedBoards     []string `yaml:"unsupported_boards,omitempty"`
 }
 
 // ############################################# APP Project ###############################################
@@ -266,32 +308,32 @@ type AppCompileOptions struct {
     Platform string
 }
 
-func (appCompileOptions AppCompileOptions) IsHeaderOnly() bool {
+func (options *AppCompileOptions) IsHeaderOnly() bool {
     return false
 }
 
-func (appCompileOptions AppCompileOptions) GetPlatform() string {
-    return appCompileOptions.Platform
+func (options *AppCompileOptions) GetPlatform() string {
+    return options.Platform
 }
 
-func (appTag AppTag) GetName() string {
-    return appTag.Name
+func (app *AppTag) GetName() string {
+    return app.Name
 }
 
-func (appTag AppTag) GetVersion() string {
+func (app *AppTag) GetVersion() string {
     return "1.0.0"
 }
 
-func (appTag AppTag) GetConfigurations() Configurations {
-    return appTag.Config
+func (app *AppTag) GetConfigurations() Configurations {
+    return app.Config
 }
 
-func (appTag AppTag) GetCompileOptions() CompileOptions {
-    return appTag.CompileOptions
+func (app *AppTag) GetCompileOptions() CompileOptions {
+    return &app.CompileOptions
 }
 
-func (appTag AppTag) GetIde() string {
-    return appTag.Ide
+func (app *AppTag) GetIde() string {
+    return app.Ide
 }
 
 // ############################################# PKG Project ###############################################
@@ -313,29 +355,29 @@ type PkgCompileOptions struct {
     Platform   string
 }
 
-func (pkgCompileOptions PkgCompileOptions) IsHeaderOnly() bool {
-    return pkgCompileOptions.HeaderOnly
+func (options *PkgCompileOptions) IsHeaderOnly() bool {
+    return options.HeaderOnly
 }
 
-func (pkgCompileOptions PkgCompileOptions) GetPlatform() string {
-    return pkgCompileOptions.Platform
+func (options *PkgCompileOptions) GetPlatform() string {
+    return options.Platform
 }
 
 type Flags struct {
-    AllowOnlyGlobalFlags   bool     `yaml:"allow_only_global_flags"`
-    AllowOnlyRequiredFlags bool     `yaml:"allow_only_required_flags"`
-    GlobalFlags            []string `yaml:"global_flags"`
+    AllowOnlyGlobalFlags   bool     `yaml:"allow_only_global_flags,omitempty"`
+    AllowOnlyRequiredFlags bool     `yaml:"allow_only_required_flags,omitempty"`
+    GlobalFlags            []string `yaml:"global_flags,omitempty"`
     RequiredFlags          []string `yaml:"required_flags"`
-    IncludedFlags          []string `yaml:"included_flags"`
+    IncludedFlags          []string `yaml:"included_flags,omitempty"`
     Visibility             string
 }
 
 type Definitions struct {
-    AllowOnlyGlobalDefinitions   bool     `yaml:"allow_only_global_definitions"`
-    AllowOnlyRequiredDefinitions bool     `yaml:"allow_only_required_definitions"`
-    GlobalDefinitions            []string `yaml:"global_definitions"`
+    AllowOnlyGlobalDefinitions   bool     `yaml:"allow_only_global_definitions,omitempty"`
+    AllowOnlyRequiredDefinitions bool     `yaml:"allow_only_required_definitions,omitempty"`
+    GlobalDefinitions            []string `yaml:"global_definitions,omitempty"`
     RequiredDefinitions          []string `yaml:"required_definitions"`
-    IncludedDefinitions          []string `yaml:"included_definitions"`
+    IncludedDefinitions          []string `yaml:"included_definitions,omitempty"`
     Visibility                   string
 }
 
@@ -349,26 +391,26 @@ type PkgTag struct {
     Definitions    Definitions
 }
 
-func (pkgTag PkgTag) GetName() string {
-    return pkgTag.Meta.Name
+func (tag *PkgTag) GetName() string {
+    return tag.Meta.Name
 }
-func (pkgTag PkgTag) GetVersion() string {
-    return pkgTag.Meta.Version
-}
-
-func (pkgTag PkgTag) GetConfigurations() Configurations {
-    return pkgTag.Config
+func (tag *PkgTag) GetVersion() string {
+    return tag.Meta.Version
 }
 
-func (pkgTag PkgTag) GetIde() string {
-    return pkgTag.Ide
+func (tag *PkgTag) GetConfigurations() Configurations {
+    return tag.Config
 }
 
-func (pkgTag PkgTag) GetCompileOptions() CompileOptions {
-    return pkgTag.CompileOptions
+func (tag *PkgTag) GetIde() string {
+    return tag.Ide
 }
 
-type Config interface {
+func (tag *PkgTag) GetCompileOptions() CompileOptions {
+    return &tag.CompileOptions
+}
+
+type IConfig interface {
     GetType() string
     GetMainTag() MainTag
     GetTargets() Targets
@@ -378,28 +420,28 @@ type Config interface {
 
 type AppConfig struct {
     MainTag         AppTag          `yaml:"app"`
-    TargetsTag      AppAVRTargets   `yaml:"targets"`
+    TargetsTag      AppTargets      `yaml:"targets"`
     DependenciesTag DependenciesTag `yaml:"dependencies"`
 }
 
-func (appConfig *AppConfig) GetType() string {
+func (config *AppConfig) GetType() string {
     return constants.APP
 }
 
-func (appConfig *AppConfig) GetMainTag() MainTag {
-    return appConfig.MainTag
+func (config *AppConfig) GetMainTag() MainTag {
+    return &config.MainTag
 }
 
-func (appConfig *AppConfig) GetTargets() Targets {
-    return appConfig.TargetsTag
+func (config *AppConfig) GetTargets() Targets {
+    return &config.TargetsTag
 }
 
-func (appConfig *AppConfig) GetDependencies() DependenciesTag {
-    return appConfig.DependenciesTag
+func (config *AppConfig) GetDependencies() DependenciesTag {
+    return config.DependenciesTag
 }
 
-func (appConfig *AppConfig) SetDependencies(tag DependenciesTag) {
-    appConfig.DependenciesTag = tag
+func (config *AppConfig) SetDependencies(tag DependenciesTag) {
+    config.DependenciesTag = tag
 }
 
 type PkgConfig struct {
@@ -408,24 +450,24 @@ type PkgConfig struct {
     DependenciesTag DependenciesTag `yaml:"dependencies"`
 }
 
-func (pkgConfig *PkgConfig) GetType() string {
+func (config *PkgConfig) GetType() string {
     return constants.PKG
 }
 
-func (pkgConfig *PkgConfig) GetMainTag() MainTag {
-    return pkgConfig.MainTag
+func (config *PkgConfig) GetMainTag() MainTag {
+    return &config.MainTag
 }
 
-func (pkgConfig *PkgConfig) GetTargets() Targets {
-    return pkgConfig.TargetsTag
+func (config *PkgConfig) GetTargets() Targets {
+    return &config.TargetsTag
 }
 
-func (pkgConfig *PkgConfig) GetDependencies() DependenciesTag {
-    return pkgConfig.DependenciesTag
+func (config *PkgConfig) GetDependencies() DependenciesTag {
+    return config.DependenciesTag
 }
 
-func (pkgConfig *PkgConfig) SetDependencies(tag DependenciesTag) {
-    pkgConfig.DependenciesTag = tag
+func (config *PkgConfig) SetDependencies(tag DependenciesTag) {
+    config.DependenciesTag = tag
 }
 
 type NpmDependencyTag map[string]string
@@ -453,4 +495,137 @@ type DConfig struct {
     Board     string
     Btarget   string
     Utarget   string
+}
+
+// Pretty print wio.yml
+func (config *PkgConfig) PrettyPrint(path string) error {
+    return PrettyPrint(config, path)
+}
+
+func (config *AppConfig) PrettyPrint(path string) error {
+    return PrettyPrint(config, path)
+}
+
+func PrettyPrint(config IConfig, path string) error {
+    data, err := yaml.Marshal(config)
+    if err != nil {
+        return err
+    }
+    return io.NormalIO.WriteFile(path, data)
+}
+
+// Write configuration with nice spacing and information
+func prettyPrintHelp(config IConfig, filePath string) error {
+    appInfoPath := "templates" + io.Sep + "config" + io.Sep + "app-helper.txt"
+    pkgInfoPath := "templates" + io.Sep + "config" + io.Sep + "pkg-helper.txt"
+    targetsInfoPath := "templates" + io.Sep + "config" + io.Sep + "targets-helper.txt"
+    dependenciesInfoPath := "templates" + io.Sep + "config" + io.Sep + "dependencies-helper.txt"
+
+    var ymlData []byte
+    var appInfoData []byte
+    var pkgInfoData []byte
+    var targetsInfoData []byte
+    var dependenciesInfoData []byte
+    var err error
+
+    if appInfoData, err = io.AssetIO.ReadFile(appInfoPath); err != nil {
+        return errors.ReadFileError{
+            FileName: appInfoPath,
+            Err:      err,
+        }
+    }
+    if pkgInfoData, err = io.AssetIO.ReadFile(pkgInfoPath); err != nil {
+        return errors.ReadFileError{
+            FileName: pkgInfoPath,
+            Err:      err,
+        }
+    }
+    if targetsInfoData, err = io.AssetIO.ReadFile(targetsInfoPath); err != nil {
+        return errors.ReadFileError{
+            FileName: targetsInfoPath,
+            Err:      err,
+        }
+    }
+    if dependenciesInfoData, err = io.AssetIO.ReadFile(dependenciesInfoPath); err != nil {
+        return errors.ReadFileError{
+            FileName: dependenciesInfoPath,
+            Err:      err,
+        }
+    }
+
+    // marshall yml data
+    if ymlData, err = yaml.Marshal(config); err != nil {
+        marshallError := errors.YamlMarshallError{
+            Err: err,
+        }
+        return marshallError
+    }
+
+    finalStr := ""
+
+    // configuration tags
+    appTagPat := regexp.MustCompile(`(^app:)|((\s| |^\w)app:(\s+|))`)
+    pkgTagPat := regexp.MustCompile(`(^pkg:)|((\s| |^\w)pkg:(\s+|))`)
+    targetsTagPat := regexp.MustCompile(`(^targets:)|((\s| |^\w)targets:(\s+|))`)
+    dependenciesTagPat := regexp.MustCompile(`(^dependencies:)|((\s| |^\w)dependencies:(\s+|))`)
+    configTagPat := regexp.MustCompile(`(^config:)|((\s| |^\w)config:(\s+|))`)
+    compileOptionsTagPat := regexp.MustCompile(`(^compile_options:)|((\s| |^\w)compile_options:(\s+|))`)
+    metaTagPat := regexp.MustCompile(`(^meta:)|((\s| |^\w)meta:(\s+|))`)
+
+    // empty array
+    emptyArrayPat := regexp.MustCompile(`:\s+\[]`)
+    // empty object
+    emptyMapPat := regexp.MustCompile(`:\s+{}`)
+    // empty tag
+    emptyTagPat := regexp.MustCompile(`:\s+\n+|:\s+"\s+"|:\s+""|:"\s+"|:""`)
+
+    scanner := bufio.NewScanner(strings.NewReader(string(ymlData)))
+    for scanner.Scan() {
+        line := scanner.Text()
+
+        // ignore empty arrays, objects and tags
+        if emptyArrayPat.MatchString(line) || emptyMapPat.MatchString(line) || emptyTagPat.MatchString(line) {
+            if !(strings.Contains(line, "global_flags: []") ||
+                strings.Contains(line, "target_flags: []") ||
+                strings.Contains(line, "pkg_flags: []") ||
+                strings.Contains(line, "global_definitions: []") ||
+                strings.Contains(line, "target_definitions: []") ||
+                strings.Contains(line, "pkg_definitions: []")) {
+                continue
+            }
+        }
+
+        if appTagPat.MatchString(line) {
+            finalStr += string(appInfoData) + "\n"
+            finalStr += line
+        } else if pkgTagPat.MatchString(line) {
+            finalStr += string(pkgInfoData) + "\n"
+            finalStr += line
+        } else if targetsTagPat.MatchString(line) {
+            finalStr += "\n"
+            finalStr += string(targetsInfoData) + "\n"
+            finalStr += line
+        } else if dependenciesTagPat.MatchString(line) {
+            finalStr += "\n"
+            finalStr += string(dependenciesInfoData) + "\n"
+            finalStr += line
+        } else if configTagPat.MatchString(line) || compileOptionsTagPat.MatchString(line) ||
+            metaTagPat.MatchString(line) {
+            finalStr += "\n"
+            finalStr += line
+        } else {
+            finalStr += line
+        }
+
+        finalStr += "\n"
+    }
+
+    if err = io.NormalIO.WriteFile(filePath, []byte(finalStr)); err != nil {
+        return errors.WriteFileError{
+            FileName: filePath,
+            Err:      err,
+        }
+    }
+
+    return nil
 }

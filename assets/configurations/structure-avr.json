@@ -2,32 +2,32 @@
   "app": {
     "paths": [
       {
-        "constrains": [],
+        "constraints": [],
         "entry": "/",
         "files": [
           {
-            "constrains": ["extra"],
+            "constraints": ["extra"],
             "from": "templates/gitignore/.gitignore-general",
             "to": ".gitignore",
             "override": false,
             "update": true
           },
           {
-            "constrains": ["extra"],
+            "constraints": ["extra"],
             "from": "templates/readme/APP_README.md",
             "to": "README.md",
             "override": false,
             "update": true
           },
           {
-            "constrains": ["ide=clion"],
+            "constraints": ["ide=clion"],
             "from": "templates/ide/clion/app/CMakeLists.txt.tpl",
             "to": "CMakeLists.txt",
             "override": false,
             "update": true
           },
           {
-            "constrains": ["ide=clion"],
+            "constraints": ["ide=clion"],
             "from": "templates/ide/clion/app/CMakeListsPrivate.txt.tpl",
             "to": "CMakeListsPrivate.txt",
             "override": true,
@@ -36,55 +36,49 @@
         ]
       },
       {
-        "constrains": [],
+        "constraints": [],
         "entry": "/src",
         "files": [
           {
-            "constrains": ["example"],
+            "constraints": ["example"],
             "from": "templates/sample-program/app/main.cpp",
             "to": "main.cpp",
             "override": false,
             "update": false
           }
         ]
-      },
-      {
-        "constrains": [],
-        "entry": ".wio/build",
-        "override": false,
-        "update": true
       }
     ]
   },
   "pkg": {
     "paths": [
       {
-        "constrains": [],
+        "constraints": [],
         "entry": "/",
         "files": [
           {
-            "constrains": ["extra"],
+            "constraints": ["extra"],
             "from": "templates/gitignore/.gitignore-general",
             "to": ".gitignore",
             "override": false,
             "update": true
           },
           {
-            "constrains": ["extra"],
+            "constraints": ["extra"],
             "from": "templates/readme/PKG_README.md",
             "to": "README.md",
             "override": false,
             "update": true
           },
           {
-            "constrains": ["ide=clion"],
+            "constraints": ["ide=clion"],
             "from": "templates/ide/clion/app/CMakeLists.txt.tpl",
             "to": "CMakeLists.txt",
             "override": false,
             "update": true
           },
           {
-            "constrains": ["ide=clion"],
+            "constraints": ["ide=clion"],
             "from": "templates/ide/clion/app/CMakeListsPrivate.txt.tpl",
             "to": "CMakeListsPrivate.txt",
             "override": true,
@@ -93,11 +87,11 @@
         ]
       },
       {
-        "constrains": ["no-header-only"],
+        "constraints": ["no-header-only"],
         "entry": "/src",
         "files": [
           {
-            "constrains": ["example"],
+            "constraints": ["example"],
             "from": "templates/sample-program/pkg/output.cpp",
             "to": "output.cpp",
             "override": false,
@@ -106,18 +100,18 @@
         ]
       },
       {
-        "constrains": [],
+        "constraints": [],
         "entry": "/include",
         "files": [
           {
-            "constrains": ["example", "no-header-only"],
+            "constraints": ["example", "no-header-only"],
             "from": "templates/sample-program/pkg/output.h",
             "to": "output.h",
             "override": false,
             "update": false
           },
           {
-            "constrains": ["example", "header-only"],
+            "constraints": ["example", "header-only"],
             "from": "templates/sample-program/pkg-header-only/printer.h",
             "to": "printer.h",
             "override": false,
@@ -126,30 +120,24 @@
         ]
       },
       {
-        "constrains": [],
+        "constraints": [],
         "entry": "/tests",
         "files": [
           {
-            "constrains": ["example", "no-header-only"],
+            "constraints": ["example", "no-header-only"],
             "from": "templates/sample-program/pkg/main.cpp",
             "to": "main.cpp",
             "override": false,
             "update": false
           },
           {
-            "constrains": ["example", "header-only"],
+            "constraints": ["example", "header-only"],
             "from": "templates/sample-program/pkg-header-only/main.cpp",
             "to": "main.cpp",
             "override": false,
             "update": false
           }
         ]
-      },
-      {
-        "constrains": [],
-        "entry": ".wio/build",
-        "override": false,
-        "update": true
       }
     ]
   }
