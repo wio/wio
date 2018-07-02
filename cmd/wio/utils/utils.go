@@ -8,11 +8,9 @@ import (
     "path/filepath"
     "regexp"
 
-    goerr "errors"
-    "wio/cmd/wio/errors"
-    "wio/cmd/wio/log"
-    "wio/cmd/wio/types"
     wio "wio/cmd/wio/utils/io"
+    "wio/cmd/wio/errors"
+    "strings"
 )
 
 // Checks if path exists and returns true and false based on that
@@ -81,20 +79,21 @@ func AppendIfMissing(slice []string, slice2 []string) []string {
 // destination file exists, all it's contents will be replaced by the contents
 // of the source file. The file mode will be copied from the source and
 // the copied data is synced/flushed to stable storage.
-func CopyFile(src, dst string) (err error) {
+func CopyFile(src, dst string)(error) {
     if !PathExists(src) {
-        return
+        msg := fmt.Sprintf("Path [%s] does not exist", src)
+        return errors.String(msg)
     }
 
     in, err := os.Open(src)
     if err != nil {
-        return
+        return err
     }
     defer in.Close()
 
     out, err := os.Create(dst)
     if err != nil {
-        return
+        return err
     }
     defer func() {
         if e := out.Close(); e != nil {
@@ -104,24 +103,39 @@ func CopyFile(src, dst string) (err error) {
 
     _, err = io.Copy(out, in)
     if err != nil {
-        return
+        return err
     }
 
     err = out.Sync()
     if err != nil {
-        return
+        return err
     }
 
     si, err := os.Stat(src)
     if err != nil {
-        return
+        return err
     }
     err = os.Chmod(dst, si.Mode())
     if err != nil {
-        return
+        return err
     }
 
-    return
+    return nil
+}
+
+func Copy(src string, dst string) (error) {
+    src = filepath.Clean(src)
+    dst = filepath.Clean(dst)
+
+    si, err := os.Stat(src)
+    if err != nil {
+        return err
+    }
+    if si.IsDir() {
+        return CopyDir(src, dst)
+    } else {
+        return CopyFile(src, dst)
+    }
 }
 
 // CopyDir recursively copies a directory tree, attempting to preserve permissions.
@@ -216,50 +230,22 @@ func Difference(a, b []string) []string {
     return ab
 }
 
-// Read config file and return config object
-func ReadWioConfig(path string) (types.Config, error) {
-    defer func() {
-        if r := recover(); r != nil {
-            configError := errors.ConfigParsingError{
-                Err: goerr.New("fatal error occurred while parsing wio.yml file"),
-            }
-
-            log.WriteErrorlnExit(configError)
+func Contains(slice []string, value string) bool {
+    for _, element := range slice {
+        if element == value {
+            return true
         }
-    }()
-
-    isApp, err := IsAppType(path)
-    if err != nil {
-        return nil, err
     }
+    return false
+}
 
-    if !isApp {
-        pkgConfig := &types.PkgConfig{}
-
-        // try to read pkg config file
-        if err := wio.NormalIO.ParseYml(path, pkgConfig); err != nil {
-            configError := errors.ConfigParsingError{
-                Err: goerr.New("wio.yml file could not be parsed for project of type: project"),
-            }
-
-            return nil, configError
+func ContainsNoCase(slice []string, value string) bool {
+    for _, element := range slice {
+        if strings.ToLower(element) == strings.ToLower(value) {
+            return true
         }
-
-        return pkgConfig, nil
-    } else {
-        appConfig := &types.AppConfig{}
-
-        // try to read pkg config file
-        if err := wio.NormalIO.ParseYml(path, appConfig); err != nil {
-            configError := errors.ConfigParsingError{
-                Err: goerr.New("wio.yml file could not be parsed for project of type: application"),
-            }
-
-            return nil, configError
-        }
-
-        return appConfig, nil
     }
+    return false
 }
 
 // Deletes all the files from the directory

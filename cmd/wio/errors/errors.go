@@ -3,6 +3,7 @@ package errors
 import (
     "fmt"
     "strings"
+    goerr "errors"
 )
 
 type Error interface {
@@ -12,6 +13,24 @@ type Error interface {
 const (
     Spaces = "         "
 )
+
+
+type Generic struct {
+    message string
+}
+
+func (err Generic) Error() string {
+    return err.message
+}
+
+func String(message string) error {
+    return goerr.New(message)
+}
+
+func Stringf(format string, a ...interface{}) error {
+    msg := fmt.Sprintf(format, a...)
+    return String(msg)
+}
 
 type ProgramArgumentsError struct {
     CommandName  string
@@ -151,13 +170,13 @@ func (err PlatformNotSupportedError) Error() string {
     return str
 }
 
-type FrameworkNotSupportedError struct {
+type UnknownFramework struct {
     Framework string
-    Platform string
-    Err      error
+    Platform  string
+    Err       error
 }
 
-func (err FrameworkNotSupportedError) Error() string {
+func (err UnknownFramework) Error() string {
     str := fmt.Sprintf(`"%s" framework is not supported for %s platform by wio`, err.Framework, err.Platform)
 
     if err.Err != nil {
@@ -167,14 +186,14 @@ func (err FrameworkNotSupportedError) Error() string {
     return str
 }
 
-type ProjectStructureConstrainError struct {
-    Constrain string
-    Path      string
-    Err       error
+type ProjectStructureConstraintError struct {
+    Constraint string
+    Path       string
+    Err        error
 }
 
-func (err ProjectStructureConstrainError) Error() string {
-    str := fmt.Sprintf(`"%s" constrain not specified for file/dir: %s`, err.Constrain, err.Path)
+func (err ProjectStructureConstraintError) Error() string {
+    str := fmt.Sprintf(`"%s" constrain not specified for file/dir: %s`, err.Constraint, err.Path)
 
     if err.Err != nil {
         str += fmt.Sprintf("\n%s%s", Spaces, err.Err.Error())
@@ -530,8 +549,8 @@ func (err ActionNotSupportedByPlatform) Error() string {
 }
 
 type FatalError struct {
-    Log         interface{}
-    Err         error
+    Log interface{}
+    Err error
 }
 
 func (err FatalError) Error() string {

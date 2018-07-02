@@ -1,8 +1,6 @@
 package dependencies
 
 import (
-    goerr "errors"
-    "github.com/fatih/color"
     "sort"
     "strconv"
     "strings"
@@ -14,7 +12,7 @@ import (
 )
 
 // recursively goes through dependencies and creates CMake target and CMake Link
-func recursivelyGoThroughTransDependencies(queue *log.Queue, parentName string, parentHeaderOnly bool,
+func traverseDependencies(queue *log.Queue, parentName string, parentHeaderOnly bool,
     dependencyPackages map[string]*DependencyScanStructure, dependencies types.DependenciesTag,
     globalFlags []string, requiredFlags []string, globalDefinitions []string, requiredDefinitions []string,
     projectDependency *types.DependencyTag) error {
@@ -52,7 +50,7 @@ func recursivelyGoThroughTransDependencies(queue *log.Queue, parentName string, 
             }
         }
 
-        log.QueueWrite(queue, log.VERB, nil, "creating cmake target for %s ...", dependencyNameToUseForLogs)
+        log.Verb(queue, "creating cmake target for %s ...", dependencyNameToUseForLogs)
 
         subQueue := log.GetQueue()
 
@@ -60,26 +58,26 @@ func recursivelyGoThroughTransDependencies(queue *log.Queue, parentName string, 
             dependencyNameToUseForLogs, dependencyTargetName, dependencyTarget, globalFlags,
             globalDefinitions, projectDependency, transDependencyPackage)
         if err != nil {
-            log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgRed), "failure")
+            log.WriteFailure(queue, log.VERB)
             log.CopyQueue(subQueue, queue, log.NO_SPACES)
             return err
         } else {
-            log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgGreen), "success")
+            log.WriteSuccess(queue, log.VERB)
             log.CopyQueue(subQueue, queue, log.NO_SPACES)
         }
 
-        log.QueueWrite(queue, log.VERB, nil, "recursively creating cmake targets for %s dependencies ...", dependencyNameToUseForLogs)
+        log.Verb(queue, "recursively creating cmake targets for %s dependencies ...", dependencyNameToUseForLogs)
         subQueue = log.GetQueue()
 
-        if err := recursivelyGoThroughTransDependencies(queue, dependencyTargetName,
+        if err := traverseDependencies(queue, dependencyTargetName,
             dependencyTarget.MainTag.GetCompileOptions().IsHeaderOnly(), dependencyPackages,
             dependencyTarget.Dependencies, globalFlags, globalDefinitions, requiredFlags, requiredDefinitions,
             projectDependency); err != nil {
-            log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgRed), "failure")
+            log.WriteFailure(queue, log.VERB)
             log.CopyQueue(subQueue, queue, log.NO_SPACES)
             return err
         } else {
-            log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgGreen), "success")
+            log.WriteSuccess(queue, log.VERB)
             log.CopyQueue(subQueue, queue, log.NO_SPACES)
         }
     }
@@ -87,7 +85,7 @@ func recursivelyGoThroughTransDependencies(queue *log.Queue, parentName string, 
     return nil
 }
 
-// Recursively calls recursivelyGoThroughTransDependencies function and creates CMake targets
+// Recursively calls traverseDependencies function and creates CMake targets
 func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetHeaderOnly bool,
     dependencyNameToUseForLogs string, dependencyTargetName string, dependencyTarget *DependencyScanStructure,
     globalFlags []string, globalDefinitions []string, configDependency *types.DependencyTag,
@@ -113,41 +111,35 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
     var optionalFlags []string
     var optionalDefinitions []string
 
-    log.QueueWrite(queue, log.VERB, nil, "matching global flags for dependency: %s ... ", dependencyNameToUseForLogs)
+    log.Verb(queue, "matching global flags for dependency: %s ... ", dependencyNameToUseForLogs)
 
     // match global flags
     dependencyTargetGlobalFlags, err := fillGlobalFlags(globalFlags, dependencyTarget.MainTag.Flags.GlobalFlags,
         dependencyNameToUseForLogs)
     if err != nil {
-        log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgRed), "failure")
+        log.WriteFailure(queue, log.VERB)
         return nil, nil, err
     } else {
-        log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgGreen), "success")
+        log.WriteSuccess(queue, log.VERB)
     }
 
-    log.QueueWrite(queue, log.VERB, nil, "matching global definitions for dependency: %s ... ", dependencyNameToUseForLogs)
+    log.Verb(queue, "matching global definitions for dependency: %s ... ", dependencyNameToUseForLogs)
 
     // match global definitions
     dependencyTargetGlobalDefinitions, err := fillGlobalFlags(globalDefinitions, dependencyTarget.MainTag.Definitions.GlobalDefinitions,
         dependencyNameToUseForLogs)
     if err != nil {
-        log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgRed), "failure")
+        log.WriteFailure(queue, log.VERB)
         return nil, nil, err
     } else {
-        log.QueueWriteln(queue, log.VERB_NONE, color.New(color.FgGreen), "success")
+        log.WriteSuccess(queue, log.VERB)
     }
 
     // when only required flags are allowed
     if dependencyTarget.MainTag.Flags.AllowOnlyRequiredFlags &&
         !dependencyTarget.MainTag.Flags.AllowOnlyGlobalFlags &&
         len(dependencyTargetGlobalFlags) > 0 {
-        err = errors.OnlyRequiredFlagsError{
-            Dependency:       dependencyNameToUseForLogs,
-            FlagCategoryName: "global flags",
-            Err:              goerr.New("global flags will be ignored"),
-        }
-
-        log.QueueWriteln(queue, log.WARN, nil, err.Error())
+        log.Warnln(queue, "Ignoring global flags")
         dependencyTargetGlobalFlags = []string{}
     }
 
@@ -155,13 +147,7 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
     if dependencyTarget.MainTag.Definitions.AllowOnlyRequiredDefinitions &&
         !dependencyTarget.MainTag.Definitions.AllowOnlyGlobalDefinitions &&
         len(dependencyTargetGlobalDefinitions) > 0 {
-        err = errors.OnlyRequiredFlagsError{
-            Dependency:       dependencyNameToUseForLogs,
-            FlagCategoryName: "global definitions",
-            Err:              goerr.New("global definitions will be ignored"),
-        }
-
-        log.QueueWriteln(queue, log.WARN, nil, err.Error())
+        log.Warnln(queue, "Ignoring global definitions")
         dependencyTargetGlobalDefinitions = []string{}
     }
 
@@ -170,11 +156,7 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
 
     ////////////////////////////////// Handle other flags besides global ////////////////////////////////////////
     if dependencyTarget.MainTag.Flags.AllowOnlyGlobalFlags && len(otherFlags) > 0 {
-        log.QueueWriteln(queue, log.WARN, nil, errors.OnlyGlobalFlagsError{
-            Dependency:       dependencyNameToUseForLogs,
-            FlagCategoryName: "other flags",
-            Err:              goerr.New("other flags will be ignored in the build process"),
-        }.Error())
+        log.Warnln(queue, "Ignoring non-global flags")
     } else {
         // match required flags with required flags requested and error out if they do not exist
         dependencyTargetRequiredFlags, optionalFlags, err = fillRequiredFlags(otherFlags,
@@ -184,13 +166,8 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
         }
 
         allFlags = utils.AppendIfMissing(allFlags, dependencyTargetRequiredFlags)
-
         if dependencyTarget.MainTag.Flags.AllowOnlyRequiredFlags && len(optionalFlags) > 0 {
-            log.QueueWriteln(queue, log.WARN, nil, errors.OnlyRequiredFlagsError{
-                Dependency:       dependencyNameToUseForLogs,
-                FlagCategoryName: "optional flags",
-                Err:              goerr.New("optional flags will be ignored in the build process"),
-            }.Error())
+            log.Warnln(queue, "Ignoring optional flags")
         } else {
             allFlags = utils.AppendIfMissing(allFlags, optionalFlags)
         }
@@ -198,11 +175,7 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
 
     //////////////////////////////////// Handle other definitions besides global ////////////////////////////////////////
     if dependencyTarget.MainTag.Definitions.AllowOnlyGlobalDefinitions && len(otherDefinitions) > 0 {
-        log.QueueWriteln(queue, log.WARN, nil, errors.OnlyGlobalDefinitionsError{
-            Dependency:       dependencyNameToUseForLogs,
-            FlagCategoryName: "other definitions",
-            Err:              goerr.New("other defintions will be ignored in the build process"),
-        }.Error())
+        log.Warnln(queue, "Ignoring non-global definitions")
     } else {
         // match required flags with required flags requested and error out if they do not exist
         dependencyTargetRequiredDefinitions, optionalDefinitions, err = fillRequiredFlags(otherDefinitions,
@@ -214,11 +187,7 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
         allDefinitions = utils.AppendIfMissing(allDefinitions, dependencyTargetRequiredDefinitions)
 
         if dependencyTarget.MainTag.Definitions.AllowOnlyRequiredDefinitions && len(optionalFlags) > 0 {
-            log.QueueWriteln(queue, log.WARN, nil, errors.OnlyRequiredDefinitionsError{
-                Dependency:       dependencyNameToUseForLogs,
-                FlagCategoryName: "optional definitions",
-                Err:              goerr.New("optional definitions will be ignored in the build process"),
-            }.Error())
+            log.Warnln(queue, "Ignoring optional flags")
         } else {
             allDefinitions = utils.AppendIfMissing(allDefinitions, optionalDefinitions)
         }
@@ -232,8 +201,8 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
     linkVisibility := strings.ToUpper(configDependency.LinkVisibility)
 
     if val, exists := cmakeTargets[hash]; exists {
-        linkVisibility = linkVisibilityVerify(queue, parentTargetName, val.TargetName, linkVisibility, parentTargetHeaderOnly)
-        cmakeTargetsLink = append(cmakeTargetsLink, cmake.CMakeTargetLink{From: parentTargetName, To: val.TargetName, LinkVisibility: linkVisibility})
+        linkVisibility = linkVisibilityVerify(linkVisibility, parentTargetHeaderOnly)
+        cmakeTargetsLink = append(cmakeTargetsLink, cmake.TargetLink{From: parentTargetName, To: val.TargetName, Visibility: linkVisibility})
     } else {
         dependencyNameToUse := dependencyTargetName
         counter := 2
@@ -254,58 +223,38 @@ func CreateCMakeTargets(queue *log.Queue, parentTargetName string, parentTargetH
         allDefinitions = utils.AppendIfMissing(allDefinitions, dependencyTarget.MainTag.Definitions.IncludedDefinitions)
 
         // verify linker visibility
-        linkVisibility = linkVisibilityVerify(queue, parentTargetName, dependencyNameToUse, linkVisibility, parentTargetHeaderOnly)
+        linkVisibility = linkVisibilityVerify(linkVisibility, parentTargetHeaderOnly)
 
-        cmakeTargets[hash] = &cmake.CMakeTarget{TargetName: dependencyNameToUse,
+        cmakeTargets[hash] = &cmake.Target{TargetName: dependencyNameToUse,
             Path: dependencyTarget.Directory, Flags: allFlags, Definitions: allDefinitions,
             HeaderOnly: dependencyTarget.MainTag.CompileOptions.HeaderOnly}
 
-        cmakeTargetsLink = append(cmakeTargetsLink, cmake.CMakeTargetLink{From: parentTargetName, To: dependencyNameToUse,
-            LinkVisibility: linkVisibility})
+        cmakeTargetsLink = append(cmakeTargetsLink, cmake.TargetLink{From: parentTargetName, To: dependencyNameToUse,
+            Visibility: linkVisibility})
 
         cmakeTargetNames[dependencyNameToUse] = true
     }
 
-    cmakeTargets[hash].FlagsVisibility = flagsDefinitionsVisibility(queue, dependencyNameToUseForLogs,
+    cmakeTargets[hash].FlagsVisibility = flagsDefinitionsVisibility(
         dependencyTarget.MainTag.Flags.Visibility, dependencyTarget.MainTag.CompileOptions.HeaderOnly)
 
-    cmakeTargets[hash].DefinitionsVisibility = flagsDefinitionsVisibility(queue, dependencyNameToUseForLogs,
+    cmakeTargets[hash].DefinitionsVisibility = flagsDefinitionsVisibility(
         dependencyTarget.MainTag.Definitions.Visibility, dependencyTarget.MainTag.CompileOptions.HeaderOnly)
 
     return dependencyTargetRequiredFlags, dependencyTargetRequiredDefinitions, nil
 }
 
 // This checks and verifies flag/definition visibility to make sure it is valid
-func flagsDefinitionsVisibility(queue *log.Queue, packageName string, givenVisibility string, headerOnly bool) string {
+func flagsDefinitionsVisibility(givenVisibility string, headerOnly bool) string {
     if givenVisibility != "PRIVATE" && givenVisibility != "PUBLIC" && givenVisibility != "INTERFACE" {
-        var err error
         if headerOnly {
-            err = errors.FlagsDefinitionsVisibilityError{
-                PackageName:     packageName,
-                GivenVisibility: givenVisibility,
-                Err:             goerr.New("header only => INTERFACE visibility will be used"),
-            }
             givenVisibility = "INTERFACE"
         } else {
-            err = errors.FlagsDefinitionsVisibilityError{
-                PackageName:     packageName,
-                GivenVisibility: givenVisibility,
-                Err:             goerr.New("PRIVATE visibility will be used"),
-            }
             givenVisibility = "PRIVATE"
         }
-
-        log.QueueWriteln(queue, log.WARN, nil, err.Error())
     } else {
-        if headerOnly && givenVisibility != "INTERFACE" {
-            err := errors.FlagsDefinitionsVisibilityError{
-                PackageName:     packageName,
-                GivenVisibility: givenVisibility,
-                Err:             goerr.New("package is header only => INTERFACE visibility will be used"),
-            }
-
+        if headerOnly {
             givenVisibility = "INTERFACE"
-            log.QueueWriteln(queue, log.WARN, nil, err.Error())
         }
     }
 
@@ -313,41 +262,18 @@ func flagsDefinitionsVisibility(queue *log.Queue, packageName string, givenVisib
 }
 
 // This checks and verifies link visibility to make sure it is valid
-func linkVisibilityVerify(queue *log.Queue, from string, to string, givenVisibility string, headerOnly bool) string {
+func linkVisibilityVerify(givenVisibility string, headerOnly bool) string {
     givenVisibility = strings.ToUpper(givenVisibility)
 
     if givenVisibility != "PRIVATE" && givenVisibility != "PUBLIC" && givenVisibility != "INTERFACE" {
-        var err error
         if headerOnly {
-            err = errors.LinkerVisibilityError{
-                From:            from,
-                To:              to,
-                GivenVisibility: givenVisibility,
-                Err:             goerr.New("header only => INTERFACE visibility will be used"),
-            }
             givenVisibility = "INTERFACE"
         } else {
-            err = errors.LinkerVisibilityError{
-                From:            from,
-                To:              to,
-                GivenVisibility: givenVisibility,
-                Err:             goerr.New("PRIVATE visibility will be used"),
-            }
             givenVisibility = "PRIVATE"
         }
-
-        log.QueueWriteln(queue, log.WARN, nil, err.Error())
     } else {
         if headerOnly && givenVisibility != "INTERFACE" {
-            err := errors.LinkerVisibilityError{
-                From:            from,
-                To:              to,
-                GivenVisibility: givenVisibility,
-                Err:             goerr.New("target is header only => INTERFACE visibility will be used"),
-            }
-
             givenVisibility = "INTERFACE"
-            log.QueueWriteln(queue, log.WARN, nil, err.Error())
         }
     }
 
