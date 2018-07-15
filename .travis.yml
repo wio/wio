@@ -1,0 +1,17 @@
+dist: trusty
+language: go
+
+go:
+  - "1.10.2"
+
+go_import_path: wio
+
+before_install:
+  - source wenv
+
+install:
+  - wmake travis-setup
+
+script:
+  - wmake build
+  - go test -v ./...
