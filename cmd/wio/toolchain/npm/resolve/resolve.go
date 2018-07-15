@@ -2,8 +2,58 @@ package resolve
 
 import (
     "wio/cmd/wio/errors"
+    "wio/cmd/wio/log"
     "wio/cmd/wio/toolchain/npm/semver"
+    "wio/cmd/wio/types"
 )
+
+const (
+    Latest = "latest"
+)
+
+func (i *Info) GetLatest(name string) (string, error) {
+    data, err := i.GetData(name)
+    if err != nil {
+        return "", err
+    }
+    if ver, exists := data.DistTags[Latest]; exists {
+        return ver, nil
+    }
+    list, err := i.GetList(name)
+    if err != nil {
+        return "", err
+    }
+    return list.Last().Str(), nil
+}
+
+func (i *Info) Exists(name string, ver string) (bool, error) {
+    if ret := semver.Parse(ver); ret == nil {
+        return false, errors.Stringf("invalid version %s", ver)
+    }
+    data, err := i.GetData(name)
+    if err != nil {
+        return false, err
+    }
+    _, exists := data.Versions[ver]
+    return exists, nil
+}
+
+func (i *Info) ResolveRemote(config types.IConfig) error {
+    log.Info("Resolving dependencies of: ")
+    log.Infoln(log.Green, "%s@%s", config.Name(), config.Version())
+    root := &Node{name: config.Name(), ver: config.Version()}
+    deps := config.Dependencies()
+    for name, ver := range deps {
+        node := &Node{name: name, ver: ver}
+        root.deps = append(root.deps, node)
+    }
+    for _, dep := range root.deps {
+        if err := i.ResolveTree(dep); err != nil {
+            return err
+        }
+    }
+    return nil
+}
 
 func (i *Info) ResolveTree(root *Node) error {
     if ret := i.GetRes(root.name, root.ver); ret != nil {
