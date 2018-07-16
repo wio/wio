@@ -25,20 +25,28 @@ pkg:
   flags:
     visibility: PRIVATE
   definitions:
+    required_definitions:
+    - STACK_SIZE
     visibility: PRIVATE
 
 targets:
   create:
     avr-tests:
-      src: avr-tests
+      src: tests/avr-tests
       platform: avr
       framework: cosa
       board: uno
+      definitions:
+        pkg_definitions:
+        - STACK_SIZE=256
     native-tests:
-      src: native-tests
+      src: tests/native-tests
       platform: native
       framework: all
       board: all
+      definitions:
+        pkg_definitions:
+        - STACK_SIZE=256
 
 dependencies:
   pkg-malloc:
@@ -46,4 +54,4 @@ dependencies:
     vendor: true
     link_visibility: PRIVATE
     definitions:
-    - STACK_SIZE=256
+    - $(STACK_SIZE)
