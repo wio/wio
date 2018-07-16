@@ -2,7 +2,6 @@ package resolve
 
 import (
     "wio/cmd/wio/errors"
-    "wio/cmd/wio/log"
     "wio/cmd/wio/toolchain/npm/semver"
     "wio/cmd/wio/types"
 )
@@ -39,9 +38,12 @@ func (i *Info) Exists(name string, ver string) (bool, error) {
 }
 
 func (i *Info) ResolveRemote(config types.IConfig) error {
-    log.Info("Resolving dependencies of: ")
-    log.Infoln(log.Green, "%s@%s", config.Name(), config.Version())
+    logResolveStart(config)
+
     root := &Node{name: config.Name(), ver: config.Version()}
+    if root.resolve = semver.Parse(root.ver); root.resolve == nil {
+        return errors.Stringf("project has invalid version %s", root.ver)
+    }
     deps := config.Dependencies()
     for name, ver := range deps {
         node := &Node{name: name, ver: ver}
@@ -52,10 +54,14 @@ func (i *Info) ResolveRemote(config types.IConfig) error {
             return err
         }
     }
+
+    logResolveDone(root)
     return nil
 }
 
 func (i *Info) ResolveTree(root *Node) error {
+    logResolve(root)
+
     if ret := i.GetRes(root.name, root.ver); ret != nil {
         root.resolve = ret
         return nil
