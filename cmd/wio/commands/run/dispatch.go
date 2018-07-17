@@ -2,7 +2,6 @@ package run
 
 import (
     "fmt"
-    "regexp"
     "strings"
     "wio/cmd/wio/commands/run/cmake"
     "wio/cmd/wio/commands/run/dependencies"
@@ -11,6 +10,8 @@ import (
     "wio/cmd/wio/log"
     "wio/cmd/wio/types"
     "wio/cmd/wio/utils/io"
+
+    "github.com/thoas/go-funk"
 )
 
 type dispatchCmakeFunc func(info *runInfo, target *types.Target) error
@@ -20,8 +21,8 @@ var dispatchCmakeFuncPlatform = map[string]dispatchCmakeFunc{
     constants.NATIVE: dispatchCmakeNative,
 }
 var dispatchCmakeFuncAvrFramework = map[string]dispatchCmakeFunc{
-    constants.COSA: dispatchCmakeAvrGeneric,
-    //constants.ARDUINO: dispatchCmakeAvrGeneric,
+    constants.COSA:    dispatchCmakeAvrCosa,
+    constants.ARDUINO: dispatchCmakeAvrArduino,
 }
 
 func dispatchCmake(info *runInfo, target *types.Target) error {
@@ -46,7 +47,8 @@ func dispatchCmakeAvr(info *runInfo, target *types.Target) error {
 
     // this means framework was not specified at all
     if framework == "" {
-        message := fmt.Sprintf("No Framework specified by the [%s] target", (*target).GetName())
+        message := fmt.Sprintf("No Framework specified by the [%s] target. Try one of %s",
+            (*target).GetName(), funk.Keys(dispatchCmakeFuncAvrFramework))
         return errors.String(message)
     }
 
@@ -64,53 +66,36 @@ func dispatchCmakeAvr(info *runInfo, target *types.Target) error {
 }
 
 func dispatchCmakeNative(info *runInfo, target *types.Target) error {
-    // perform a check for frameworks
-    frameworkProvided := strings.Trim(strings.ToLower((*target).GetFramework()), " ")
-
-    if frameworkProvided == "" {
-        return errors.Stringf("Framework not provided. You can try c++11, c, or c++11,c11")
-    }
-
     return dispatchCmakeNativeGeneric(info, target)
 }
 
-func dispatchCmakeAvrGeneric(info *runInfo, target *types.Target) error {
+func dispatchCmakeAvrCosa(info *runInfo, target *types.Target) error {
     projectName := info.config.GetMainTag().GetName()
     projectPath := info.directory
     port, err := getPort(info)
     if err != nil && info.runType == TypeRun {
         return err
     }
-    return cmake.GenerateAvrCmakeLists(target, projectName, projectPath, port)
+    return cmake.GenerateAvrCmakeLists("toolchain/cmake/CosaToolchain.cmake", target,
+        projectName, projectPath, port)
+}
+
+func dispatchCmakeAvrArduino(info *runInfo, target *types.Target) error {
+    projectName := info.config.GetMainTag().GetName()
+    projectPath := info.directory
+    port, err := getPort(info)
+    if err != nil && info.runType == TypeRun {
+        return err
+    }
+    return cmake.GenerateAvrCmakeLists("toolchain/cmake/ArduinoToolchain.cmake", target,
+        projectName, projectPath, port)
 }
 
 func dispatchCmakeNativeGeneric(info *runInfo, target *types.Target) error {
     projectName := info.config.GetMainTag().GetName()
     projectPath := info.directory
 
-    frameworks := strings.Split((*target).GetFramework(), ",")
-
-    cDetectionPat := regexp.MustCompile(`c[0-9][0-9]`)
-    cppDetectionPat := regexp.MustCompile(`c\+\+[0-9][0-9]`)
-
-    var cppStandard string
-    var cStandard string
-
-    for _, framework := range frameworks {
-        if cppDetectionPat.MatchString(framework) {
-            cppStandard = strings.Split(framework, "++")[1]
-            framework = strings.Replace(framework, "++", "PP", 1) // use CPP instead of C++
-        } else if framework == "c" {
-            cStandard = "11"
-        } else if cDetectionPat.MatchString(framework) {
-            cStandard = strings.Split(framework, "c")[1]
-        } else {
-            return errors.Stringf("Framework [%s] is not valid. You can try c++11, c, or c++11,c11", framework)
-        }
-    }
-
-    return cmake.GenerateNativeCmakeLists(target, strings.Join(frameworks, ""), cppStandard, cStandard,
-        projectName, projectPath)
+    return cmake.GenerateNativeCmakeLists(target, projectName, projectPath)
 }
 
 func dispatchCmakeDependencies(info *runInfo, target *types.Target) error {
