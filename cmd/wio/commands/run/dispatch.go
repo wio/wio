@@ -119,7 +119,8 @@ func dispatchRunTarget(info *runInfo, target *types.Target) error {
         }
         return err
     case constants.NATIVE:
-        return runTarget(binDir, "."+io.Sep+(*target).GetName())
+		args := info.context.String("args")
+        return runTarget(info.directory, io.Path(binDir, (*target).GetName()), args)
     default:
         return errors.Stringf("Platform [%s] is not supported", platform)
     }
