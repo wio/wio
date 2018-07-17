@@ -9,13 +9,12 @@ import (
     "wio/cmd/wio/types"
     "wio/cmd/wio/utils/io"
     "wio/cmd/wio/utils/template"
-
-    "github.com/thoas/go-funk"
 )
 
-var validCppStandard = map[string]string{
+var cppStandards = map[string]string{
     "c++98": "98",
     "c++03": "98",
+    "c++0x": "11",
     "c++11": "11",
     "c++14": "14",
     "c++17": "17",
@@ -23,7 +22,7 @@ var validCppStandard = map[string]string{
     "c++20": "20",
 }
 
-var validCStandard = map[string]string{
+var cStandards = map[string]string{
     "iso9899:1990": "90",
     "c90":          "90",
     "iso9899:1999": "99",
@@ -39,24 +38,27 @@ var validCStandard = map[string]string{
 
 // Reads standard provided by user and returns CMake standard
 func GetStandard(target *types.Target) (string, string, error) {
-    standard := strings.ToLower(strings.Trim((*target).GetStandard(), " "))
-    var cppStandard string
-    var cStandard string
+    stdString := strings.Trim((*target).GetStandard(), " ")
+    stdString = strings.ToLower(stdString)
+    cppStandard := ""
+    cStandard := ""
 
-    for _, currStandard := range strings.Split(standard, ",") {
-        currStandard = strings.Trim(currStandard, " ")
-
-        if funk.Contains(validCppStandard, currStandard) {
-            cppStandard = validCppStandard[currStandard]
-            cStandard = validCStandard["c11"]
-        } else if funk.Contains(validCppStandard, currStandard) {
-            cStandard = validCStandard[currStandard]
-            cppStandard = validCppStandard["c++11"]
-        } else {
-            return "", "", errors.Stringf("[%s] standard is not valid for ISO standard", currStandard)
+    for _, std := range strings.Split(stdString, ",") {
+        std = strings.Trim(std, " ")
+        if val, exists := cppStandards[std]; exists {
+            cppStandard = val
+        } else if val, exists := cStandards[std]; exists {
+            cStandard = val
+        } else if val != "" {
+            return "", "", errors.Stringf("invalid ISO C/C++ standard [%s]", std)
         }
     }
-
+    if cppStandard == "" {
+        cppStandard = "11"
+    }
+    if cStandard == "" {
+        cStandard = "99"
+    }
     return cppStandard, cStandard, nil
 }
 
@@ -110,11 +112,11 @@ func GenerateAvrCmakeLists(
         "PROJECT_NAME":               projectName,
         "CPP_STANDARD":               cppStandard,
         "C_STANDARD":                 cStandard,
-        "FRAMEWORK":                  framework,
         "PORT":                       port,
-        "PLATFORM":                   constants.AVR,
-        "TARGET_NAME":                (*target).GetName(),
+        "PLATFORM":                   strings.ToUpper(constants.AVR),
+        "FRAMEWORK":                  strings.ToUpper(framework),
         "BOARD":                      (*target).GetBoard(),
+        "TARGET_NAME":                (*target).GetName(),
         "ENTRY":                      (*target).GetSrc(),
         "TARGET_COMPILE_FLAGS":       strings.Join(flags, " "),
         "TARGET_COMPILE_DEFINITIONS": strings.Join(definitions, " "),
@@ -142,10 +144,10 @@ func GenerateNativeCmakeLists(
         "CPP_STANDARD":               cppStandard,
         "C_STANDARD":                 cStandard,
         "TARGET_NAME":                (*target).GetName(),
-        "FRAMEWORK":                  (*target).GetFramework(),
-        "HARDWARE":                   (*target).GetBoard(),
+        "PLATFORM":                   strings.ToUpper(constants.NATIVE),
+        "FRAMEWORK":                  strings.ToUpper((*target).GetFramework()),
+        "OS":                         strings.ToUpper((*target).GetBoard()),
         "ENTRY":                      (*target).GetSrc(),
-        "PLATFORM":                   constants.NATIVE,
         "TARGET_COMPILE_FLAGS":       strings.Join(flags, " "),
         "TARGET_COMPILE_DEFINITIONS": strings.Join(definitions, " "),
     })

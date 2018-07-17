@@ -50,6 +50,9 @@ _linux_setup() {
         exit 1;
     fi
 
+    printf "Initiating submodules...\n"
+    git submodule update --init --recursive
+
     printf "Retrieving dependencies...\n"
     make get
 
@@ -67,10 +70,6 @@ _linux_setup() {
     fi
     printf "Done!\n"
 
-    printf "Getting toolchain (Submodules)... "
-    git submodule update --init --recursive
-    printf "Done!\n"
-
     printf "Linking toolchain... "
     mkdir -p ./bin
     rm -rf $(pwd)/bin/toolchain
@@ -82,6 +81,11 @@ _linux_setup() {
     ./symlinks.sh
     cd ..
     printf "Done!\n"
+}
+
+_avr_setup() {
+    apt-get update
+    apt-get install gcc-avr avr-libc avrdude
 }
 
 _format() {
@@ -127,6 +131,9 @@ _simple() {
         echo "Setting up environment for Travis CI"
         TRAVIS=true
         _linux_setup
+    elif [ "$1" == 'avr-setup' ] ; then
+        echo "Installing AVR development dependencies"
+        _avr_setup
     elif [ "$1" == 'format' ] ; then
         echo "Formatting wio codebase"
         _format

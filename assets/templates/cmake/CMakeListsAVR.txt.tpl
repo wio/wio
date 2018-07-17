@@ -32,9 +32,9 @@ endif()
 
 # properties
 set(TARGET_NAME {{TARGET_NAME}})
-set(BOARD {{BOARD}})
 set(PLATFORM {{PLATFORM}})
 set(FRAMEWORK {{FRAMEWORK}})
+set(BOARD {{BOARD}})
 set(ENTRY {{ENTRY}})
 
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
