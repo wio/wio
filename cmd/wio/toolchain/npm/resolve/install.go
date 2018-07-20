@@ -28,8 +28,8 @@ func (i *Info) InstallResolved() error {
     return nil
 }
 
-func (i *Info) install(name string, ver string, data *npm.Version) error {
-    local, err := tryFindConfig(name, ver, i.dir)
+func (i *Info) install(name , ver string, data *npm.Version) error {
+    local, err := i.GetPkg(name, ver)
     if err != nil {
         return err
     }

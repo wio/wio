@@ -1,12 +1,8 @@
-#ifndef STACK_SIZE
-#error "STACK_SIZE must be defined"
-#endif
-
 #define static_assert(cond, msg) typedef char __static_assertion[(cond) ? 1 : -1]
 
 #include <pkg-malloc.h>
 
-static_assert(STACK_SIZE == 256, "Expected STACK_SIZE to be 256");
+static_assert(STACK_SIZE >= 256, "Expected STACK_SIZE to be at least 256");
 
 typedef unsigned char byte;
 static byte memory[STACK_SIZE];
