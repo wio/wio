@@ -1,17 +1,18 @@
 package dependencies
 
 import (
+    "fmt"
     "regexp"
     "strings"
     "wio/cmd/wio/errors"
     "wio/cmd/wio/utils"
 )
 
-var placeholderMatch = regexp.MustCompile(`^\$\([a-zA-Z_][a-zA-Z0-9_]*\)$`)
+var placeholderMatch = regexp.MustCompile(`^\$\([a-zA-Z_-][a-zA-Z0-9_]*\)$`)
 
 // Verifies the placeholder syntax
 func IsPlaceholder(flag string) bool {
-    return placeholderMatch.MatchString(flag)
+    return placeholderMatch.MatchString(strings.Trim(flag, " "))
 }
 
 // matches a flag by the requested flag
@@ -42,7 +43,7 @@ func fillPlaceholders(givenFlags, requiredFlags []string) ([]string, error) {
                 goto Continue
             }
         }
-        return nil, errors.Stringf("placeholder flag %s unfilled", required)
+        return nil, errors.String(fmt.Sprintf("placeholder flag/definition \"%s\" unfilled in ", required) + "%s")
 
     Continue:
         continue
@@ -60,11 +61,12 @@ func fillGlobal(givenFlags, requiredFlags []string) ([]string, error) {
                 goto Continue
             }
         }
-        return nil, errors.Stringf("global flag %s unfilled", required)
+        return nil, errors.String(fmt.Sprintf("global flag/definition \"%s\" unfilled in ", required) + "%s")
 
     Continue:
         continue
     }
+
     return ret, nil
 }
 
@@ -77,11 +79,12 @@ func fillRequired(givenFlags []string, requiredFlags []string) ([]string, []stri
                 ret = append(ret, res)
                 goto Continue
             }
-            return nil, nil, errors.Stringf("required flag %s unfilled", required)
-
-        Continue:
-            continue
         }
+        return nil, nil, errors.String(fmt.Sprintf("required flag/definition \"%s\" unfilled in ", required) + "%s")
+
+    Continue:
+        continue
     }
+
     return ret, utils.Difference(givenFlags, ret), nil
 }
