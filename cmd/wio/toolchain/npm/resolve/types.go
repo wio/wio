@@ -2,11 +2,13 @@ package resolve
 
 import (
     "wio/cmd/wio/errors"
+
     "wio/cmd/wio/toolchain/npm"
     "wio/cmd/wio/toolchain/npm/client"
     "wio/cmd/wio/toolchain/npm/semver"
     "wio/cmd/wio/types"
     "wio/cmd/wio/utils"
+
     "wio/cmd/wio/utils/io"
 )
 
@@ -81,6 +83,10 @@ func (i *Info) setVer(name string, ver string, data *npm.Version) {
     } else {
         i.ver[name] = map[string]*npm.Version{ver: data}
     }
+}
+
+func (i *Info) GetRoot() *Node {
+    return i.root
 }
 
 func (i *Info) SetRes(name string, query string, ver *semver.Version) {
