@@ -1,24 +1,21 @@
 package dependencies
 
 import (
-    "fmt"
+    "wio/cmd/wio/commands/run/cmake"
     "wio/cmd/wio/errors"
-    "wio/cmd/wio/log"
     "wio/cmd/wio/toolchain/npm/resolve"
     "wio/cmd/wio/types"
     "wio/cmd/wio/utils"
 )
 
-type flagsDefinitionsInfo struct {
+type definitionsInfo struct {
     name         string
-    isFlag       bool
     globalsGiven []string
     otherGiven   []string
-    globals      []string
-    required     []string
-    included     []string
-    onlyGlobal   bool
-    onlyRequired bool
+    globals      map[string][]string
+    required     map[string][]string
+    optional     map[string][]string
+    singleton    bool
 }
 
 type parentGivenInfo struct {
@@ -28,43 +25,53 @@ type parentGivenInfo struct {
     linkFlags      []string
 }
 
-func fillFlagsDefinitions(info flagsDefinitionsInfo) ([]string, error) {
-    var all []string
+func fillDefinitions(info definitionsInfo) (map[string][]string, error) {
+    var all = map[string][]string{}
 
-    global, err := fillGlobal(info.globalsGiven, info.globals)
+    globalPrivate, err := fillDefinition("global", info.globalsGiven, info.globals[types.Private])
     if err != nil {
         return nil, errors.Stringf(err.Error(), info.name)
     } else {
-        all = utils.AppendIfMissing(all, global)
+        all[types.Private] = utils.AppendIfMissing(all[types.Private], globalPrivate)
     }
 
-    if !info.onlyGlobal && len(info.required) > 0 {
-        required, other, err := fillRequired(info.otherGiven, info.required)
+    globalPublic, err := fillDefinition("global", info.globalsGiven, info.globals[types.Public])
+    if err != nil {
+        return nil, errors.Stringf(err.Error(), info.name)
+    } else {
+        all[types.Public] = utils.AppendIfMissing(all[types.Public], globalPublic)
+    }
+
+    if !info.singleton && (len(info.required[types.Private]) > 0 || len(info.required[types.Public]) > 0) {
+        requiredPrivate, err := fillDefinition("required", info.otherGiven, info.required[types.Private])
         if err != nil {
-            fmt.Println(err.Error())
             return nil, errors.Stringf(err.Error(), info.name)
         } else {
-            all = utils.AppendIfMissing(all, required)
-            all = utils.AppendIfMissing(all, other)
-        }
-    } else {
-        acceptName := "flags"
-        if !info.isFlag {
-            acceptName = "definitions"
+            all[types.Private] = utils.AppendIfMissing(all[types.Private], requiredPrivate)
         }
 
-        if info.onlyGlobal && info.onlyRequired {
-            log.Warnln(fmt.Sprintf("%s is set to accept only global %s and only required %s. "+
-                "Ignoring required %s...", info.name, acceptName, acceptName, acceptName))
-        } else if info.onlyRequired {
-            log.Warnln(fmt.Sprintf("%s only accepts global %s but required flags are also requested. "+
-                "Ignoring required %s...", info.name, acceptName, acceptName))
+        requiredPublic, err := fillDefinition("required", info.otherGiven, info.required[types.Public])
+        if err != nil {
+            return nil, errors.Stringf(err.Error(), info.name)
+        } else {
+            all[types.Public] = utils.AppendIfMissing(all[types.Public], requiredPublic)
         }
 
-        all = utils.AppendIfMissing(all, info.otherGiven)
+        optionalPrivate, err := fillDefinition("other", info.otherGiven, info.optional[types.Private])
+        if err != nil {
+            return nil, errors.Stringf(err.Error(), info.name)
+        } else {
+            all[types.Private] = utils.AppendIfMissing(all[types.Private], optionalPrivate)
+        }
+
+        optionalPublic, err := fillDefinition("other", info.otherGiven, info.optional[types.Public])
+        if err != nil {
+            return nil, errors.Stringf(err.Error(), info.name)
+        } else {
+            all[types.Public] = utils.AppendIfMissing(all[types.Public], optionalPublic)
+        }
     }
 
-    all = utils.AppendIfMissing(all, info.included)
     return all, nil
 }
 
@@ -79,43 +86,53 @@ func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, 
         return errors.Stringf("%s dependency does not exist. Check vendor or wio install", currNode.Name)
     }
 
-    currTarget := &Target{
-        Name:                  pkg.Config.Name(),
-        Version:               pkg.Config.Version(),
-        Path:                  pkg.Path,
-        FromVendor:            pkg.Vendor,
-        HeaderOnly:            pkg.Config.GetMainTag().GetCompileOptions().IsHeaderOnly(),
-        FlagsVisibility:       pkg.Config.MainTag.Flags.Visibility,
-        DefinitionsVisibility: pkg.Config.MainTag.Definitions.Visibility,
+    cxxStandard, cStandard, err := cmake.GetStandard(pkg.Config.GetInfo().GetOptions().GetStandard())
+    if err != nil {
+        return err
     }
 
-    // resolve flags
-    if currTarget.Flags, err = fillFlagsDefinitions(flagsDefinitionsInfo{
-        name:         currTarget.Name + "__" + currTarget.Version,
-        globalsGiven: globalFlags,
-        otherGiven:   parentGiven.flags,
-        globals:      pkg.Config.MainTag.Flags.GlobalFlags,
-        required:     pkg.Config.MainTag.Flags.RequiredFlags,
-        included:     pkg.Config.MainTag.Flags.IncludedFlags,
-        onlyGlobal:   pkg.Config.MainTag.Flags.AllowOnlyGlobalFlags,
-        onlyRequired: pkg.Config.MainTag.Flags.AllowOnlyRequiredFlags,
-    }); err != nil {
-        return err
+    currTarget := &Target{
+        Name:        pkg.Config.GetName(),
+        Version:     pkg.Config.GetVersion(),
+        Path:        pkg.Path,
+        FromVendor:  pkg.Vendor,
+        HeaderOnly:  pkg.Config.GetInfo().GetOptions().GetIsHeaderOnly(),
+        CXXStandard: cxxStandard,
+        CStandard:   cStandard,
+    }
+
+    definitions := pkg.Config.GetInfo().GetDefinitions()
+    defGlobals := map[string][]string{
+        types.Private: definitions.GetGlobal().GetPrivate(),
+        types.Public:  definitions.GetGlobal().GetPublic(),
+    }
+
+    defRequired := map[string][]string{
+        types.Private: definitions.GetRequired().GetPrivate(),
+        types.Public:  definitions.GetRequired().GetPublic(),
+    }
+
+    defOptional := map[string][]string{
+        types.Private: definitions.GetOptional().GetPrivate(),
+        types.Public:  definitions.GetOptional().GetPublic(),
     }
 
     // resolve definitions
-    if currTarget.Definitions, err = fillFlagsDefinitions(flagsDefinitionsInfo{
-        name:         currTarget.Name + "__" + currTarget.Version,
-        globalsGiven: globalDefinitions,
-        otherGiven:   parentGiven.definitions,
-        globals:      pkg.Config.MainTag.Definitions.GlobalDefinitions,
-        required:     pkg.Config.MainTag.Definitions.RequiredDefinitions,
-        included:     pkg.Config.MainTag.Definitions.IncludedDefinitions,
-        onlyGlobal:   pkg.Config.MainTag.Definitions.AllowOnlyGlobalDefinitions,
-        onlyRequired: pkg.Config.MainTag.Definitions.AllowOnlyRequiredDefinitions,
-    }); err != nil {
+    if currTarget.Definitions, err = fillDefinitions(
+        definitionsInfo{
+            name:         currTarget.Name + "__" + currTarget.Version,
+            globalsGiven: globalDefinitions,
+            otherGiven:   parentGiven.definitions,
+            globals:      defGlobals,
+            required:     defRequired,
+            optional:     defOptional,
+            singleton:    definitions.IsSingleton(),
+        }); err != nil {
         return err
     }
+
+    // flags
+    currTarget.Flags = utils.AppendIfMissing(pkg.Config.GetInfo().GetOptions().GetFlags(), parentGiven.flags)
 
     targetSet.Add(currTarget)
 
@@ -124,7 +141,7 @@ func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, 
     })
 
     for _, dep := range currNode.Dependencies {
-        configDependency := &types.DependencyTag{}
+        var configDependency types.Dependency
         var exists bool
 
         if configDependency, exists = pkg.Config.GetDependencies()[dep.Name]; !exists {
@@ -133,11 +150,13 @@ func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, 
         }
 
         // resolve placeholders
-        parentFlags, err := fillPlaceholders(currTarget.Flags, configDependency.Flags)
+        parentFlags, err := fillPlaceholders(currTarget.Flags, configDependency.GetFlags())
         if err != nil {
             return errors.Stringf(err.Error(), currTarget.Name)
         }
-        parentDefinitions, err := fillPlaceholders(currTarget.Definitions, configDependency.Definitions)
+        parentDefinitions, err := fillPlaceholders(
+            utils.AppendIfMissing(currTarget.Definitions[types.Private], currTarget.Definitions[types.Public]),
+            configDependency.GetDefinitions())
         if err != nil {
             return errors.Stringf(err.Error(), currTarget.Name)
         }
@@ -145,7 +164,7 @@ func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, 
         parentInfo := &parentGivenInfo{
             flags:          parentFlags,
             definitions:    parentDefinitions,
-            linkVisibility: configDependency.LinkVisibility,
+            linkVisibility: configDependency.GetVisibility(),
         }
 
         if err = resolveTree(i, dep, currTarget, targetSet, globalFlags, globalDefinitions, parentInfo); err != nil {
