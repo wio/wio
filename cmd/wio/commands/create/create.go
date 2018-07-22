@@ -12,6 +12,7 @@ import (
     "wio/cmd/wio/constants"
     "wio/cmd/wio/log"
     "wio/cmd/wio/types"
+    "wio/cmd/wio/utils"
     "wio/cmd/wio/utils/io"
 
     "github.com/fatih/color"
@@ -49,7 +50,7 @@ func (create Create) createProject(dir string) error {
     // Fill configuration file
     queue = log.GetQueue()
     log.Info(log.Cyan, "configuring project files ... ")
-    if err := fillConfig(queue, &info); err != nil {
+    if err := fillConfig(&info); err != nil {
         log.WriteFailure()
         return err
     } else {
@@ -99,108 +100,63 @@ func createStructure(queue *log.Queue, info *createInfo) error {
 }
 
 // Generate wio.yml for app project
-func fillConfig(queue *log.Queue, info *createInfo) error {
+func fillConfig(info *createInfo) error {
     switch info.projectType {
     case constants.APP:
-        return fillAppConfig(queue, info)
+        return fillAppConfig(info)
     case constants.PKG:
-        return fillPackageConfig(queue, info)
+        return fillPackageConfig(info)
     }
     return nil
 }
 
-func fillAppConfig(queue *log.Queue, info *createInfo) error {
-    log.Verb(queue, "creating config files for app ... ")
-    appConfig := &types.AppConfig{
-        MainTag: types.AppTag{
-            Name: info.name,
-            Ide:  config.ProjectDefaults.Ide,
-            Config: types.Configurations{
-                WioVersion:          config.ProjectMeta.Version,
-                SupportedPlatforms:  []string{info.platform},
-                SupportedFrameworks: []string{info.framework},
-                SupportedBoards:     []string{info.board},
-            },
-            CompileOptions: types.AppCompileOptions{
-                Platform: info.platform,
+func fillAppConfig(info *createInfo) error {
+    config := &types.ConfigImpl{
+        Type: constants.APP,
+        Info: &types.InfoImpl{
+            Name:     info.name,
+            Version:  "0.0.1",
+            Keywords: []string{"wio"},
+            Options: &types.OptionsImpl{
+                Default: "main",
+                Version: config.ProjectMeta.Version,
             },
         },
-        TargetsTag: types.AppTargets{
-            DefaultTarget: config.ProjectDefaults.AppTargetName,
-            Targets: map[string]*types.AppTarget{
-                config.ProjectDefaults.AppTargetName: {
-                    Src:         "src",
-                    Board:       getBoard(info.board),
-                    Framework:   getFramework(info.framework),
-                    Platform:    getPlatform(info.platform),
-                    Flags:       types.AppTargetFlags{},
-                    Definitions: types.AppTargetDefinitions{},
-                },
+        Targets: map[string]*types.TargetImpl{
+            "main": &types.TargetImpl{
+                Source:    "src",
+                Platform:  getPlatform(info.platform),
+                Framework: getFramework(info.framework),
+                Board:     getBoard(info.board),
             },
         },
     }
-    log.WriteSuccess(queue, log.VERB)
-    log.Verb(queue, "pretty printing wio.yml file ... ")
-    wioYmlPath := info.directory + io.Sep + io.Config
-    if err := appConfig.PrettyPrint(wioYmlPath); err != nil {
-        log.WriteFailure(queue, log.VERB)
-        return err
-    }
-    log.WriteSuccess(queue, log.VERB)
-    return nil
+    return utils.WriteWioConfig(info.directory, config)
 }
 
 // Generate wio.yml for package project
-func fillPackageConfig(queue *log.Queue, info *createInfo) error {
-    log.Verb(queue, "creating config file for package ... ")
-    visibility := "PRIVATE"
-    if info.headerOnly {
-        visibility = "INTERFACE"
-    }
-    target := config.ProjectDefaults.PkgTargetName
-    projectConfig := &types.PkgConfig{
-        MainTag: types.PkgTag{
-            Ide: config.ProjectDefaults.Ide,
-            Meta: types.PackageMeta{
-                Name:     info.name,
-                Version:  "0.0.1",
-                License:  "MIT",
-                Keywords: []string{info.platform, info.framework, "wio"},
+func fillPackageConfig(info *createInfo) error {
+    config := &types.ConfigImpl{
+        Type: constants.PKG,
+        Info: &types.InfoImpl{
+            Name:     info.name,
+            Version:  "0.0.1",
+            Keywords: []string{"wio"},
+            Options: &types.OptionsImpl{
+                Default: "tests",
+                Version: config.ProjectMeta.Version,
             },
-            CompileOptions: types.PkgCompileOptions{
-                HeaderOnly: info.headerOnly,
-                Platform:   info.platform,
-            },
-            Config: types.Configurations{
-                WioVersion:          config.ProjectMeta.Version,
-                SupportedPlatforms:  []string{info.platform},
-                SupportedFrameworks: []string{info.framework},
-                SupportedBoards:     []string{info.board},
-            },
-            Flags:       types.Flags{Visibility: visibility},
-            Definitions: types.Definitions{Visibility: visibility},
         },
-        TargetsTag: types.PkgAVRTargets{
-            DefaultTarget: target,
-            Targets: map[string]*types.PkgTarget{
-                target: {
-                    Src:       target,
-                    Platform:  getPlatform(info.platform),
-                    Framework: getFramework(info.framework),
-                    Board:     getBoard(info.board),
-                },
+        Targets: map[string]*types.TargetImpl{
+            "tests": &types.TargetImpl{
+                Source:    "tests",
+                Platform:  getPlatform(info.platform),
+                Framework: getFramework(info.framework),
+                Board:     getBoard(info.board),
             },
         },
     }
-    log.WriteSuccess(queue, log.VERB)
-    log.Verb(queue, "pretty printing wio.yml file ... ")
-    wioYmlPath := info.directory + io.Sep + io.Config
-    if err := projectConfig.PrettyPrint(wioYmlPath); err != nil {
-        log.WriteFailure(queue, log.VERB)
-        return err
-    }
-    log.WriteSuccess(queue, log.VERB)
-    return nil
+    return utils.WriteWioConfig(info.directory, config)
 }
 
 // Print package creation summary
