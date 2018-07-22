@@ -15,6 +15,8 @@ import (
     "wio/cmd/wio/utils"
     "wio/cmd/wio/utils/io"
 
+    "wio/cmd/wio/config/defaults"
+
     "github.com/fatih/color"
 )
 
@@ -80,7 +82,7 @@ func createStructure(queue *log.Queue, info *createInfo) error {
     subQueue := log.GetQueue()
 
     dataType := &structureData.Pkg
-    if info.projectType == constants.APP {
+    if info.projectType == constants.App {
         dataType = &structureData.App
     }
 
@@ -93,7 +95,7 @@ func createStructure(queue *log.Queue, info *createInfo) error {
         log.CopyQueue(subQueue, queue, log.FOUR_SPACES)
     }
 
-    readmeFile := info.directory + io.Sep + "README.md"
+    readmeFile := io.Path(info.directory, "README.md")
     err := info.fillReadMe(queue, readmeFile)
 
     return err
@@ -102,75 +104,78 @@ func createStructure(queue *log.Queue, info *createInfo) error {
 // Generate wio.yml for app project
 func fillConfig(info *createInfo) error {
     switch info.projectType {
-    case constants.APP:
+    case constants.App:
         return fillAppConfig(info)
-    case constants.PKG:
+    case constants.Pkg:
         return fillPackageConfig(info)
     }
     return nil
 }
 
 func fillAppConfig(info *createInfo) error {
-    config := &types.ConfigImpl{
-        Type: constants.APP,
+    cfg := &types.ConfigImpl{
+        Type: constants.App,
         Info: &types.InfoImpl{
             Name:     info.name,
-            Version:  "0.0.1",
-            Keywords: []string{"wio"},
+            Version:  defaults.Version,
+            Keywords: defaults.AppKeywords,
             Options: &types.OptionsImpl{
-                Default: "main",
+                Default: defaults.AppTargetName,
                 Version: config.ProjectMeta.Version,
             },
         },
         Targets: map[string]*types.TargetImpl{
-            "main": &types.TargetImpl{
-                Source:    "src",
+            defaults.AppTargetName: {
+                Source:    defaults.AppTargetPath,
                 Platform:  getPlatform(info.platform),
                 Framework: getFramework(info.framework),
                 Board:     getBoard(info.board),
             },
         },
     }
-    return utils.WriteWioConfig(info.directory, config)
+    return utils.WriteWioConfig(info.directory, cfg)
 }
 
 // Generate wio.yml for package project
 func fillPackageConfig(info *createInfo) error {
-    config := &types.ConfigImpl{
-        Type: constants.PKG,
+    cfg := &types.ConfigImpl{
+        Type: constants.Pkg,
         Info: &types.InfoImpl{
             Name:     info.name,
-            Version:  "0.0.1",
-            Keywords: []string{"wio"},
+            Version:  defaults.Version,
+            Keywords: defaults.PkgKeywords,
             Options: &types.OptionsImpl{
-                Default: "tests",
+                Default: defaults.PkgTargetName,
                 Version: config.ProjectMeta.Version,
             },
         },
         Targets: map[string]*types.TargetImpl{
-            "tests": &types.TargetImpl{
-                Source:    "tests",
+            defaults.PkgTargetName: {
+                Source:    defaults.PkgTargetPath,
                 Platform:  getPlatform(info.platform),
                 Framework: getFramework(info.framework),
                 Board:     getBoard(info.board),
             },
         },
     }
-    return utils.WriteWioConfig(info.directory, config)
+    return utils.WriteWioConfig(info.directory, cfg)
 }
 
 // Print package creation summary
 func (info createInfo) printPackageCreateSummary() {
-    log.Writeln()
+    log.Infoln()
     log.Infoln(log.Yellow.Add(color.Underline), "Project structure summary")
     if !info.headerOnly {
         log.Info(log.Cyan, "src              ")
-        log.Writeln("source/non client files")
+        log.Infoln("source/non client files")
     }
-    log.Info(log.Cyan, "tests            ")
-    log.Writeln("source files for test target")
-    log.Info(log.Cyan, "include          ")
-    log.Writeln("public headers for the package")
+
+    if info.projectType == constants.Pkg {
+        log.Info(log.Cyan, "tests            ")
+        log.Infoln("source files for test target")
+        log.Info(log.Cyan, "include          ")
+        log.Infoln("public headers for the package")
+    }
 
     // print project summary
     log.Writeln()
@@ -183,6 +188,9 @@ func (info createInfo) printPackageCreateSummary() {
     log.Writeln(info.platform)
     log.Info(log.Cyan, "framework        ")
     log.Writeln(info.framework)
-    log.Info(log.Cyan, "board            ")
-    log.Writeln(info.board)
+
+    if info.framework == constants.Avr {
+        log.Info(log.Cyan, "board            ")
+        log.Writeln(info.board)
+    }
 }

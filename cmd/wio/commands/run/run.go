@@ -35,8 +35,10 @@ type runInfo struct {
     context *cli.Context
     config  types.Config
 
-    directory string
-    targets   []string
+    directory   string
+    projectType string
+    headerOnly  bool
+    targets     []string
 
     runType Type
     jobs    int
@@ -67,10 +69,12 @@ func (run Run) Execute() error {
     }
     targets := run.Context.Args()
     info := runInfo{
-        context:   run.Context,
-        config:    config,
-        directory: directory,
-        targets:   targets,
+        context:     run.Context,
+        config:      config,
+        directory:   directory,
+        projectType: config.GetType(),
+        headerOnly:  config.GetInfo().GetOptions().GetIsHeaderOnly(),
+        targets:     targets,
     }
     if err := info.execute(run.RunType); err != nil {
         return err

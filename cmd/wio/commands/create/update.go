@@ -17,7 +17,7 @@ func (create Create) updateApp(directory string, config types.Config) error {
     info := &createInfo{
         context:     create.Context,
         directory:   directory,
-        projectType: constants.APP,
+        projectType: constants.App,
         name:        config.GetName(),
     }
     log.Info(log.Cyan, "updating app files ... ")
@@ -28,7 +28,7 @@ func (create Create) updatePackage(directory string, config types.Config) error 
     info := &createInfo{
         context:     create.Context,
         directory:   directory,
-        projectType: constants.PKG,
+        projectType: constants.Pkg,
         name:        config.GetName(),
     }
 
@@ -38,10 +38,12 @@ func (create Create) updatePackage(directory string, config types.Config) error 
 
 func (info *createInfo) update(config types.Config) error {
     queue := log.GetQueue()
-    //if err := updateProjectFiles(queue, info); err != nil {
-    //    log.WriteFailure()
-    //    return err
-    //}
+
+    if err := updateProjectFiles(queue, info); err != nil {
+        log.WriteFailure()
+        log.PrintQueue(queue, log.TWO_SPACES)
+        return err
+    }
     log.WriteSuccess()
     log.PrintQueue(queue, log.TWO_SPACES)
 
@@ -49,9 +51,10 @@ func (info *createInfo) update(config types.Config) error {
     queue = log.GetQueue()
     if err := updateConfig(queue, config, info); err != nil {
         log.WriteFailure()
-        log.Errln(err)
+        log.PrintQueue(queue, log.TWO_SPACES)
         return err
     }
+
     log.WriteSuccess()
     log.PrintQueue(queue, log.TWO_SPACES)
 
@@ -76,10 +79,10 @@ func (create Create) handleUpdate(directory string) error {
         return err
     }
     switch cfg.GetType() {
-    case constants.APP:
+    case constants.App:
         err = create.updateApp(directory, cfg)
         break
-    case constants.PKG:
+    case constants.Pkg:
         err = create.updatePackage(directory, cfg)
         break
     }
@@ -89,9 +92,9 @@ func (create Create) handleUpdate(directory string) error {
 // Update configurations
 func updateConfig(queue *log.Queue, config types.Config, info *createInfo) error {
     switch info.projectType {
-    case constants.APP:
+    case constants.App:
         return updateAppConfig(queue, config, info)
-    case constants.PKG:
+    case constants.Pkg:
         return updatePackageConfig(queue, config, info)
     }
     return nil
@@ -130,7 +133,7 @@ func updateProjectFiles(queue *log.Queue, info *createInfo) error {
         log.WriteSuccess(queue, log.VERB)
     }
     dataType := &structureData.Pkg
-    if info.projectType == constants.APP {
+    if info.projectType == constants.App {
         dataType = &structureData.App
     }
     copyProjectAssets(queue, info, dataType)
