@@ -2,18 +2,6 @@ package cmake
 
 //////////////////////////////////////////////// Dependencies ////////////////////////////////////////
 
-const targetIncludeDirectories = `target_include_directories({{TARGET}} {{VISIBILITY}} {{DIRECTORIES}})`
-const targetCompileDefinitions = `target_compile_definitions({{TARGET}} {{VISIBILITY}} {{DEFINITIONS}})`
-const targetCompileOptions = `target_compile_options({{TARGET}} {{VISIBILITY}} {{FLAGS}})`
-const targetLinkLibraries = `target_link_libraries({{TARGET}} {{VISIBILITY}} {{LIBRARIES}})`
-
-const file = `file({{TYPE}} {{VARIABLE}} {{ARGS}})`
-const addLibrary = `add_library({{LIBRARY}} {{TYPE}} {{FILES}})`
-const generateArduinoLibrary = `generate_arduino_library({{LIBRARY}} SRCS {{FILES}} BOARD {{BOARD}})`
-
-const addExecutable = `add_executable({{TARGET}} {{FILES}})`
-const generateArduinoFirmware = `genreate_arduino_firmware({{TARGET}} SRCS {{FILES}} BOARD {{BOARD}} PORT {{PORT}})`
-
 // This for header only AVR dependency
 const AvrHeader = `
 add_library({{DEPENDENCY_NAME}} INTERFACE)
@@ -170,4 +158,4 @@ target_include_directories(
 
 // This is for linking dependencies
 const LinkString = `
-target_link_libraries({{LINKER_NAME}} {{LINK_VISIBILITY}} {{DEPENDENCY_NAME}})`
+target_link_libraries({{LINKER_NAME}} {{LINK_VISIBILITY}} {{DEPENDENCY_NAME}} {{LINKER_FLAGS}})`

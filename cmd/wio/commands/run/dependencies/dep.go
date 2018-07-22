@@ -57,6 +57,7 @@ func GenerateCMakeDependencies(cmakePath string, platform string, targets *Targe
             "LINKER_NAME":     linkerName,
             "DEPENDENCY_NAME": link.To.Name + "__" + link.To.Version,
             "LINK_VISIBILITY": link.LinkInfo.Visibility,
+            "LINKER_FLAGS":    strings.Join(link.LinkInfo.Flags, " "),
         })
         cmakeStrings = append(cmakeStrings, finalString)
     }
@@ -79,7 +80,7 @@ func CreateBuildTargets(projectDir string, target types.Target) (*TargetSet, err
         return nil, err
     }
 
-    if config.GetType() == constants.APP {
+    if config.GetType() == constants.App {
         for _, dep := range i.GetRoot().Dependencies {
             var configDependency types.Dependency
             var exists bool
@@ -90,9 +91,10 @@ func CreateBuildTargets(projectDir string, target types.Target) (*TargetSet, err
             }
 
             parentInfo := &parentGivenInfo{
-                flags:          configDependency.GetFlags(),
+                flags:          configDependency.GetCompileFlags(),
                 definitions:    configDependency.GetDefinitions(),
                 linkVisibility: configDependency.GetVisibility(),
+                linkFlags:      configDependency.GetLinkerFlags(),
             }
 
             // all direct dependencies will link to the main target

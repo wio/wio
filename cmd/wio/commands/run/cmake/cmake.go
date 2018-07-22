@@ -63,7 +63,7 @@ func GetStandard(standard string) (string, string, error) {
 }
 
 func BuildPath(projectPath string) string {
-    return projectPath + io.Sep + io.Folder + io.Sep + constants.TargetDir
+    return io.Path(projectPath, io.Folder, constants.TargetDir)
 }
 
 func generateCmakeLists(templateFile string, buildPath string, values map[string]string) error {
@@ -106,7 +106,7 @@ func GenerateAvrCmakeLists(
         "CPP_STANDARD":               cppStandard,
         "C_STANDARD":                 cStandard,
         "PORT":                       port,
-        "PLATFORM":                   strings.ToUpper(constants.AVR),
+        "PLATFORM":                   strings.ToUpper(constants.Avr),
         "FRAMEWORK":                  strings.ToUpper(framework),
         "BOARD":                      target.GetBoard(),
         "TARGET_NAME":                target.GetName(),
@@ -134,7 +134,7 @@ func GenerateNativeCmakeLists(
         "CPP_STANDARD":               cppStandard,
         "C_STANDARD":                 cStandard,
         "TARGET_NAME":                target.GetName(),
-        "PLATFORM":                   strings.ToUpper(constants.NATIVE),
+        "PLATFORM":                   strings.ToUpper(constants.Native),
         "FRAMEWORK":                  strings.ToUpper(target.GetFramework()),
         "OS":                         strings.ToUpper(target.GetBoard()),
         "ENTRY":                      target.GetSource(),
