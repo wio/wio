@@ -14,6 +14,8 @@ import (
     "wio/cmd/wio/commands/create"
     "wio/cmd/wio/commands/devices"
     "wio/cmd/wio/commands/pac/install"
+    "wio/cmd/wio/commands/pac/publish"
+    "wio/cmd/wio/commands/pac/user"
     "wio/cmd/wio/commands/pac/vendor"
     "wio/cmd/wio/commands/run"
     "wio/cmd/wio/config"
@@ -204,8 +206,46 @@ var cmd = []cli.Command{
         Name:      "install",
         Usage:     "Install packages from remote server.",
         UsageText: "wio install [name] [version]",
+        Flags: []cli.Flag{
+            cli.BoolFlag{Name: "verbose",
+                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
+            cli.BoolFlag{Name: "disable-warnings",
+                Usage: "Disables all the warning shown by wio.",
+            },
+        },
         Action: func(c *cli.Context) {
             command = install.Cmd{Context: c}
+        },
+    },
+    {
+        Name:      "login",
+        Usage:     "Login to the npm registry.",
+        UsageText: "wio login",
+        Action: func(c *cli.Context) {
+            command = user.Login{Context: c}
+        },
+    },
+    {
+        Name:      "logout",
+        Usage:     "Clear login token.",
+        UsageText: "wio logout",
+        Action: func(c *cli.Context) {
+            command = user.Logout{Context: c}
+        },
+    },
+    {
+        Name:      "publish",
+        Usage:     "Publish package to registry.",
+        UsageText: "wio publish",
+        Flags: []cli.Flag{
+            cli.BoolFlag{Name: "verbose",
+                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
+            cli.BoolFlag{Name: "disable-warnings",
+                Usage: "Disables all the warning shown by wio.",
+            },
+        },
+        Action: func(c *cli.Context) {
+            command = publish.Cmd{Context: c}
         },
     },
     {
