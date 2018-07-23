@@ -1,7 +1,7 @@
 {
   "name": "wio",
-  "version": "0.3.2",
-  "description": "An Iot Development Environment",
+  "version": "0.4.0",
+  "description": "An IOT Development Environment",
   "main": "index.js",
   "scripts": {
     "preinstall": "node npm-go/preinstall.js",
@@ -11,7 +11,7 @@
   "bin": "./bin/wio",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wio/wio-core.git"
+    "url": "git+https://github.com/wio/wio.git"
   },
   "keywords": [
     "wio",
