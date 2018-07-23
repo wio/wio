@@ -1,26 +1,74 @@
 package cmake
 
 import (
+    "os"
     "path/filepath"
     "strings"
+    "wio/cmd/wio/constants"
+    "wio/cmd/wio/errors"
     "wio/cmd/wio/types"
     "wio/cmd/wio/utils/io"
-    "os"
     "wio/cmd/wio/utils/template"
-    "wio/cmd/wio/constants"
 )
 
-func BuildPath(projectPath string) string {
-    return projectPath + io.Sep + io.Folder + io.Sep + constants.TargetDir
+var cppStandards = map[string]string{
+    "c++98": "98",
+    "c++03": "98",
+    "c++0x": "11",
+    "c++11": "11",
+    "c++14": "14",
+    "c++17": "17",
+    "c++2a": "20",
+    "c++20": "20",
 }
 
-func generateCmakeLists(
-    templateFile string,
-    buildPath string,
-    values map[string]string) error {
+var cStandards = map[string]string{
+    "iso9899:1990": "90",
+    "c90":          "90",
+    "iso9899:1999": "99",
+    "c99":          "99",
+    "iso9899:2011": "11",
+    "c11":          "11",
+    "iso9899:2017": "11",
+    "c17":          "11",
+    "gnu90":        "90",
+    "gnu99":        "99",
+    "gnu11":        "11",
+}
 
-    templatePath := "templates/cmake/" + templateFile + ".txt.tpl"
-    cmakeListsPath := buildPath + io.Sep + "CMakeLists.txt"
+// Reads standard provided by user and returns CMake standard
+func GetStandard(standard string) (string, string, error) {
+    stdString := strings.Trim(standard, " ")
+    stdString = strings.ToLower(stdString)
+    cppStandard := ""
+    cStandard := ""
+
+    for _, std := range strings.Split(stdString, ",") {
+        std = strings.Trim(std, " ")
+        if val, exists := cppStandards[std]; exists {
+            cppStandard = val
+        } else if val, exists := cStandards[std]; exists {
+            cStandard = val
+        } else if val != "" {
+            return "", "", errors.Stringf("invalid ISO C/C++ standard [%s]", std)
+        }
+    }
+    if cppStandard == "" {
+        cppStandard = "11"
+    }
+    if cStandard == "" {
+        cStandard = "99"
+    }
+    return cppStandard, cStandard, nil
+}
+
+func BuildPath(projectPath string) string {
+    return io.Path(projectPath, io.Folder, constants.TargetDir)
+}
+
+func generateCmakeLists(templateFile string, buildPath string, values map[string]string) error {
+    templatePath := io.Path("templates", "cmake", templateFile+".txt.tpl")
+    cmakeListsPath := io.Path(buildPath, "CMakeLists.txt")
     if err := os.MkdirAll(buildPath, os.ModePerm); err != nil {
         return err
     }
@@ -32,17 +80,19 @@ func generateCmakeLists(
 
 // This creates the main CMakeLists.txt file for AVR app type project
 func GenerateAvrCmakeLists(
-    target *types.Target,
+    toolchainPath string,
+    target types.Target,
     projectName string,
     projectPath string,
+    cppStandard string,
+    cStandard string,
     port string) error {
 
-    flags := (*target).GetFlags().GetTargetFlags()
-    definitions := (*target).GetDefinitions().GetTargetDefinitions()
-    framework := (*target).GetFramework()
-    buildPath := BuildPath(projectPath) + io.Sep + (*target).GetName()
+    flags := target.GetFlags().GetTarget()
+    definitions := target.GetDefinitions().GetTarget()
+    framework := target.GetFramework()
+    buildPath := io.Path(BuildPath(projectPath), target.GetName())
     templateFile := "CMakeListsAVR"
-    toolchainPath := "toolchain/cmake/CosaToolchain.cmake"
     executablePath, err := io.NormalIO.GetRoot()
     if err != nil {
         return err
@@ -53,35 +103,41 @@ func GenerateAvrCmakeLists(
         "TOOLCHAIN_FILE_REL":         filepath.ToSlash(toolchainPath),
         "PROJECT_PATH":               filepath.ToSlash(projectPath),
         "PROJECT_NAME":               projectName,
-        "FRAMEWORK":                  framework,
+        "CPP_STANDARD":               cppStandard,
+        "C_STANDARD":                 cStandard,
         "PORT":                       port,
-        "PLATFORM":                   constants.AVR,
-        "TARGET_NAME":                (*target).GetName(),
-        "BOARD":                      (*target).GetBoard(),
-        "ENTRY":                      (*target).GetSrc(),
+        "PLATFORM":                   strings.ToUpper(constants.Avr),
+        "FRAMEWORK":                  strings.ToUpper(framework),
+        "BOARD":                      target.GetBoard(),
+        "TARGET_NAME":                target.GetName(),
+        "ENTRY":                      target.GetSource(),
         "TARGET_COMPILE_FLAGS":       strings.Join(flags, " "),
         "TARGET_COMPILE_DEFINITIONS": strings.Join(definitions, " "),
     })
 }
 
 func GenerateNativeCmakeLists(
-    target *types.Target,
+    target types.Target,
     projectName string,
-    projectPath string) error {
+    projectPath string,
+    cppStandard string,
+    cStandard string) error {
 
-    flags := (*target).GetFlags().GetTargetFlags()
-    definitions := (*target).GetDefinitions().GetTargetDefinitions()
-    buildPath := BuildPath(projectPath) + io.Sep + (*target).GetName()
+    flags := target.GetFlags().GetTarget()
+    definitions := target.GetDefinitions().GetTarget()
+    buildPath := io.Path(BuildPath(projectPath), target.GetName())
     templateFile := "CMakeListsNative"
 
     return generateCmakeLists(templateFile, buildPath, map[string]string{
         "PROJECT_PATH":               filepath.ToSlash(projectPath),
         "PROJECT_NAME":               projectName,
-        "TARGET_NAME":                (*target).GetName(),
-        "FRAMEWORK":                  (*target).GetFramework(),
-        "BOARD":                      (*target).GetBoard(),
-        "ENTRY":                      (*target).GetSrc(),
-        "PLATFORM":                   constants.NATIVE,
+        "CPP_STANDARD":               cppStandard,
+        "C_STANDARD":                 cStandard,
+        "TARGET_NAME":                target.GetName(),
+        "PLATFORM":                   strings.ToUpper(constants.Native),
+        "FRAMEWORK":                  strings.ToUpper(target.GetFramework()),
+        "OS":                         strings.ToUpper(target.GetBoard()),
+        "ENTRY":                      target.GetSource(),
         "TARGET_COMPILE_FLAGS":       strings.Join(flags, " "),
         "TARGET_COMPILE_DEFINITIONS": strings.Join(definitions, " "),
     })

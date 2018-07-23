@@ -10,23 +10,23 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 all: build run
 
 get:
-	@echo Getting Required tools to build this project
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/kardianos/govendor
-	@echo Tools Downloaded and Built!!
+	go get -u github.com/stretchr/testify
+	go get -u github.com/pmezard/go-difflib/difflib
 
 build:
 	@echo Building $(BINARY_NAME) project:
 	@cd "$(CURDIR)/cmd/$(BINARY_NAME)/utils/io" && go-bindata -nomemcopy -pkg io -prefix ../../../../ ../../../../assets/...
 	@cd "$(CURDIR)/cmd/$(BINARY_NAME)" && $(GOBUILD) -o ../../bin/$(BINARY_NAME) -v
-	@echo Project built!!
+	@echo Done!
 
 clean:
 	@echo Cleaning $(BINARY_NAME) project files:
 	@$(GOCLEAN)
 	@rm -f bin/$(BINARY_NAME)
 	@rm -f bin/$(BINARY_UNIX)
-	@echo Cleaning Finished!!
+	@echo Done!
 
 run:
 	@./bin/$(BINARY_NAME) ${ARGS}

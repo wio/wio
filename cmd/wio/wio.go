@@ -8,18 +8,24 @@
 package main
 
 import (
-    "github.com/urfave/cli"
     "os"
     "time"
     "wio/cmd/wio/commands"
     "wio/cmd/wio/commands/create"
     "wio/cmd/wio/commands/devices"
-    "wio/cmd/wio/commands/pac"
+    "wio/cmd/wio/commands/pac/install"
+    "wio/cmd/wio/commands/pac/publish"
+    "wio/cmd/wio/commands/pac/user"
+    "wio/cmd/wio/commands/pac/vendor"
     "wio/cmd/wio/commands/run"
     "wio/cmd/wio/config"
+    "wio/cmd/wio/constants"
     "wio/cmd/wio/log"
     "wio/cmd/wio/utils/io"
-    "wio/cmd/wio/constants"
+
+    "wio/cmd/wio/config/defaults"
+
+    "github.com/urfave/cli"
 )
 
 var createFlags = []cli.Flag{
@@ -73,7 +79,7 @@ var buildFlags = []cli.Flag{
         Usage: "Build all available targets",
     },
     cli.StringFlag{
-        Name: "port",
+        Name:  "port",
         Usage: "Specify upload port",
     },
     cli.BoolFlag{
@@ -88,15 +94,19 @@ var buildFlags = []cli.Flag{
 
 var cleanFlags = []cli.Flag{
     cli.BoolFlag{
-        Name: "hard",
+        Name:  "hard",
         Usage: "Removes build directories",
     },
 }
 
 var runFlags = []cli.Flag{
     cli.StringFlag{
-        Name: "port",
+        Name:  "port",
         Usage: "Specify upload port",
+    },
+    cli.StringFlag{
+        Name:  "args",
+        Usage: "Arguments passed to executable",
     },
     cli.BoolFlag{
         Name:  "verbose",
@@ -120,7 +130,7 @@ var cmd = []cli.Command{
                 UsageText: "wio create pkg [command options]",
                 Flags:     createFlags,
                 Action: func(c *cli.Context) {
-                    command = create.Create{Context: c, Update: false, Type: constants.PKG}
+                    command = create.Create{Context: c, Update: false, Type: constants.Pkg}
                 },
             },
             {
@@ -129,7 +139,7 @@ var cmd = []cli.Command{
                 UsageText: "wio create app [command options]",
                 Flags:     createFlags,
                 Action: func(c *cli.Context) {
-                    command = create.Create{Context: c, Update: false, Type: constants.APP}
+                    command = create.Create{Context: c, Update: false, Type: constants.App}
                 },
             },
         },
@@ -165,13 +175,79 @@ var cmd = []cli.Command{
         Name:      "run",
         Usage:     "Builds, Runs and/or Uploads the project to a device.",
         UsageText: "wio run [directory] [command options]",
-        Flags: runFlags,
+        Flags:     runFlags,
         Action: func(c *cli.Context) {
             command = run.Run{Context: c, RunType: run.TypeRun}
         },
     },
-
-
+    {
+        Name:  "vendor",
+        Usage: "Manage locally vendored dependencies.",
+        Subcommands: cli.Commands{
+            {
+                Name:      "add",
+                Usage:     "Add a vendored package as a dependency.",
+                UsageText: "wio vendor add [package]",
+                Action: func(c *cli.Context) {
+                    command = vendor.Cmd{Context: c, Op: vendor.Add}
+                },
+            },
+            {
+                Name:      "rm",
+                Usage:     "Remove a vendor dependency.",
+                UsageText: "wio vendor rm [package]",
+                Action: func(c *cli.Context) {
+                    command = vendor.Cmd{Context: c, Op: vendor.Remove}
+                },
+            },
+        },
+    },
+    {
+        Name:      "install",
+        Usage:     "Install packages from remote server.",
+        UsageText: "wio install [name] [version]",
+        Flags: []cli.Flag{
+            cli.BoolFlag{Name: "verbose",
+                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
+            cli.BoolFlag{Name: "disable-warnings",
+                Usage: "Disables all the warning shown by wio.",
+            },
+        },
+        Action: func(c *cli.Context) {
+            command = install.Cmd{Context: c}
+        },
+    },
+    {
+        Name:      "login",
+        Usage:     "Login to the npm registry.",
+        UsageText: "wio login",
+        Action: func(c *cli.Context) {
+            command = user.Login{Context: c}
+        },
+    },
+    {
+        Name:      "logout",
+        Usage:     "Clear login token.",
+        UsageText: "wio logout",
+        Action: func(c *cli.Context) {
+            command = user.Logout{Context: c}
+        },
+    },
+    {
+        Name:      "publish",
+        Usage:     "Publish package to registry.",
+        UsageText: "wio publish",
+        Flags: []cli.Flag{
+            cli.BoolFlag{Name: "verbose",
+                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
+            cli.BoolFlag{Name: "disable-warnings",
+                Usage: "Disables all the warning shown by wio.",
+            },
+        },
+        Action: func(c *cli.Context) {
+            command = publish.Cmd{Context: c}
+        },
+    },
     {
         Name:      "devices",
         Usage:     "Handles serial devices connected.",
@@ -184,10 +260,10 @@ var cmd = []cli.Command{
                 Flags: []cli.Flag{
                     cli.IntFlag{Name: "baud",
                         Usage: "Baud rate for the Serial port.",
-                        Value: config.ProjectDefaults.Baud},
+                        Value: defaults.Baud},
                     cli.StringFlag{Name: "port",
                         Usage: "Serial Port to open.",
-                        Value: config.ProjectDefaults.Port},
+                        Value: defaults.Port},
                     cli.BoolFlag{Name: "gui",
                         Usage: "Runs the GUI version of the serial monitor tool"},
                     cli.BoolFlag{Name: "disable-warnings",
@@ -217,90 +293,6 @@ var cmd = []cli.Command{
                     command = devices.Devices{Context: c, Type: devices.LIST}
                 },
             },
-        },
-    },
-    {
-        Name:      "install",
-        Usage:     "Install's wio packages from remote server.",
-        UsageText: "wio install [package name] [command options]",
-        Flags: []cli.Flag{
-            cli.BoolFlag{Name: "save",
-                Usage: "Adds package to wio.yml file and installs it."},
-            cli.BoolFlag{Name: "clean",
-                Usage: "Deletes previous packages and installs new ones."},
-            cli.BoolFlag{Name: "verbose",
-                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
-            cli.BoolFlag{Name: "disable-warnings",
-                Usage: "Disables all the warning shown by wio."},
-            cli.BoolFlag{Name: "config-help",
-                Usage: "Prints help text in the config file."},
-        },
-        Action: func(c *cli.Context) {
-            command = pac.Pac{Context: c, Type: pac.INSTALL}
-        },
-    },
-    {
-        Name:      "uninstall",
-        Usage:     "Uninstall's wio packages downloaded.",
-        UsageText: "wio uninstall <package name> [command options]",
-        Flags: []cli.Flag{
-            cli.BoolFlag{Name: "save",
-                Usage: "Removes package from wio.yml file."},
-            cli.BoolFlag{Name: "verbose",
-                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
-            cli.BoolFlag{Name: "disable-warnings",
-                Usage: "Disables all the warning shown by wio."},
-            cli.BoolFlag{Name: "config-help",
-                Usage: "Prints help text in the config file."},
-        },
-        Action: func(c *cli.Context) {
-            command = pac.Pac{Context: c, Type: pac.UNINSTALL}
-        },
-    },
-    {
-        Name:      "publish",
-        Usage:     "Publishes wio package.",
-        UsageText: "wio publish [directory] [command options]",
-        Flags: []cli.Flag{
-            cli.BoolFlag{Name: "verbose",
-                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
-            cli.BoolFlag{Name: "disable-warnings",
-                Usage: "Disables all the warning shown by wio.",
-            },
-        },
-        Action: func(c *cli.Context) {
-            command = pac.Pac{Context: c, Type: pac.PUBLISH}
-        },
-    },
-    {
-        Name:      "collect",
-        Usage:     "Grabs all the remote packages and stores them in vendor directory.",
-        UsageText: "wio collect [package] [command options]",
-        Flags: []cli.Flag{
-            cli.BoolFlag{Name: "save",
-                Usage: "Updates packages moved to vendor status to true."},
-            cli.BoolFlag{Name: "disable-warnings",
-                Usage: "Disables all the warning shown by wio."},
-            cli.BoolFlag{Name: "config-help",
-                Usage: "Prints help text in the config file."},
-        },
-        Action: func(c *cli.Context) {
-            command = pac.Pac{Context: c, Type: pac.COLLECT}
-        },
-    },
-    {
-        Name:      "list",
-        Usage:     "List all the packages installed.",
-        UsageText: "wio list [directory] [command options]",
-        Flags: []cli.Flag{
-            cli.BoolFlag{Name: "verbose",
-                Usage: "Turns verbose mode on to show detailed errors and commands being executed."},
-            cli.BoolFlag{Name: "disable-warnings",
-                Usage: "Disables all the warning shown by wio.",
-            },
-        },
-        Action: func(c *cli.Context) {
-            command = pac.Pac{Context: c, Type: pac.LIST}
         },
     },
 }
@@ -361,5 +353,6 @@ func main() {
     err := wio()
     if err != nil {
         log.Errln(err.Error())
+        os.Exit(1)
     }
 }

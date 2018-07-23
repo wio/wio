@@ -1,13 +1,13 @@
 package run
 
 import (
+    "fmt"
     "os"
     "os/exec"
-    "fmt"
     "runtime"
-    sysio "io"
-    "wio/cmd/wio/utils/io"
+    "strings"
     "wio/cmd/wio/log"
+    "wio/cmd/wio/utils/io"
 )
 
 func configTarget(dir string) error {
@@ -24,8 +24,12 @@ func uploadTarget(dir string) error {
     return Execute(dir, "make", "upload")
 }
 
-func runTarget(dir string, file string) error {
-    return Execute(dir, file)
+func runTarget(dir, file, args string) error {
+    var argv []string
+    if args != "" {
+        argv = strings.Split(args, " ")
+    }
+    return Execute(dir, file, argv...)
 }
 
 func cleanTarget(dir string) error {
@@ -36,7 +40,7 @@ type targetFunc func(string, chan error)
 
 func configAndBuild(dir string, errChan chan error) {
     log.Verbln(log.Magenta, "Building directory: %s", dir)
-    binDir := dir + io.Sep + "bin"
+    binDir := io.Path(dir, "bin")
     if err := os.MkdirAll(binDir, os.ModePerm); err != nil {
         errChan <- err
     } else if err := configTarget(binDir); err != nil {
@@ -48,11 +52,9 @@ func configAndBuild(dir string, errChan chan error) {
 
 func cleanIfExists(dir string, errChan chan error) {
     log.Verbln(log.Magenta, "Cleaning directory: %s", dir)
-    binDir := dir + io.Sep + "bin"
-    exists, err := io.Exists(binDir)
-    if err != nil {
-        errChan <- err
-    } else if exists {
+    binDir := io.Path(dir, "bin")
+    exists := io.Exists(binDir)
+    if exists {
         errChan <- cleanTarget(binDir)
     } else {
         errChan <- nil
@@ -67,23 +69,8 @@ func hardClean(dir string, errChan chan error) {
 func Execute(dir string, name string, args ...string) error {
     cmd := exec.Command(name, args...)
     cmd.Dir = dir
-    stdoutIn, err := cmd.StdoutPipe()
-    if err != nil {
-        return err
-    }
-    stderrIn, err := cmd.StderrPipe()
-    if err != nil {
-        return err
-    }
-    err = cmd.Start()
-    if err != nil {
-        return err
-    }
-    go func() { sysio.Copy(os.Stdout, stdoutIn) }()
-    go func() { sysio.Copy(os.Stderr, stderrIn) }()
-    err = cmd.Wait()
-    if err != nil {
-        return err
-    }
-    return nil
+    cmd.Stdin = os.Stdin
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    return cmd.Run()
 }

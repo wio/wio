@@ -7,14 +7,15 @@
 package run
 
 import (
-    "github.com/urfave/cli"
     "os"
+    "runtime"
+    "wio/cmd/wio/errors"
     "wio/cmd/wio/log"
     "wio/cmd/wio/types"
     "wio/cmd/wio/utils"
-    "wio/cmd/wio/errors"
+
     "github.com/fatih/color"
-    "runtime"
+    "github.com/urfave/cli"
 )
 
 type Type int
@@ -25,17 +26,19 @@ type Run struct {
 }
 
 const (
-    TypeBuild  Type = 0
-    TypeClean  Type = 1
-    TypeRun    Type = 2
+    TypeBuild Type = 0
+    TypeClean Type = 1
+    TypeRun   Type = 2
 )
 
 type runInfo struct {
     context *cli.Context
-    config  types.IConfig
+    config  types.Config
 
-    directory string
-    targets   []string
+    directory   string
+    projectType string
+    headerOnly  bool
+    targets     []string
 
     runType Type
     jobs    int
@@ -66,10 +69,12 @@ func (run Run) Execute() error {
     }
     targets := run.Context.Args()
     info := runInfo{
-        context:   run.Context,
-        config:    config,
-        directory: directory,
-        targets:   targets,
+        context:     run.Context,
+        config:      config,
+        directory:   directory,
+        projectType: config.GetType(),
+        headerOnly:  config.GetInfo().GetOptions().GetIsHeaderOnly(),
+        targets:     targets,
     }
     if err := info.execute(run.RunType); err != nil {
         return err
@@ -94,7 +99,7 @@ func (info *runInfo) execute(runType Type) error {
 func (info *runInfo) clean(targets []types.Target) error {
     targetDirs := make([]string, 0, len(targets))
     for _, target := range targets {
-        targetDirs = append(targetDirs, targetPath(info, &target))
+        targetDirs = append(targetDirs, targetPath(info, target))
     }
 
     log.Infoln(log.Cyan.Add(color.Underline), "Cleaning targets")
@@ -108,13 +113,11 @@ func (info *runInfo) clean(targets []types.Target) error {
 }
 
 func (info *runInfo) build(targets []types.Target) error {
-    log.Info(log.Cyan, "Generating files ... ")
+    log.Infoln(log.Cyan, "Generating files ... ")
     targetDirs, err := configureTargets(info, targets)
     if err != nil {
-        log.WriteFailure()
         return err
     }
-    log.WriteSuccess()
 
     log.Infoln(log.Cyan.Add(color.Underline), "Building targets")
     log.Infoln(log.Magenta, "Running with JOBS=%d", runtime.NumCPU()+2)
@@ -126,17 +129,17 @@ func (info *runInfo) run(targets []types.Target) error {
     target := targets[0]
     log.Info(log.Cyan, "Target: ")
     log.Infoln(log.Magenta, target.GetName())
-    if !dispatchCanRunTarget(info, &target) {
+    if !dispatchCanRunTarget(info, target) {
         if err := info.build(targets[:1]); err != nil {
             return err
         }
     }
-    return dispatchRunTarget(info, &target)
+    return dispatchRunTarget(info, target)
 }
 
 func getTargetArgs(info *runInfo) ([]types.Target, error) {
     targets := make([]types.Target, 0, len(info.targets))
-    projectTargets := info.config.GetTargets().GetTargets()
+    projectTargets := info.config.GetTargets()
 
     if info.context.Bool("all") {
         for name, target := range projectTargets {
@@ -144,18 +147,21 @@ func getTargetArgs(info *runInfo) ([]types.Target, error) {
             targets = append(targets, target)
         }
     } else {
-        for _, targetName := range info.targets {
-            if _, exists := projectTargets[targetName]; exists {
-                projectTargets[targetName].SetName(targetName)
-                targets = append(targets, projectTargets[targetName])
+        for _, name := range info.targets {
+            if _, exists := projectTargets[name]; exists {
+                projectTargets[name].SetName(name)
+                targets = append(targets, projectTargets[name])
             } else {
-                log.Warnln("Unrecognized target name: [%s]", targetName)
+                return nil, errors.Stringf("unrecognized target %s", name)
             }
         }
         if len(info.targets) <= 0 {
-            defaultName := info.config.GetTargets().GetDefaultTarget()
+            defaultName := info.config.GetInfo().GetOptions().GetDefault()
+            if defaultName == "" {
+                return nil, errors.String("no default target specified")
+            }
             if _, exists := projectTargets[defaultName]; !exists {
-                return nil, errors.Stringf("default target [%s] does not exist", defaultName)
+                return nil, errors.Stringf("default target %s does not exist", defaultName)
             }
             projectTargets[defaultName].SetName(defaultName)
             targets = append(targets, projectTargets[defaultName])
@@ -167,13 +173,13 @@ func getTargetArgs(info *runInfo) ([]types.Target, error) {
 func configureTargets(info *runInfo, targets []types.Target) ([]string, error) {
     targetDirs := make([]string, 0, len(targets))
     for _, target := range targets {
-        if err := dispatchCmake(info, &target); err != nil {
+        if err := dispatchCmake(info, target); err != nil {
             return nil, err
         }
-        if err := dispatchCmakeDependencies(info, &target); err != nil {
+        if err := dispatchCmakeDependencies(info, target); err != nil {
             return nil, err
         }
-        targetDir := targetPath(info, &target)
+        targetDir := targetPath(info, target)
         if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
             return nil, err
         }

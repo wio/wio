@@ -1,33 +1,47 @@
 package create
 
 import (
-    "wio/cmd/wio/types"
+    "path/filepath"
+    "strings"
     "wio/cmd/wio/constants"
+    "wio/cmd/wio/errors"
     "wio/cmd/wio/log"
-    "github.com/fatih/color"
+    "wio/cmd/wio/types"
     "wio/cmd/wio/utils"
     "wio/cmd/wio/utils/io"
-    "strings"
-    "wio/cmd/wio/errors"
-    "path/filepath"
+
+    "github.com/fatih/color"
 )
 
-func (create Create) updateApp(directory string, config *types.AppConfig) error {
-    return nil
-}
-
-func (create Create) updatePackage(directory string, config *types.PkgConfig) error {
+func (create Create) updateApp(directory string, config types.Config) error {
     info := &createInfo{
         context:     create.Context,
         directory:   directory,
-        projectType: constants.PKG,
-        name:        config.MainTag.GetName(),
+        projectType: constants.App,
+        name:        config.GetName(),
+    }
+    log.Info(log.Cyan, "updating app files ... ")
+    return info.update(config)
+}
+
+func (create Create) updatePackage(directory string, config types.Config) error {
+    info := &createInfo{
+        context:     create.Context,
+        directory:   directory,
+        projectType: constants.Pkg,
+        name:        config.GetName(),
     }
 
     log.Info(log.Cyan, "updating package files ... ")
+    return info.update(config)
+}
+
+func (info *createInfo) update(config types.Config) error {
     queue := log.GetQueue()
+
     if err := updateProjectFiles(queue, info); err != nil {
         log.WriteFailure()
+        log.PrintQueue(queue, log.TWO_SPACES)
         return err
     }
     log.WriteSuccess()
@@ -37,22 +51,23 @@ func (create Create) updatePackage(directory string, config *types.PkgConfig) er
     queue = log.GetQueue()
     if err := updateConfig(queue, config, info); err != nil {
         log.WriteFailure()
-        log.Errln(err)
+        log.PrintQueue(queue, log.TWO_SPACES)
         return err
     }
+
     log.WriteSuccess()
     log.PrintQueue(queue, log.TWO_SPACES)
 
     log.Writeln()
     log.Infoln(log.Yellow.Add(color.Underline), "Project update summary")
     log.Info(log.Cyan, "path             ")
-    log.Writeln(directory)
+    log.Writeln(info.directory)
     log.Info(log.Cyan, "project name     ")
     log.Writeln(info.name)
     log.Info(log.Cyan, "wio version      ")
-    log.Writeln(config.GetMainTag().GetConfigurations().WioVersion)
+    log.Writeln(config.GetInfo().GetOptions().GetWioVersion())
     log.Info(log.Cyan, "project type     ")
-    log.Writeln("pkg")
+    log.Writeln(info.projectType)
 
     return nil
 }
@@ -64,62 +79,47 @@ func (create Create) handleUpdate(directory string) error {
         return err
     }
     switch cfg.GetType() {
-    case constants.APP:
-        err = create.updateApp(directory, cfg.(*types.AppConfig))
+    case constants.App:
+        err = create.updateApp(directory, cfg)
         break
-    case constants.PKG:
-        err = create.updatePackage(directory, cfg.(*types.PkgConfig))
+    case constants.Pkg:
+        err = create.updatePackage(directory, cfg)
         break
     }
     return err
 }
 
 // Update configurations
-func updateConfig(queue *log.Queue, config *types.PkgConfig, info *createInfo) error {
+func updateConfig(queue *log.Queue, config types.Config, info *createInfo) error {
     switch info.projectType {
-    case constants.APP:
+    case constants.App:
         return updateAppConfig(queue, config, info)
-    case constants.PKG:
+    case constants.Pkg:
         return updatePackageConfig(queue, config, info)
     }
     return nil
 }
 
-func updatePackageConfig(queue *log.Queue, config *types.PkgConfig, info *createInfo) error {
+func updatePackageConfig(queue *log.Queue, config types.Config, info *createInfo) error {
     // Ensure a minimum wio version is specified
-    if strings.Trim(config.MainTag.Config.WioVersion, " ") == "" {
+    if strings.Trim(config.GetInfo().GetOptions().GetWioVersion(), " ") == "" {
         return errors.String("wio.yml missing `minimum_wio_version`")
     }
-    if config.MainTag.GetName() != filepath.Base(info.directory) {
+    if config.GetName() != filepath.Base(info.directory) {
         log.Warnln(queue, "Base directory different from project name")
     }
-    if config.MainTag.CompileOptions.HeaderOnly {
-        config.MainTag.Flags.Visibility = "INTERFACE"
-        config.MainTag.Definitions.Visibility = "INTERFACE"
-    } else {
-        config.MainTag.Flags.Visibility = "PRIVATE"
-        config.MainTag.Definitions.Visibility = "PRIVATE"
-    }
-    if strings.Trim(config.MainTag.Meta.Version, " ") == "" {
-        config.MainTag.Meta.Version = "0.0.1"
-    }
-    configPath := info.directory + io.Sep + io.Config
-    return config.PrettyPrint(configPath)
+    return utils.WriteWioConfig(info.directory, config)
 }
 
-func updateAppConfig(queue *log.Queue, config *types.PkgConfig, info *createInfo) error {
+func updateAppConfig(queue *log.Queue, config types.Config, info *createInfo) error {
     // Ensure a minimum wio version is specified
-    if strings.Trim(config.MainTag.Config.WioVersion, " ") == "" {
+    if strings.Trim(config.GetInfo().GetOptions().GetWioVersion(), " ") == "" {
         return errors.String("wio.yml missing `minimum_wio_version`")
     }
-    if config.MainTag.GetName() != filepath.Base(info.directory) {
+    if config.GetName() != filepath.Base(info.directory) {
         log.Warnln(queue, "Base directory different from project name")
     }
-    if strings.Trim(config.MainTag.Meta.Version, " ") == "" {
-        config.MainTag.Meta.Version = "0.0.1"
-    }
-    configPath := info.directory + io.Sep + io.Config
-    return config.PrettyPrint(configPath)
+    return utils.WriteWioConfig(info.directory, config)
 }
 
 // Update project files
@@ -132,9 +132,9 @@ func updateProjectFiles(queue *log.Queue, info *createInfo) error {
     } else {
         log.WriteSuccess(queue, log.VERB)
     }
-    dataType := &structureData.App
-    if info.projectType == constants.APP {
-        dataType = &structureData.Pkg
+    dataType := &structureData.Pkg
+    if info.projectType == constants.App {
+        dataType = &structureData.App
     }
     copyProjectAssets(queue, info, dataType)
     return nil
