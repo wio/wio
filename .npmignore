@@ -10,3 +10,11 @@ dist/
 Makefile
 CONTRIBUTING.md
 *.tgz
+tests/
+.travis.yml
+.wwhrd.yml
+env.bat
+env.ps1
+wenv
+wmake
+wmake.bat
