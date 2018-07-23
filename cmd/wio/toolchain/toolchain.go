@@ -3,9 +3,8 @@ package toolchain
 import (
     "errors"
     "os/exec"
-    "wio/cmd/wio/utils/io"
     "path/filepath"
-    "wio/cmd/wio/utils"
+    "wio/cmd/wio/utils/io"
 )
 
 const (
@@ -25,7 +24,7 @@ func GetToolchainPath() (string, error) {
 
     toolchainPath := executablePath + io.Sep + "toolchain"
 
-    if !utils.PathExists(toolchainPath) {
+    if !io.Exists(toolchainPath) {
         toolchainPath, err = filepath.Abs(executablePath + io.Sep + ".." + io.Sep + "toolchain")
         if err != nil {
             return "", err
@@ -41,7 +40,7 @@ func GetPySerialCommand(args ...string) (*exec.Cmd, error) {
     if err != nil {
         return nil, err
     }
-    
+
     if operatingSystem == io.LINUX {
         pySerialPath += io.Sep + serialLinux
     } else if operatingSystem == io.DARWIN {

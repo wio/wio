@@ -8,47 +8,32 @@ package create
 
 import (
     goerr "errors"
-    "github.com/urfave/cli"
     "os"
+    "path/filepath"
     "wio/cmd/wio/errors"
     "wio/cmd/wio/log"
     "wio/cmd/wio/utils"
     "wio/cmd/wio/utils/io"
-    "path/filepath"
+
+    "github.com/urfave/cli"
 )
 
 // Check directory
 func performDirectoryCheck(context *cli.Context) (string, error) {
-    var directory string
-    var err error
-
     // directory is always the first argument
     if len(context.Args()) <= 0 {
-        directory, err = os.Getwd()
-        if err != nil {
-            return "", err
-        }
-    } else {
-        directory, err = filepath.Abs(context.Args()[0])
-        if err != nil {
-            return "", err
-        }
+        return os.Getwd()
     }
-    return directory, nil
+    return filepath.Abs(context.Args()[0])
 }
 
 // This check is used to see if wio.yml file exists and the directory is valid
 func performWioExistsCheck(directory string) error {
-    if !utils.PathExists(directory) {
+    if !io.Exists(directory) {
         return errors.PathDoesNotExist{Path: directory}
-    } else if !utils.PathExists(directory + io.Sep + io.Config) {
+    } else if !io.Exists(io.Path(directory, io.Config)) {
         return errors.ConfigMissing{}
     }
-    return nil
-}
-
-// This performs various checks before update can be triggered
-func performPreUpdateCheck(directory string, create *Create) error {
     return nil
 }
 
@@ -59,7 +44,7 @@ func performPreCreateCheck(directory string, onlyConfig bool) error {
     // Configure existing directory
     if onlyConfig {
         // Check if config exists
-        if utils.PathExists(directory + io.Sep + io.Config) {
+        if io.Exists(io.Path(directory, io.Config)) {
             promptMsg := "Override existing wio.yml?"
             yes, err := log.PromptYes(promptMsg)
             if err != nil {
@@ -70,7 +55,7 @@ func performPreCreateCheck(directory string, onlyConfig bool) error {
             }
         }
 
-    } else if utils.PathExists(directory) {
+    } else if io.Exists(directory) {
         if isEmpty, err := utils.IsEmpty(directory); err != nil {
             return err
         } else if !isEmpty {

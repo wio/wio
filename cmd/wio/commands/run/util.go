@@ -2,29 +2,21 @@ package run
 
 import (
     "wio/cmd/wio/commands/run/cmake"
+    "wio/cmd/wio/constants"
     "wio/cmd/wio/types"
     "wio/cmd/wio/utils/io"
-    "wio/cmd/wio/constants"
-    "os"
 )
 
 func buildPath(info *runInfo) string {
     return cmake.BuildPath(info.directory)
 }
 
-func targetPath(info *runInfo, target *types.Target) string {
-    return buildPath(info) + io.Sep + (*target).GetName()
+func targetPath(info *runInfo, target types.Target) string {
+    return io.Path(buildPath(info), target.GetName())
 }
 
-func binaryPath(info *runInfo, target *types.Target) string {
-    return targetPath(info, target) + io.Sep + constants.BinDir
-}
-
-func readDirectory(args []string) (string, error) {
-    if len(args) <= 0 {
-        return os.Getwd()
-    }
-    return args[0], nil
+func binaryPath(info *runInfo, target types.Target) string {
+    return io.Path(targetPath(info, target), constants.BinDir)
 }
 
 func nativeExtension() string {
@@ -38,9 +30,9 @@ func nativeExtension() string {
 
 func platformExtension(platform string) string {
     switch platform {
-    case constants.AVR:
+    case constants.Avr:
         return ".elf"
-    case constants.NATIVE:
+    case constants.Native:
         return nativeExtension()
     default:
         return ""
