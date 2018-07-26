@@ -71,7 +71,7 @@ _linux_setup() {
     printf "Done!\n"
 
     printf "Linking test vendor packages... "
-    cd tests
+    cd test
     ./symlinks.sh
     cd ..
     printf "Done!\n"
@@ -99,12 +99,17 @@ _format() {
     }
 
     printf "Running gofmt... "
-    find $(pwd)/cmd -type f -name "*.go" -exec \
+    find cmd pkg internal -type f -name "*.go" -exec \
         goimports -w {} \;
     printf "Done!\nRunning retab... "
-    find $(pwd)/cmd -type f -name "*.go" -exec \
+    find cmd pkg internal -type f -name "*.go" -exec \
         vim -e -s +"set tabstop=4 shiftwidth=4 expandtab | retab | %s/\s\+$//e | wq" {} \;
     printf "Done!\n"
+}
+
+_test() {
+    cd test
+    ./runtests.sh
 }
 
 _release() {
@@ -147,6 +152,8 @@ _simple() {
     elif [ "$1" == 'format' ] ; then
         echo "Formatting wio codebase"
         _format
+    elif [ "$1" == 'test' ] ; then
+        _test
     elif [ "$1" == 'release' ] ; then
          if [ $# -le 3 ] ; then
             echo "Provide tag name, tag description and git remote"

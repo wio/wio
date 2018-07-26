@@ -1,0 +1,34 @@
+type: pkg
+
+project:
+  name: pkg-trace
+  version: 0.0.1
+  keywords:
+  - wio
+  - pkg
+  compile_options:
+    wio_version: 0.3.2
+    default_target: cosa-tests
+  definitions:
+    required:
+      private:
+      - BUFFER_SIZE
+
+targets:
+  cosa-tests:
+    src: tests/cosa-tests
+    platform: avr
+    framework: cosa
+    board: uno
+    definitions:
+      package:
+      - BUFFER_SIZE=256
+
+dependencies:
+  pkg-uart:
+    vendor: true
+    version: 0.0.1
+    link_visibility: PUBLIC
+    definitions:
+    - $(BUFFER_SIZE)
+

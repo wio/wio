@@ -1,0 +1,22 @@
+type: app
+
+project:
+  name: app-pipe
+  version: 0.0.1
+  keywords:
+  - wio
+  - app
+  compile_options:
+    wio_version: 0.3.2
+    default_target: main
+
+targets:
+  main:
+    src: src
+    platform: native
+    framework: all
+    board: all
+    definitions:
+      target:
+      - BUFFER_SIZE=80
+
