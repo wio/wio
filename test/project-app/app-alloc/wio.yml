@@ -1,0 +1,29 @@
+type: app
+
+project:
+  name: app-alloc
+  version: 0.0.1
+  keywords:
+  - wio
+  - app
+  compile_options:
+    wio_version: 0.3.2
+    default_target: tests
+
+targets:
+  tests:
+    src: src
+    platform: native
+
+dependencies:
+  alloc-one:
+    vendor: true
+    version: 0.0.1
+    definitions:
+    - STACK_SIZE=256
+  alloc-two:
+    vendor: true
+    version: 0.0.1
+    definitions:
+    - STACK_SIZE=512
+

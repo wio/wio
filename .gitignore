@@ -1,4 +1,4 @@
-bin
+bin/
 .idea/
 
 # Test binary, build with `go test -c`
@@ -10,13 +10,13 @@ bin
 dist/
 node_modules/
 package-lock.json
-cmd/wio/utils/io/bindata.go
+pkg/util/sys/bindata.go
 
 # Toolchain symlink
 bin/toolchain
 
 # vendor directories
-tests/**/*/vendor/
+test/**/*/vendor/
 vendor/*
 !vendor/vendor.json
 

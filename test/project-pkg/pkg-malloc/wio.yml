@@ -1,0 +1,24 @@
+type: pkg
+
+project:
+  name: pkg-malloc
+  version: 0.0.1
+  keywords:
+  - wio
+  - pkg
+  compile_options:
+    wio_version: 0.3.2
+    default_target: tests
+  definitions:
+    required:
+      public:
+      - STACK_SIZE
+
+targets:
+  tests:
+    src: tests
+    platform: native
+    definitions:
+      package:
+      - STACK_SIZE=256
+
