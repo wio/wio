@@ -15,6 +15,12 @@
 			"revisionTime": "2018-06-03T19:32:48Z"
 		},
 		{
+			"checksumSHA1": "2rMeyJv9LKWkHiJxTICEmBl0CSM=",
+			"path": "github.com/dhillondeep/go-serial",
+			"revision": "40ec8e9df429517061bf324152dc7638c98e4499",
+			"revisionTime": "2018-09-30T19:29:02Z"
+		},
+		{
 			"checksumSHA1": "92dnVWesQCC1xueK1Du/6c+yLOk=",
 			"path": "github.com/dsnet/compress",
 			"revision": "cc9eb1d7ad760af14e8f918698f745e80377af4f",
