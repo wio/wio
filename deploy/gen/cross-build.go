@@ -171,10 +171,8 @@ func packAndCompress(destFolder string, otherFiles []string) error {
                     return err
                 }
 
-                hash := sha256.New()
-                hash.Write(data)
-                md := hash.Sum(nil)
-                str := hex.EncodeToString(md)
+                hash := sha256.Sum256(data)
+                str := hex.EncodeToString(hash[:])
                 checkSums = append(checkSums, str + "  " + compressedPath[strings.LastIndex(
                     compressedPath, "/")+1:])
             }
