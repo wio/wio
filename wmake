@@ -23,7 +23,7 @@ HEREDOC
 }
 
 #### Variables ####
-GO_VERSION=1.1
+GO_VERSION=1.1[1-9]
 TRAVIS=false
 
 _build() {
@@ -46,7 +46,7 @@ _linux_setup() {
     }
     go version | grep ${GO_VERSION} &> /dev/null
     if [ $? != 0 ] ; then
-        echo 'go version 1.1x is required';
+        echo 'go version 1.1x is required where x is >= 1';
         exit 1;
     fi
 
@@ -80,6 +80,7 @@ _linux_setup() {
     if [ "$TRAVIS" = false ] ; then
         go get -u golang.org/x/tools/...
     fi
+
     printf "Done!\n"
 }
 
@@ -113,13 +114,39 @@ _test() {
 }
 
 _release() {
+    # create build files
+    cd ./deploy
+    go run cross-build.go
+
     # create a tag
+    printf "Creating release tag $1...\n"
     git tag -a "$1" -m "$2"
     git push "$3" "$1"
 
-    # execute goreleaser
-    goreleaser --rm-dist
-    printf "Done!\n"
+    # download relaser library and create release tag
+    printf "Creating Github Release...\n" 
+    go get -u github.com/aktau/github-release
+    github-release release \
+        --user wio \
+        --repo wio \
+        --tag "$1" \
+        --name "$1" \
+        --description "$2"
+    
+    # upload files
+    printf "Pushing binaries to the Release...\n"
+    cd ./out
+    for file in *; do
+        printf "  Uploading $file...\n"
+        github-release upload \
+            --user wio \
+            --repo wio \
+            --tag "$1" \
+            --name "$file" \
+            --file "$file"
+    done
+
+    printf "Project $1 Successfully Released!\n"
 }
 
 _simple() {
