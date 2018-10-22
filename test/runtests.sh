@@ -227,6 +227,14 @@ _test22() {
     wio run test-jeff
 }
 
+_test18() {
+    cd ./project-app/app-pthreads
+    wio clean --hard
+    wio update
+    wio build
+    wio run
+}
+
 # Source and build
 cd ./../
 source ./wenv
