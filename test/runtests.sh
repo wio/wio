@@ -4,7 +4,7 @@ set -e
 
 test_folder="wio-test"
 base_folder=$(pwd)
-num_tests=17
+num_tests=18
 
 # Check that working directory contains script
 if [ ! -f $(pwd)/`basename "${0}"` ]; then
@@ -185,6 +185,14 @@ _test17() {
     echo "    - WLIB_TLSF_LOG2_ALIGN=$align" >> wio.yml
     echo "    - WLIB_TLSF_LOG2_MAX=10" >> wio.yml
     wio build
+}
+
+_test18() {
+    cd ./project-app/app-pthreads
+    wio clean --hard
+    wio update
+    wio build
+    wio run
 }
 
 # Source and build

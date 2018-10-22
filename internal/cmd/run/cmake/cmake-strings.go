@@ -147,7 +147,16 @@ target_include_directories(
 const SharedLibraryFind = `find_library(
     LIB_{{SHARED_LIB_NAME}}
     {{SHARED_LIB_NAME_ORG}}
-    PATHS "{{SHARED_LIB_PATH}}")
+    PATHS "{{SHARED_LIB_PATH}}"
+    {{SHARED_LIB_REQUIRED}})
+`
+
+const SharedLibraryGlobalFind = `find_package(
+    {{SHARED_LIB_NAME}}
+    {{SHARED_LIB_VERSION}}
+    COMPONENTS {{SHARED_LIB_REQUIRED_COMPONENTS}}
+    OPTIONAL_COMPONENTS {{SHARED_LIB_OPTIONAL_COMPONENTS}}
+    {{SHARED_LIB_REQUIRED}})
 `
 
 const SharedLibraryInclude = `target_include_directories(

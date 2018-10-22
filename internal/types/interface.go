@@ -25,6 +25,11 @@ type Target interface {
 }
 
 type Library interface {
+    GetGlobal() bool
+    GetVersion() string
+    GetRequiredComponents() []string
+    GetOptionalComponents() []string
+    GetRequired() bool
     GetPath() string
     GetIncludePath() string
     GetLinkerVisibility() string

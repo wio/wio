@@ -83,10 +83,35 @@ func (t *TargetImpl) SetName(name string) {
 }
 
 type LibraryImpl struct {
-    Path             string   `yaml:"lib_path"`
-    IncludePath      string   `yaml:"include_path"`
-    LinkerVisibility string   `yaml:"linker_visibility,omitempty"`
-    LinkerFlags      []string `yaml:"linker_flags,omitempty"`
+    Global             bool     `yaml:"global"`
+    Version            string   `yaml:"version,omitempty"`
+    RequiredComponents []string `yaml:"required_components,omitempty"`
+    OptionalComponents []string `yaml:"optional_components,omitempty"`
+    Required           bool     `yaml:"required,omitempty"`
+    Path               string   `yaml:"lib_path,omitempty"`
+    IncludePath        string   `yaml:"include_path,omitempty"`
+    LinkerVisibility   string   `yaml:"linker_visibility,omitempty"`
+    LinkerFlags        []string `yaml:"linker_flags,omitempty"`
+}
+
+func (l *LibraryImpl) GetGlobal() bool {
+    return l.Global
+}
+
+func (l *LibraryImpl) GetVersion() string {
+    return l.Version
+}
+
+func (l *LibraryImpl) GetRequiredComponents() []string {
+    return l.RequiredComponents
+}
+
+func (l *LibraryImpl) GetOptionalComponents() []string {
+    return l.OptionalComponents
+}
+
+func (l *LibraryImpl) GetRequired() bool {
+    return l.Required
 }
 
 func (l *LibraryImpl) GetPath() string {

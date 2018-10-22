@@ -31,6 +31,7 @@ type Target struct {
     hashValue         string
     SharedIncludePath string
     ParentPath        string
+    SharedTarget      types.Library
 }
 
 type TargetSet struct {

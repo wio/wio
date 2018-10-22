@@ -28,12 +28,36 @@ func GenerateCMakeDependencies(cmakePath string, platform string, targets *Targe
     cmakeStrings := make([]string, 0, 256)
 
     for shared := range shared.TargetIterator() {
-        finalString := cmake.SharedLibraryFind
+        var finalString string
+
+        if shared.SharedTarget.GetGlobal() {
+            finalString = cmake.SharedLibraryGlobalFind
+            finalString = template.Replace(finalString, map[string]string{
+                "SHARED_LIB_VERSION":             shared.SharedTarget.GetVersion(),
+                "SHARED_LIB_REQUIRED_COMPONENTS": strings.Join(shared.SharedTarget.GetRequiredComponents(), " "),
+                "SHARED_LIB_OPTIONAL_COMPONENTS": strings.Join(shared.SharedTarget.GetOptionalComponents(), " "),
+            })
+        } else {
+            finalString = cmake.SharedLibraryFind
+        }
 
         finalString = template.Replace(finalString, map[string]string{
-            "SHARED_LIB_NAME":     shared.Name,
+            "SHARED_LIB_NAME": func() string {
+                if shared.SharedTarget.GetGlobal() {
+                    return strings.Split(shared.Name, "__")[0]
+                } else {
+                    return shared.Name
+                }
+            }(),
             "SHARED_LIB_NAME_ORG": strings.Split(shared.Name, "__")[0],
             "SHARED_LIB_PATH":     strings.Replace(shared.Path, "$(PROJECT_PATH)", shared.ParentPath, -1),
+            "SHARED_LIB_REQUIRED": func() string {
+                if shared.SharedTarget.GetRequired() {
+                    return "REQUIRED"
+                } else {
+                    return ""
+                }
+            }(),
         })
 
         cmakeStrings = append(cmakeStrings, finalString+"\n")
@@ -55,12 +79,17 @@ func GenerateCMakeDependencies(cmakePath string, platform string, targets *Targe
     }
 
     for sharedLink := range shared.LinkIterator() {
-        finalString := template.Replace(cmake.SharedLibraryInclude, map[string]string{
-            "TARGET_NAME": sharedLink.From.Name + "__" + sharedLink.From.Version,
-            "SHARED_LIB_INCLUDE_PATH": strings.Replace(sharedLink.To.SharedIncludePath,
-                "$(PROJECT_PATH)", sharedLink.To.ParentPath, -1),
-        })
-        cmakeStrings = append(cmakeStrings, finalString)
+        var finalString string
+        if !sharedLink.To.SharedTarget.GetGlobal() {
+            finalString := cmake.SharedLibraryInclude
+
+            finalString = template.Replace(cmake.SharedLibraryInclude, map[string]string{
+                "TARGET_NAME": sharedLink.From.Name + "__" + sharedLink.From.Version,
+                "SHARED_LIB_INCLUDE_PATH": strings.Replace(sharedLink.To.SharedIncludePath,
+                    "$(PROJECT_PATH)", sharedLink.To.ParentPath, -1),
+            })
+            cmakeStrings = append(cmakeStrings, finalString)
+        }
 
         if sharedLink.From.HeaderOnly {
             sharedLink.LinkInfo.Visibility = types.Interface
@@ -74,8 +103,24 @@ func GenerateCMakeDependencies(cmakePath string, platform string, targets *Targe
         }
 
         finalString = template.Replace(cmake.LinkString, map[string]string{
-            "LINKER_NAME":     linkerName,
-            "DEPENDENCY_NAME": "${LIB_" + sharedLink.To.Name + "}",
+            "LINKER_NAME": linkerName,
+            "DEPENDENCY_NAME": func() string {
+                if !sharedLink.To.SharedTarget.GetGlobal() {
+                    return "${LIB_" + sharedLink.To.Name + "}"
+                }
+
+                toTargetName := strings.Split(sharedLink.To.Name, "__")[0]
+
+                if len(sharedLink.To.SharedTarget.GetRequiredComponents()) > 0 {
+                    var str string
+                    for _, component := range sharedLink.To.SharedTarget.GetRequiredComponents() {
+                        str += toTargetName + "::" + component + " "
+                    }
+                    return str
+                } else {
+                    return toTargetName + "::" + toTargetName
+                }
+            }(),
             "LINK_VISIBILITY": sharedLink.LinkInfo.Visibility,
             "LINKER_FLAGS":    strings.Join(sharedLink.LinkInfo.Flags, " "),
         })
@@ -134,6 +179,7 @@ func CreateBuildTargets(projectDir string, target types.Target) (*TargetSet, *Ta
                 Path:              shared.GetPath(),
                 SharedIncludePath: shared.GetIncludePath(),
                 ParentPath:        projectDir,
+                SharedTarget:      shared,
             }
 
             sharedTargetSet.Add(currTarget)
