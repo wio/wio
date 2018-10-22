@@ -256,7 +256,7 @@ var commands = []cli.Command{
             cli.Command{
                 Name:      "monitor",
                 Usage:     "Opens a Serial monitor.",
-                UsageText: "wio monitor open [command options]",
+                UsageText: "wio devices monitor open [command options]",
                 Flags: []cli.Flag{
                     cli.IntFlag{Name: "baud",
                         Usage: "Baud rate for the Serial port.",
@@ -293,6 +293,27 @@ var commands = []cli.Command{
                     command = devices.Devices{Context: c, Type: devices.LIST}
                 },
             },
+        },
+    },
+    {
+        Name:      "monitor",
+        Usage:     "Opens a Serial monitor.",
+        UsageText: "wio monitor open [command options]",
+        Flags: []cli.Flag{
+            cli.IntFlag{Name: "baud",
+                Usage: "Baud rate for the Serial port.",
+                Value: defaults.Baud},
+            cli.StringFlag{Name: "port",
+                Usage: "Serial Port to open.",
+                Value: defaults.Port},
+            cli.BoolFlag{Name: "gui",
+                Usage: "Runs the GUI version of the serial monitor tool"},
+            cli.BoolFlag{Name: "disable-warnings",
+                Usage: "Disables all the warning shown by wio.",
+            },
+        },
+        Action: func(c *cli.Context) {
+            command = devices.Devices{Context: c, Type: devices.MONITOR}
         },
     },
 }

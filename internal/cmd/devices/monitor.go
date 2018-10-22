@@ -10,6 +10,7 @@ import (
     "fmt"
     "os"
     "os/signal"
+    "strings"
     "syscall"
     "wio/internal/toolchain"
     "wio/pkg/log"
@@ -17,6 +18,7 @@ import (
 
     "github.com/dhillondeep/go-serial"
     "github.com/urfave/cli"
+    bserial "go.bug.st/serial.v1"
 )
 
 type Devices struct {
@@ -117,14 +119,17 @@ func HandleMonitor(baud int, portDefined bool, portProvided string) error {
     }
 
     // Open the first serial port detected at 9600bps N81
-    options := serial.RawOptions
-    options.BitRate = baud
-    options.Parity = serial.PARITY_NONE
-    options.DataBits = 8
-
-    serialPort, err := options.Open(portToUse)
+    mode := &bserial.Mode{
+        BaudRate: baud,
+        Parity:   bserial.NoParity,
+        DataBits: 8,
+        StopBits: bserial.OneStopBit,
+    }
+    serialPort, err := bserial.Open(portToUse, mode)
     if err != nil {
-        return err
+        if strings.Contains(err.Error(), "Invalid serial port") {
+            return util.Error("invalid baud rate")
+        }
     }
 
     defer serialPort.Close()
