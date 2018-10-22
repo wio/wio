@@ -1,0 +1,22 @@
+type: app
+
+project:
+  name: cmakeTests
+  version: 0.0.1
+  keywords:
+  - wio
+  - app
+  compile_options:
+    wio_version: 0.5.1
+    default_target: main
+
+targets:
+  main:
+    src: src
+    platform: native
+
+libraries:
+  Threads:
+    global: true
+    required: true
+
