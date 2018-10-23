@@ -26,13 +26,13 @@ type Target interface {
 }
 
 type Library interface {
-    GetGlobal() bool
+    IsCmakePackage() bool
     GetVersion() string
     GetRequiredComponents() []string
     GetOptionalComponents() []string
-    GetRequired() bool
-    GetPath() string
-    GetIncludePath() string
+    IsRequired() bool
+    GetPath() []string
+    GetIncludePath() []string
     GetLinkerVisibility() string
     GetLinkerFlags() []string
 }

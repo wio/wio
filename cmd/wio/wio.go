@@ -94,12 +94,20 @@ var buildFlags = []cli.Flag{
 
 var cleanFlags = []cli.Flag{
     cli.BoolFlag{
+        Name:  "all",
+        Usage: "Clean all available targets",
+    },
+    cli.BoolFlag{
         Name:  "hard",
         Usage: "Removes build directories",
     },
 }
 
 var runFlags = []cli.Flag{
+    cli.BoolFlag{
+        Name:  "all",
+        Usage: "Run all available targets",
+    },
     cli.StringFlag{
         Name:  "port",
         Usage: "Specify upload port",

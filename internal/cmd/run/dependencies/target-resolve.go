@@ -70,7 +70,7 @@ func fillDefinitions(info definitionsInfo) (map[string][]string, error) {
 }
 
 func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, targetSet *TargetSet,
-    sharedSet *TargetSet, globalFlags, globalDefinitions []string, parentGiven *parentGivenInfo) error {
+    librarySet *TargetSet, globalFlags, globalDefinitions []string, parentGiven *parentGivenInfo) error {
     var err error
 
     pkg, err := i.GetPkg(currNode.Name, currNode.ResolvedVersion.Str())
@@ -134,7 +134,7 @@ func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, 
     // flags
     currTarget.Flags = util.AppendIfMissing(pkg.Config.GetInfo().GetOptions().GetFlags(), parentGiven.flags)
 
-    targetSet.Add(currTarget)
+    targetSet.Add(currTarget, false)
     targetSet.Link(parentTarget, currTarget, &TargetLinkInfo{
         Visibility: parentGiven.linkVisibility,
         Flags:      parentGiven.linkFlags,
@@ -146,19 +146,17 @@ func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, 
         return err
     }
 
-    for name, shared := range pkgConfig.GetLibraries() {
-        sharedTarget := &Target{
-            Name:              name,
-            Path:              shared.GetPath(),
-            SharedIncludePath: shared.GetIncludePath(),
-            ParentPath:        currTarget.Path,
-            SharedTarget:      shared,
+    for name, library := range pkgConfig.GetLibraries() {
+        libraryTarget := &Target{
+            Name:       name,
+            ParentPath: currTarget.Path,
+            Library:    library,
         }
 
-        sharedSet.Add(sharedTarget)
-        sharedSet.Link(currTarget, sharedTarget, &TargetLinkInfo{
-            Visibility: shared.GetLinkerVisibility(),
-            Flags:      shared.GetLinkerFlags(),
+        librarySet.Add(libraryTarget, true)
+        librarySet.Link(currTarget, libraryTarget, &TargetLinkInfo{
+            Visibility: library.GetLinkerVisibility(),
+            Flags:      library.GetLinkerFlags(),
         })
     }
 
@@ -180,7 +178,7 @@ func resolveTree(i *resolve.Info, currNode *resolve.Node, parentTarget *Target, 
                 linkVisibility: configDependency.GetVisibility(),
                 linkFlags:      configDependency.GetLinkerFlags(),
             }
-            if err := resolveTree(i, dep, currTarget, targetSet, sharedSet, globalFlags, globalDefinitions, parentInfo); err != nil {
+            if err := resolveTree(i, dep, currTarget, targetSet, librarySet, globalFlags, globalDefinitions, parentInfo); err != nil {
                 return err
             }
         }

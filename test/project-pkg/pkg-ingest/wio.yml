@@ -12,13 +12,13 @@ project:
   definitions:
     ingest:
       private:
-        - -DIngest=45
+      - -DIngest=45
     required:
       private:
-        - -DReq
+      - -DReq
     optional:
       private:
-        - -DOpt
+      - -DOpt
 
 targets:
   test1:
@@ -32,5 +32,6 @@ targets:
     platform: native
     definitions:
       package:
-        - -DReq=20
-        - -DOpt=10
+      - -DReq=20
+      - -DOpt=10
+

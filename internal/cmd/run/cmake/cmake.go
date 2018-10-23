@@ -155,9 +155,9 @@ func GenerateNativeCmakeLists(
         "TARGET_LINK_LIBRARIES": func() string {
             if len(target.GetLinkerFlags()) > 0 {
                 return "\n" + template.Replace(LinkString, map[string]string{
-                    "LINKER_NAME":     "${TARGET_NAME}",
+                    "LINK_FROM":       "${TARGET_NAME}",
                     "LINK_VISIBILITY": "PRIVATE",
-                    "DEPENDENCY_NAME": "# no dep",
+                    "LINK_TO":         "# no dep",
                     "LINKER_FLAGS":    strings.Join(target.GetLinkerFlags(), " "),
                 })
             } else {

@@ -7,26 +7,26 @@ import (
 )
 
 // resolves operating system specific flags and definitions
-func resolveOSSpecificFlagsDefs(flags []string) []string {
-    if len(flags) == 0 {
-        return flags
+func resolveOSSpecific(texts []string) []string {
+    if len(texts) == 0 {
+        return texts
     }
     os := sys.GetOS()
-    var newFlags []string
-    for _, flag := range flags {
+    var newTexts []string
+    for _, text := range texts {
         operatingSystemMath := regexp.MustCompile(
-            `^\$(darwin|windows|linux)\([a-zA-Z_\-$()\s=0-9]*\)$`)
-        if operatingSystemMath.MatchString(flag) {
-            if strings.Contains(flag, "$"+os+"(") {
-                newFlag := strings.Replace(flag, "$"+os+"(", "", 1)
+            `^\$(darwin|windows|linux)\(([a-z_\-$()\s=0-9]*\)|((?:[^/]*)*)(.*))$`)
+        if operatingSystemMath.MatchString(strings.ToLower(text)) {
+            if strings.Contains(text, "$"+os+"(") {
+                newFlag := strings.Replace(text, "$"+os+"(", "", 1)
                 newFlag = newFlag[:len(newFlag)-1]
-                newFlags = append(newFlags, strings.Split(newFlag, " ")...)
+                newTexts = append(newTexts, strings.Split(newFlag, " ")...)
             }
         } else {
-            newFlags = append(newFlags, flag)
+            newTexts = append(newTexts, text)
         }
     }
-    return newFlags
+    return newTexts
 }
 
 type PropertiesImpl struct {
@@ -39,21 +39,21 @@ func (p *PropertiesImpl) GetGlobal() []string {
     if p == nil {
         return []string{}
     }
-    return resolveOSSpecificFlagsDefs(p.Global)
+    return resolveOSSpecific(p.Global)
 }
 
 func (p *PropertiesImpl) GetTarget() []string {
     if p == nil {
         return []string{}
     }
-    return resolveOSSpecificFlagsDefs(p.Target)
+    return resolveOSSpecific(p.Target)
 }
 
 func (p *PropertiesImpl) GetPackage() []string {
     if p == nil {
         return []string{}
     }
-    return resolveOSSpecificFlagsDefs(p.Package)
+    return resolveOSSpecific(p.Package)
 }
 
 type TargetImpl struct {
@@ -104,7 +104,7 @@ func (t *TargetImpl) GetDefinitions() Properties {
 }
 
 func (t *TargetImpl) GetLinkerFlags() []string {
-    return resolveOSSpecificFlagsDefs(t.LinkerFlags)
+    return resolveOSSpecific(t.LinkerFlags)
 }
 
 func (t *TargetImpl) GetName() string {
@@ -116,19 +116,19 @@ func (t *TargetImpl) SetName(name string) {
 }
 
 type LibraryImpl struct {
-    Global             bool     `yaml:"global"`
+    Package            bool     `yaml:"cmake_package"`
     Version            string   `yaml:"version,omitempty"`
     RequiredComponents []string `yaml:"required_components,omitempty"`
     OptionalComponents []string `yaml:"optional_components,omitempty"`
     Required           bool     `yaml:"required,omitempty"`
-    Path               string   `yaml:"lib_path,omitempty"`
-    IncludePath        string   `yaml:"include_path,omitempty"`
+    Path               []string `yaml:"lib_path,omitempty"`
+    IncludePath        []string `yaml:"include_path,omitempty"`
     LinkerVisibility   string   `yaml:"linker_visibility,omitempty"`
     LinkerFlags        []string `yaml:"linker_flags,omitempty"`
 }
 
-func (l *LibraryImpl) GetGlobal() bool {
-    return l.Global
+func (l *LibraryImpl) IsCmakePackage() bool {
+    return l.Package
 }
 
 func (l *LibraryImpl) GetVersion() string {
@@ -143,16 +143,16 @@ func (l *LibraryImpl) GetOptionalComponents() []string {
     return l.OptionalComponents
 }
 
-func (l *LibraryImpl) GetRequired() bool {
+func (l *LibraryImpl) IsRequired() bool {
     return l.Required
 }
 
-func (l *LibraryImpl) GetPath() string {
-    return l.Path
+func (l *LibraryImpl) GetPath() []string {
+    return resolveOSSpecific(l.Path)
 }
 
-func (l *LibraryImpl) GetIncludePath() string {
-    return l.IncludePath
+func (l *LibraryImpl) GetIncludePath() []string {
+    return resolveOSSpecific(l.IncludePath)
 }
 
 func (l *LibraryImpl) GetLinkerVisibility() string {
@@ -160,7 +160,7 @@ func (l *LibraryImpl) GetLinkerVisibility() string {
 }
 
 func (l *LibraryImpl) GetLinkerFlags() []string {
-    return resolveOSSpecificFlagsDefs(l.LinkerFlags)
+    return resolveOSSpecific(l.LinkerFlags)
 }
 
 type DependencyImpl struct {
@@ -181,15 +181,15 @@ func (d *DependencyImpl) GetVisibility() string {
 }
 
 func (d *DependencyImpl) GetCompileFlags() []string {
-    return resolveOSSpecificFlagsDefs(d.CompileFlags)
+    return resolveOSSpecific(d.CompileFlags)
 }
 
 func (d *DependencyImpl) GetLinkerFlags() []string {
-    return resolveOSSpecificFlagsDefs(d.LinkerFlags)
+    return resolveOSSpecific(d.LinkerFlags)
 }
 
 func (d *DependencyImpl) GetDefinitions() []string {
-    return resolveOSSpecificFlagsDefs(d.Definitions)
+    return resolveOSSpecific(d.Definitions)
 }
 
 func (d *DependencyImpl) IsVendor() bool {
@@ -221,7 +221,7 @@ func (o *OptionsImpl) GetDefault() string {
 }
 
 func (o *OptionsImpl) GetFlags() []string {
-    return resolveOSSpecificFlagsDefs(o.Flags)
+    return resolveOSSpecific(o.Flags)
 }
 
 type DefinitionSetImpl struct {
@@ -233,14 +233,14 @@ func (d *DefinitionSetImpl) GetPublic() []string {
     if d == nil {
         return []string{}
     }
-    return resolveOSSpecificFlagsDefs(d.Public)
+    return resolveOSSpecific(d.Public)
 }
 
 func (d *DefinitionSetImpl) GetPrivate() []string {
     if d == nil {
         return []string{}
     }
-    return resolveOSSpecificFlagsDefs(d.Private)
+    return resolveOSSpecific(d.Private)
 }
 
 type DefinitionsImpl struct {
