@@ -74,11 +74,20 @@ func GenerateCMakeDependencies(cmakePath string, platform string, dependencies *
             finalString = cmake.LibraryFind
         }
 
+        pathHintsCMake := func(prefix string) string {
+            if len(configLibrary.GetPath()) > 0 {
+                return prefix + " " + cmakeSliceJoin(fillPaths(configLibrary.GetPath(), library.ParentPath),
+                    "no path/hint provided")
+            } else {
+                return "# no path/hint provided"
+            }
+        }
+
         finalString = template.Replace(finalString, map[string]string{
             "LIB_NAME_VAR": library.Name,
             "LIB_NAME":     GetOriginalName(library, true),
-            "LIB_PATHS": cmakeSliceJoin(fillPaths(configLibrary.GetPath(), library.ParentPath),
-                "no path provided"),
+            "LIB_PATHS":    pathHintsCMake("PATHS"),
+            "LIB_HINTS":    pathHintsCMake("HINTS"),
             "LIB_REQUIRED": func() string {
                 if configLibrary.IsRequired() {
                     return "REQUIRED"

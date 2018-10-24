@@ -16,7 +16,7 @@ targets:
     platform: native
     definitions:
       target:
-        - $windows(-DHello=2)
-        - $linux(-DHello=3)
-        - $darwin(-DHello=4)
+      - $windows(-DHello=2)
+      - $linux(-DHello=3)
+      - $darwin(-DHello=4)
 

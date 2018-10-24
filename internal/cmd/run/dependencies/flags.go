@@ -7,7 +7,7 @@ import (
     "strings"
 )
 
-var placeholderMatch = regexp.MustCompile(`^\$\([a-zA-Z_-][a-zA-Z0-9_]*\)$`)
+var placeholderMatch = regexp.MustCompile(`^\$(|optional)\([a-zA-Z_-][a-zA-Z0-9_]*\)$`)
 
 // Verifies the placeholder syntax
 func IsPlaceholder(flag string) bool {
@@ -16,7 +16,7 @@ func IsPlaceholder(flag string) bool {
 
 // matches a flag by the requested flag
 func TryMatch(key, given string) (string, bool) {
-    pat := regexp.MustCompile(`^` + key + `(=|->).*$`)
+    pat := regexp.MustCompile(`^` + key + `(|=|->).*$`)
     if !pat.MatchString(given) {
         return "", false
     }
@@ -34,14 +34,22 @@ func fillPlaceholders(givenFlags, requiredFlags []string) ([]string, error) {
             ret = append(ret, required)
             continue
         }
+
+        newRequest := strings.Replace(required, "$optional(", "$(", 1)
+
         // look for a match
         for _, given := range givenFlags {
-            key := required[2 : len(required)-1]
+            key := newRequest[2 : len(newRequest)-1]
             if res, match := TryMatch(key, given); match {
                 ret = append(ret, res)
                 goto Continue
             }
         }
+
+        if strings.Contains(required, "$optional(") {
+            continue
+        }
+
         return nil, errors.New(fmt.Sprintf("placeholder definition \"%s\" unfilled in ", required) + "%s")
 
     Continue:
@@ -55,7 +63,10 @@ func fillDefinition(givenFlags, requiredFlags []string, optional bool) ([]string
     var ret []string
     for _, required := range requiredFlags {
         for _, given := range givenFlags {
-            if res, match := TryMatch(required, given); match {
+            newRequired := strings.Replace(required, "-D", "", 1)
+            newGiven := strings.Replace(given, "-D", "", 1)
+
+            if res, match := TryMatch(newRequired, newGiven); match {
                 ret = append(ret, res)
                 goto Continue
             }

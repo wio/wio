@@ -168,8 +168,8 @@ target_include_directories(
 const LibraryFind = `find_library(
     {{LIB_NAME_VAR}}
     {{LIB_NAME}}
-    PATHS "{{LIB_PATHS}}"
-    HINTS "{{LIB_PATHS}}"
+    {{LIB_HINTS}}
+    {{LIB_PATHS}}
     {{LIB_REQUIRED}}
 )
 
@@ -188,7 +188,8 @@ const LibraryInclude = `target_include_directories(
 const LibraryPackageFind = `find_package(
     {{LIB_NAME}}
     {{LIB_VERSION}}
-    PATHS {{LIB_PATHS}}
+    {{LIB_HINTS}}
+    {{LIB_PATHS}}
     COMPONENTS {{LIB_REQUIRED_COMPONENTS}}
     OPTIONAL_COMPONENTS {{LIB_OPTIONAL_COMPONENTS}}
     {{LIB_REQUIRED}}

@@ -10,15 +10,17 @@ project:
     wio_version: 0.5.2
     header_only: true
   definitions:
-    ingest:
-      private:
-      - -DIngest=45
     required:
       private:
       - -DReq
     optional:
       private:
+      - LIVES_IN_CANADA
+      - USER_AGE
       - -DOpt
+    ingest:
+      private:
+      - -DIngest=45
 
 targets:
   test1:
@@ -26,7 +28,7 @@ targets:
     platform: native
     definitions:
       package:
-        - -DReq=20
+      - -DReq=20
   test2:
     src: tests
     platform: native
