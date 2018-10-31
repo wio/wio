@@ -4,7 +4,7 @@ set -e
 
 test_folder="wio-test"
 base_folder=$(pwd)
-num_tests=22
+num_tests=23
 
 # Check that working directory contains script
 if [ ! -f $(pwd)/`basename "${0}"` ]; then
@@ -225,6 +225,13 @@ _test22() {
     wio build --all
     wio run test-deep
     wio run test-jeff
+}
+
+_test23() {
+    cd ./project-pkg/simple-websocket-server-cpp-1.0.0
+    wio clean --hard
+    wio update
+    wio build --all
 }
 
 # Source and build
