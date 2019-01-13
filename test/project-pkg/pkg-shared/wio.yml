@@ -17,9 +17,7 @@ targets:
 
 libraries:
   honly:
-    cmake_package: false
     lib_path:
     - $(PROJECT_PATH)/shared/honly
     include_path:
     - $(PROJECT_PATH)/shared/honly/include
-
