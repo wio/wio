@@ -10,6 +10,8 @@ package main
 import (
     "os"
     "time"
+    "wio/internal/cmd/env"
+    "wio/internal/executor"
 
     "wio/internal/cmd"
     "wio/internal/cmd/create"
@@ -112,6 +114,11 @@ var devicesListFlags = []cli.Flag{
         Usage: "Shows only the name of the ports."},
     cli.BoolFlag{Name: "show-all",
         Usage: "Shows all the ports, closed or open (Default: only open devices)."},
+}
+
+var envFlags = []cli.Flag{
+    cli.BoolFlag{Name: "local",
+        Usage: "Creates and updates local environment"},
 }
 
 var command cmd.Command
@@ -268,6 +275,43 @@ var commands = []cli.Command{
             command = devices.Devices{Context: c, Type: devices.MONITOR}
         },
     },
+    {
+        Name:      "env",
+        Usage:     "Wio global environment variables.",
+        UsageText: "wio env [command options]",
+        Action: func(c *cli.Context) {
+            command = env.Env{Context: c, Command: env.VIEW}
+        },
+        Subcommands: cli.Commands{
+            cli.Command{
+                Name:      "reset",
+                Usage:     "Resets environment variables to default",
+                UsageText: "wio env reset [command options]",
+                Flags:     envFlags,
+                Action: func(c *cli.Context) {
+                    command = env.Env{Context: c, Command: env.RESET}
+                },
+            },
+            cli.Command{
+                Name:      "set",
+                Usage:     "Modifies the environment variable or adds a new one (name=value or name).",
+                UsageText: "wio env set [vars...] [command options]",
+                Flags:     envFlags,
+                Action: func(c *cli.Context) {
+                    command = env.Env{Context: c, Command: env.SET}
+                },
+            },
+            cli.Command{
+                Name:      "unset",
+                Usage:     "Removes the environment variable.",
+                UsageText: "wio env unset [vars...] [command options]",
+                Flags:     envFlags,
+                Action: func(c *cli.Context) {
+                    command = env.Env{Context: c, Command: env.UNSET}
+                },
+            },
+        },
+    },
 }
 
 func wio() error {
@@ -321,9 +365,16 @@ func wio() error {
 }
 
 func main() {
-    err := wio()
-    if err != nil {
-        log.Errln(err.Error())
-        os.Exit(1)
+    errorHandle := func(err error) {
+        if err != nil {
+            log.Errln(err.Error())
+            os.Exit(1)
+        }
     }
+
+    // startup
+    errorHandle(executor.ExecuteStartup())
+
+    // wio stuff
+    errorHandle(wio())
 }

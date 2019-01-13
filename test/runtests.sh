@@ -4,7 +4,7 @@ set -e
 
 test_folder="wio-test"
 base_folder=$(pwd)
-num_tests=22
+num_tests=23
 
 # Check that working directory contains script
 if [ ! -f $(pwd)/`basename "${0}"` ]; then
@@ -227,11 +227,11 @@ _test22() {
     wio run test-jeff
 }
 
-_test18() {
-    cd ./project-app/app-pthreads
-    wio clean --hard
+_test23() {
+    cd ./project-pkg/pkg-libraries-complex
+    wio clean --all --hard
     wio update
-    wio build
+    wio build --all
     wio run
 }
 
