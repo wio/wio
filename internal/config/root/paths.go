@@ -1,12 +1,12 @@
 package root
 
 type configPaths struct {
-    WioUserPath   string
-    ToolchainPath string
-    SecurityPath  string
-    UpdatePath    string
-    EnvFilePath   string
-    ConfigFilePath   string
+    WioUserPath    string
+    ToolchainPath  string
+    SecurityPath   string
+    UpdatePath     string
+    EnvFilePath    string
+    ConfigFilePath string
 }
 
 var wioInternalConfigPaths = configPaths{}

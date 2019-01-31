@@ -223,7 +223,7 @@ var commands = []cli.Command{
                 Name:      "add",
                 Usage:     "Add a vendored package as a dependency.",
                 UsageText: "wio vendor add [package]",
-                Flags: appWideFlags,
+                Flags:     appWideFlags,
                 Action: func(c *cli.Context) {
                     command = vendor.Cmd{Context: c, Op: vendor.Add}
                 },
@@ -232,7 +232,7 @@ var commands = []cli.Command{
                 Name:      "rm",
                 Usage:     "Remove a vendor dependency.",
                 UsageText: "wio vendor rm [package]",
-                Flags: appWideFlags,
+                Flags:     appWideFlags,
                 Action: func(c *cli.Context) {
                     command = vendor.Cmd{Context: c, Op: vendor.Remove}
                 },
@@ -252,7 +252,7 @@ var commands = []cli.Command{
         Name:      "login",
         Usage:     "Login to the registry.",
         UsageText: "wio login",
-        Flags: appWideFlags,
+        Flags:     appWideFlags,
         Action: func(c *cli.Context) {
             command = user.Login{Context: c}
         },
@@ -261,7 +261,7 @@ var commands = []cli.Command{
         Name:      "logout",
         Usage:     "Logout from registry account.",
         UsageText: "wio logout",
-        Flags: appWideFlags,
+        Flags:     appWideFlags,
         Action: func(c *cli.Context) {
             command = user.Logout{Context: c}
         },
@@ -350,7 +350,7 @@ var commands = []cli.Command{
         Name:      "upgrade",
         Usage:     "Upgrades wio to a specific version or latest version.",
         UsageText: "wio upgrade [version]",
-        Flags: append(upgradeFlags, appWideFlags...),
+        Flags:     append(upgradeFlags, appWideFlags...),
         Action: func(c *cli.Context) {
             command = upgrade.Upgrade{Context: c}
         },

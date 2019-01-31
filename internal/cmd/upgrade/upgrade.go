@@ -70,7 +70,7 @@ func (upgrade Upgrade) Execute() error {
     }
 
     if !upgrade.Context.Bool("force") && versionToUpgradeSem.Lt(semver.Parse("0.7.0")) {
-       return util.Error("wio can only be upgraded/downgraded to versions >= 0.7.0")
+        return util.Error("wio can only be upgraded/downgraded to versions >= 0.7.0")
     }
 
     version = versionToUpgradeSem.Str()
