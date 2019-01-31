@@ -85,6 +85,7 @@ func (info *createInfo) generateConstraints() (map[string]bool, map[string]bool)
 
     if info.ide != "none" {
         fileConstraints["ide="+info.ide] = true
+        dirConstraints["ide="+info.ide] = true
     }
 
     return dirConstraints, fileConstraints
