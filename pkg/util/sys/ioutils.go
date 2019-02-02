@@ -15,15 +15,20 @@ import (
     "path"
     "path/filepath"
     "runtime"
+    "strings"
 )
 
 const (
-    Folder   = ".wio"
-    Temp     = ".tmp"
-    Config   = "wio.yml"
-    Modules  = "node_modules"
-    Vendor   = "vendor"
-    Download = "cache"
+    WioFolder  = ".wio"
+    TempFolder = ".tmp"
+    Config     = "wio.yml"
+    Modules    = "packages"
+    Vendor     = "vendor"
+    Download   = "cache"
+    TargetDir  = "targets"
+    BinDir     = "bin"
+    IdeaFolder = ".idea"
+    IdeFolder  = "ide"
 )
 
 const (
@@ -89,6 +94,11 @@ func GetOS() string {
     } else {
         return LINUX
     }
+}
+
+// Returns architecture
+func GetArch() string {
+    return strings.ToLower(runtime.GOARCH)
 }
 
 func Exists(path string) bool {
@@ -160,4 +170,15 @@ func Copy(src string, dst string) error {
         }
     }
     return nil
+}
+
+// Checks if the give path is a director and based on the returns
+// true or false. If path does not exist, it throws an error
+func IsDir(path string) (bool, error) {
+    fi, err := os.Stat(path)
+    if err != nil {
+        return false, err
+    }
+
+    return fi.IsDir(), nil
 }

@@ -40,7 +40,7 @@ func (i *Info) install(name, ver string, data *npm.Version) error {
     }
 
     file := name + "__" + ver
-    tar := sys.Path(i.dir, sys.Folder, sys.Download, file+".tgz")
+    tar := sys.Path(i.dir, sys.WioFolder, sys.Download, file+".tgz")
     if !sys.Exists(tar) {
         url := data.Dist.Tarball
         total, err := contentSize(url)
@@ -65,22 +65,28 @@ func (i *Info) install(name, ver string, data *npm.Version) error {
         return util.Error("expected tar checksum %s", data.Dist.Shasum)
     }
 
-    modules := sys.Path(i.dir, sys.Folder, sys.Modules)
-    pkg := sys.Path(modules, "package")
-    if err := os.RemoveAll(pkg); err != nil {
-        return err
+    modules := sys.Path(i.dir, sys.WioFolder, sys.Modules)
+
+    if !sys.Exists(sys.Path(modules, file)) {
+        pkg := sys.Path(modules, "package")
+        if err := os.RemoveAll(pkg); err != nil {
+            return err
+        }
+        if err := untar(tar, modules); err != nil {
+            return err
+        }
+
+        return os.Rename(pkg, sys.Path(modules, file))
     }
-    if err := untar(tar, modules); err != nil {
-        return err
-    }
-    return os.Rename(pkg, sys.Path(modules, file))
+
+    return nil
 }
 
 func download(url string, dst string, cb io.Writer) error {
     if err := os.MkdirAll(filepath.Dir(dst), os.ModePerm); err != nil {
         return err
     }
-    out, err := os.Create(dst + sys.Temp)
+    out, err := os.Create(dst + sys.TempFolder)
     if err != nil {
         return err
     }
@@ -95,11 +101,11 @@ func download(url string, dst string, cb io.Writer) error {
     }
     out.Close()
     resp.Body.Close()
-    return os.Rename(dst+sys.Temp, dst)
+    return os.Rename(dst+sys.TempFolder, dst)
 }
 
-func untar(src string, dst string) error {
-    return archiver.TarGz.Open(src, dst)
+func untar(src string, dest string) error {
+    return archiver.Unarchive(src, dest)
 }
 
 func installCallback(name string, ver string) callback {

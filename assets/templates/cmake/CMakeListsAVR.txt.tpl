@@ -5,9 +5,11 @@
 set(CMAKE_VER 3.1.0)
 set(PROJECT_NAME {{PROJECT_NAME}})
 set(PROJECT_PATH "{{PROJECT_PATH}}")
-set(CMAKE_TOOLCHAIN_PATH "{{TOOLCHAIN_PATH}}")
+set(CMAKE_TOOLCHAIN_FILE "{{TOOLCHAIN_FILE}}")
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
-set(DEPENDENCY_FILE dependencies)
+
+# Hardware
+include("${PROJECT_PATH}/.wio/targets/{{TARGET_NAME}}/hardware.cmake")
 
 # C++ standard
 set(CMAKE_CXX_STANDARD {{CPP_STANDARD}})
@@ -19,27 +21,20 @@ set(CMAKE_C_STANDARD {{C_STANDARD}})
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-# all the paths toolchain can be at (this is because of different package managers)
-if (EXISTS "${CMAKE_TOOLCHAIN_PATH}/{{TOOLCHAIN_FILE_REL}}")
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_PATH}/{{TOOLCHAIN_FILE_REL}}")
-elseif (EXISTS "${CMAKE_TOOLCHAIN_PATH}/../{{TOOLCHAIN_FILE_REL}}")
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_PATH}/../{{TOOLCHAIN_FILE_REL}}")
-elseif (EXISTS "/usr/share/wio/{{TOOLCHAIN_FILE_REL}}")
-    set(CMAKE_TOOLCHAIN_FILE "/usr/share/wio/{{TOOLCHAIN_FILE_REL}}")
-else()
-    message(FATAL_ERROR "Failed to find AVR toolchain files!")
-endif()
-
-# properties
+# Properties
 set(TARGET_NAME {{TARGET_NAME}})
 set(PLATFORM {{PLATFORM}})
 set(FRAMEWORK {{FRAMEWORK}})
-set(BOARD {{BOARD}})
+set(BOARD ${WIO_TARGET_HARDWARE})
 set(ENTRY {{ENTRY}})
 
+# CMAKE
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(${PROJECT_NAME} C CXX ASM)
 cmake_policy(SET CMP0023 OLD)
+
+# Dependencies
+set(DEPENDENCY_FILE "${PROJECT_PATH}/.wio/targets/${TARGET_NAME}/dependencies.cmake")
 
 file(GLOB_RECURSE SRC_FILES
     "${PROJECT_PATH}/${ENTRY}/*.cpp"
@@ -49,7 +44,7 @@ file(GLOB_RECURSE SRC_FILES
 generate_arduino_firmware(${TARGET_NAME}
     SRCS ${SRC_FILES}
     BOARD ${BOARD}
-    PORT {{PORT}})
+    PORT ${WIO_UPLOAD_PORT})
 
 target_compile_definitions(
     ${TARGET_NAME}
