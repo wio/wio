@@ -2,6 +2,7 @@
 <project version="4">
     <component name="CMakeRunConfigurationManager" shouldGenerate="true" assignedExecutableTargets="true" buildAllGenerated="true">
         <generated>
+            <config projectName="{{PROJECT_NAME}}" targetName="WIO_BUILD_RUN" />
             <config projectName="{{PROJECT_NAME}}" targetName="WIO_BUILD" />
             <config projectName="{{PROJECT_NAME}}" targetName="WIO_RUN" />
             <config projectName="{{PROJECT_NAME}}" targetName="WIO_CLEAN" />
@@ -153,7 +154,11 @@
             <envs />
             <method />
         </configuration>
-        <configuration default="false" name="WIO_BUILD" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="{{PROJECT_NAME}}" TARGET_NAME="WIO_BUILD" CONFIG_NAME="Debug">
+        <configuration default="false" name="WIO_BUILD_RUN" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="{{PROJECT_NAME}}" TARGET_NAME="WIO_BUILD_RUN" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="{{PROJECT_NAME}}" RUN_TARGET_NAME="{{TARGET_NAME}}">
+            <envs />
+            <method />
+        </configuration>
+        <configuration default="false" name="WIO_BUILD" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="{{PROJECT_NAME}}" TARGET_NAME="WIO_BUILD" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="{{PROJECT_NAME}}" RUN_TARGET_NAME="{{TARGET_NAME}}">
             <envs />
             <method />
         </configuration>
@@ -165,7 +170,7 @@
             <envs />
             <method />
         </configuration>
-        <configuration default="false" name="WIO_RUN" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="{{PROJECT_NAME}}" TARGET_NAME="WIO_RUN" CONFIG_NAME="Debug">
+        <configuration default="false" name="WIO_RUN" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="{{PROJECT_NAME}}" TARGET_NAME="WIO_RUN" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="{{PROJECT_NAME}}" RUN_TARGET_NAME="{{TARGET_NAME}}">
             <envs />
             <method />
         </configuration>
@@ -177,14 +182,15 @@
             <envs />
             <method />
         </configuration>
-        <list size="9">
+        <list size="8">
             <item index="0" class="java.lang.String" itemvalue="Application.Build All" />
-            <item index="1" class="java.lang.String" itemvalue="Application.WIO_BUILD" />
-            <item index="2" class="java.lang.String" itemvalue="Application.WIO_RUN" />
-            <item index="3" class="java.lang.String" itemvalue="Application.WIO_CLEAN" />
-            <item index="4" class="java.lang.String" itemvalue="Application.WIO_CLEAN_HARD" />
-            <item index="5" class="java.lang.String" itemvalue="Application.WIO_INSTALL" />
-            <item index="6" class="java.lang.String" itemvalue="Application.WIO_UPDATE" />
+            <item index="1" class="java.lang.String" itemvalue="Application.WIO_BUILD_RUN" />
+            <item index="2" class="java.lang.String" itemvalue="Application.WIO_BUILD" />
+            <item index="3" class="java.lang.String" itemvalue="Application.WIO_RUN" />
+            <item index="4" class="java.lang.String" itemvalue="Application.WIO_CLEAN" />
+            <item index="5" class="java.lang.String" itemvalue="Application.WIO_CLEAN_HARD" />
+            <item index="6" class="java.lang.String" itemvalue="Application.WIO_INSTALL" />
+            <item index="7" class="java.lang.String" itemvalue="Application.WIO_UPDATE" />
         </list>
     </component>
     <component name="ShelveChangesManager" show_recycled="false" />

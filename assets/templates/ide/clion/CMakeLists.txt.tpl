@@ -9,6 +9,13 @@ include(args.cmake)
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
 
 add_custom_target(
+    WIO_BUILD_RUN ALL
+    COMMAND ${WIO_CMD} build ${TARGET_NAME} ${WIO_BUILD_ARGS}
+    COMMAND ${WIO_CMD} run ${TARGET_NAME} ${WIO_BUILD_ARGS}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
+add_custom_target(
     WIO_BUILD ALL
     COMMAND ${WIO_CMD} build ${TARGET_NAME} ${WIO_BUILD_ARGS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
