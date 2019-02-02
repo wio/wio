@@ -9,11 +9,12 @@ package run
 import (
     "os"
     "runtime"
+    "wio/internal/cmd/generate"
     "wio/internal/types"
     "wio/pkg/log"
     "wio/pkg/util"
+    "wio/pkg/util/sys"
 
-    "github.com/fatih/color"
     "github.com/urfave/cli"
 )
 
@@ -38,9 +39,13 @@ type runInfo struct {
     projectType string
     headerOnly  bool
     targets     []string
+    port        string
 
     runType Type
     jobs    int
+
+    force  bool
+    retool bool
 }
 
 type runExecuteFunc func(*runInfo, []types.Target) error
@@ -62,7 +67,7 @@ func (run Run) Execute() error {
     if err != nil {
         return err
     }
-    config, err := types.ReadWioConfig(directory)
+    config, err := types.ReadWioConfig(directory, true)
     if err != nil {
         return err
     }
@@ -74,6 +79,9 @@ func (run Run) Execute() error {
         projectType: config.GetType(),
         headerOnly:  config.GetInfo().GetOptions().GetIsHeaderOnly(),
         targets:     targets,
+        port:        run.Context.String("port"),
+        force:       run.Context.Bool("force"),
+        retool:      run.Context.Bool("retool"),
     }
     if err := info.execute(run.RunType); err != nil {
         return err
@@ -84,7 +92,7 @@ func (run Run) Execute() error {
 func (info *runInfo) execute(runType Type) error {
     info.runType = runType
 
-    log.Info(log.Cyan, "Reading targets ... ")
+    log.Info(log.Cyan, "Reading targets... ")
     targets, err := getTargetArgs(info)
     if err != nil {
         log.WriteFailure()
@@ -99,27 +107,42 @@ func (info *runInfo) clean(targets []types.Target) error {
     targetDirs := make([]string, 0, len(targets))
     for _, target := range targets {
         targetDirs = append(targetDirs, targetPath(info, target))
+
+        wioTimePath := sys.Path(targetPath(info, target), "wio.time")
+
+        if sys.Exists(wioTimePath) {
+            if err := os.Remove(wioTimePath); err != nil {
+                return err
+            }
+        }
     }
 
-    log.Infoln(log.Cyan.Add(color.Underline), "Cleaning targets")
-    log.Infoln(log.Magenta, "Running with JOBS=%d", runtime.NumCPU()+2)
-    errs := asyncCleanTargets(targetDirs, info.context.Bool("hard"))
+    doHardClean := info.context.Bool("hard")
+
+    log.Infoln(log.Magenta, "Running "+func() string {
+        if doHardClean {
+            return "hard "
+        } else {
+            return ""
+        }
+    }()+"clean with JOBS=%d", runtime.NumCPU()+2)
+
+    errs := asyncCleanTargets(targetDirs, doHardClean)
     if err := awaitErrors(errs); err != nil {
         return err
     }
-    log.Infoln(log.Green, "Done!")
+
+    log.Infoln(log.Green, "|> Done!")
     return nil
 }
 
 func (info *runInfo) build(targets []types.Target) error {
-    log.Infoln(log.Cyan, "Generating files ... ")
-    targetDirs, err := configureTargets(info, targets)
+    targetDirs, err := configureTargetsBuildFiles(info, targets)
     if err != nil {
         return err
     }
 
-    log.Infoln(log.Cyan.Add(color.Underline), "Building targets")
-    log.Infoln(log.Magenta, "Running with JOBS=%d", runtime.NumCPU()+2)
+    log.Infoln(log.Magenta, "Running build with JOBS=%d", runtime.NumCPU()+2)
     errs := asyncBuildTargets(targetDirs)
     return awaitErrors(errs)
 }
@@ -169,19 +192,43 @@ func getTargetArgs(info *runInfo) ([]types.Target, error) {
     return targets, nil
 }
 
-func configureTargets(info *runInfo, targets []types.Target) ([]string, error) {
+func configureTargetsBuildFiles(info *runInfo, targets []types.Target) ([]string, error) {
     targetDirs := make([]string, 0, len(targets))
+
+    infoGen := &generate.InfoGenerate{
+        Config:      info.config,
+        Directory:   info.directory,
+        ProjectType: info.projectType,
+        Port:        info.port,
+    }
+
     for _, target := range targets {
-        if err := dispatchCmake(info, target); err != nil {
+        buildStatus, err := shouldCreateBuildFiles(info.directory, target.GetName())
+        if err != nil {
             return nil, err
         }
-        if err := dispatchCmakeDependencies(info, target); err != nil {
-            return nil, err
+
+        if info.retool || info.force || buildStatus {
+            log.Infoln(log.Cyan, "Generating CMake build files for target %s", target.GetName())
+
+            if err := generate.CMakeListsFile(infoGen, target); err != nil {
+                return nil, err
+            }
+            if err := generate.DependenciesFile(infoGen, target); err != nil {
+                return nil, err
+            }
+            if err := generate.HardwareFile(infoGen, target); err != nil {
+                return nil, err
+            }
+        } else {
+            log.Infoln(log.Cyan, "Build files up to date for target %s", target.GetName())
         }
+
         targetDir := targetPath(info, target)
         if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
             return nil, err
         }
+
         targetDirs = append(targetDirs, targetDir)
     }
     return targetDirs, nil

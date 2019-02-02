@@ -11,7 +11,7 @@ import (
 func findLocalConfigs(root string) ([]string, error) {
     paths := []string{
         sys.Path(root, sys.Vendor),
-        sys.Path(root, sys.Folder, sys.Modules),
+        sys.Path(root, sys.WioFolder, sys.Modules),
     }
     var ret []string
     for _, path := range paths {
@@ -61,7 +61,7 @@ func tryGetConfig(path string) (types.Config, error) {
     if !sys.Exists(wioPath) {
         return nil, nil
     }
-    config, err := types.ReadWioConfig(path)
+    config, err := types.ReadWioConfig(path, true)
     if err != nil {
         return nil, err
     }
