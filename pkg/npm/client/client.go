@@ -20,6 +20,10 @@ var Npm = &http.Client{Timeout: timeoutSeconds * time.Second}
 
 func GetJson(client *http.Client, req *http.Request, target interface{}) (int, error) {
     resp, err := client.Do(req)
+    if resp == nil {
+        return -1, util.Error("unable to make Http Request")
+    }
+
     defer resp.Body.Close()
     if err != nil {
         return 0, err
@@ -65,7 +69,8 @@ func FetchPackageData(name string) (*npm.Data, error) {
     if err != nil {
         return nil, err
     }
-    if status == http.StatusNotFound {
+
+    if data.Versions == nil || len(data.Versions) == 0 || status == http.StatusNotFound {
         return nil, util.Error("package not found: %s", name)
     }
     if status != http.StatusOK {
