@@ -31,12 +31,17 @@ func (upgrade Upgrade) GetContext() *cli.Context {
 	return upgrade.Context
 }
 
-var archMapping = map[string]string{
-	"386":   "i386",
-	"amd64": "x86_64",
-	"arm-5": "arm5",
-	"arm-6": "arm6",
-	"arm-7": "arm7",
+var currArchMapping = map[string]string{
+	"386":   "32bit",
+	"amd64": "64bit",
+	"arm":   "arm",
+	"arm64": "arm64",
+}
+
+var currOsMapping = map[string]string{
+	"darwin":  "macOS",
+	"windows": "windows",
+	"linux":   "linux",
 }
 
 var formatMapping = map[string]string{
@@ -52,8 +57,26 @@ var extensionMapping = map[string]string{
 }
 
 const (
-	wioReleaseName = "wio_{{platform}}_{{arch}}{{extension}}"
-	wioReleaseUrl  = "https://github.com/wio/wio/releases/download/v{{version}}/wio_{{platform}}_{{arch}}.{{format}}"
+	currWioReleaseName = "wio{{extension}}"
+	currWioReleaseUrl  = "https://github.com/wio/wio/releases/download/v{{version}}/wio_{{version}}_{{platform}}_{{arch}}.{{format}}"
+)
+
+var preArchMapping = map[string]string{
+	"386":   "i386",
+	"amd64": "x86_64",
+	"arm":   "arm7",
+	"arm64": "arm7",
+}
+
+var preOsMapping = map[string]string{
+	"darwin":  "darwin",
+	"windows": "windows",
+	"linux":   "linux",
+}
+
+const (
+	preWioReleaseName = "wio_{{platform}}_{{arch}}{{extension}}"
+	preWioReleaseUrl  = "https://github.com/wio/wio/releases/download/v{{version}}/wio_{{platform}}_{{arch}}.{{format}}"
 )
 
 // Runs the build command when cli build option is provided
@@ -82,6 +105,18 @@ func (upgrade Upgrade) Execute() error {
 
 	version = versionToUpgradeSem.String()
 
+	wioReleaseName := currWioReleaseName
+	wioReleaseUrl := currWioReleaseUrl
+	osMapping := currOsMapping
+	archMapping := currArchMapping
+
+	if version < "0.9.0" {
+		wioReleaseName = preWioReleaseName
+		wioReleaseUrl = preWioReleaseUrl
+		osMapping = preOsMapping
+		archMapping = preArchMapping
+	}
+
 	releaseName := template.Replace(wioReleaseName, map[string]string{
 		"platform":  strings.ToLower(env.GetOS()),
 		"arch":      strings.ToLower(archMapping[env.GetArch()]),
@@ -90,9 +125,9 @@ func (upgrade Upgrade) Execute() error {
 
 	releaseUrl := template.Replace(wioReleaseUrl, map[string]string{
 		"version":  version,
-		"platform": strings.ToLower(env.GetOS()),
+		"platform": strings.ToLower(osMapping[env.GetOS()]),
 		"arch":     strings.ToLower(archMapping[env.GetArch()]),
-		"format":   formatMapping[env.GetOS()],
+		"format":   strings.ToLower(formatMapping[env.GetOS()]),
 	})
 
 	if err := os.MkdirAll(sys.Path(root.GetUpdatePath(), sys.Download), os.ModePerm); err != nil {
