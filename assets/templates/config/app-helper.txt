@@ -1,4 +1,0 @@
-# define global app configurations. This is an application and can be built, run and uploaded. Some terminology:
-# - Framework: SDK for the application (cosa, arduino, c, c++, etc)
-# - Platform: platform to build application for
-# - Dependencies: wio packages

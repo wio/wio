@@ -1,5 +1,0 @@
-# define global pkg configurations. This is a package and is created to be used by other wio projects. Even though
-# package cannot be built, it can be tested by using "tests" directory. Some terminology:
-# - Framework: SDK for the application (cosa, arduino, c, c++, etc)
-# - Platform: platform to build application for
-# - Dependencies: wio packages

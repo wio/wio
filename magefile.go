@@ -66,7 +66,7 @@ func Setup() error {
 		}
 	}
 
-	if err := sh.RunWith(nil, goexe,  "get", "-u", "github.com/davecgh/go-spew/spew"); err != nil {
+	if err := sh.RunWith(nil, goexe, "get", "-u", "github.com/davecgh/go-spew/spew"); err != nil {
 		return err
 	}
 	if err := sh.RunWith(nil, goexe, "get", "-u", "github.com/stretchr/testify"); err != nil {
@@ -82,8 +82,7 @@ func Setup() error {
 	return nil
 }
 
-// Build wio binary
-func Build() error {
+func TemplateGen() error {
 	// We want to use Go 1.11 modules even if the source lives inside GOPATH.
 	os.Setenv("GO111MODULE", "on")
 
@@ -92,12 +91,22 @@ func Build() error {
 		return err
 	}
 
-	if err := os.Chdir(currDir + "/pkg/util/sys"); err != nil {
+	if err := os.Chdir(currDir + "/templates"); err != nil {
 		return err
 	}
 
-	if err := sh.RunWith(nil, "go-bindata", "-nomemcopy", "-pkg", "sys",
-		"-prefix", "../../../", "../../../assets/..."); err != nil {
+	return sh.RunWith(nil, "qtc")
+}
+
+// Build wio binary
+func Build() error {
+	// We want to use Go 1.11 modules even if the source lives inside GOPATH.
+	os.Setenv("GO111MODULE", "on")
+
+	TemplateGen()
+
+	currDir, err := os.Getwd()
+	if err != nil {
 		return err
 	}
 
@@ -106,7 +115,7 @@ func Build() error {
 	}
 
 	if err := sh.RunWith(nil, goexe, "build", "-ldflags=-s -w", "-o",
-		"../../bin/" + execName, "-v"); err != nil {
+		"../../bin/"+execName, "-v"); err != nil {
 		return err
 	}
 

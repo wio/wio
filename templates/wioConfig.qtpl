@@ -1,0 +1,75 @@
+{% import "strings" %}
+
+{% code
+type ProjectCreation struct {
+	Type        string
+	ProjectName string
+	ProjectPath string
+	Platform    string
+	Toolchain   string
+	MainFile    string
+	PkgType     string
+	HeaderOnly  bool
+}
+%}
+
+
+{% func CreateAppConfig(creation ProjectCreation) %}{% stripspace %}
+type: app {% endstripspace %}
+
+project:
+  name: {%s= creation.ProjectName %}
+  version: 0.0.1
+
+targets:
+  main:
+    executable_options:
+      source: src
+      main_file: {%s= creation.MainFile %}
+      platform: {%s= creation.Platform %}
+      {% if strings.TrimSpace(creation.Toolchain) != "" %}{% stripspace %}
+        toolchain: {% space %} {%s= creation.Toolchain %} {% newline %}
+      {% endif %} {% endstripspace %}
+tests:
+  main:
+    executable_options:
+      source: test
+      platform: {%s= creation.Platform %}
+      {% if strings.TrimSpace(creation.Toolchain) != "" %}{% stripspace %}
+        toolchain: {% space %} {%s= creation.Toolchain %} {% newline %}
+      {% endif %} {% endstripspace %}
+    target_name: main
+
+test_dependencies:
+  github.com/wio-pm/simple-tests:
+{% endfunc %}
+
+
+{% func CreatePkgConfig(creation ProjectCreation) %}{% stripspace %}
+type: pkg {% endstripspace %}
+
+project:
+  name: {%s= creation.ProjectName %}
+  version: 0.0.1
+
+  package_options:
+    type: {%s creation.PkgType %}
+    {% if creation.HeaderOnly %}{% stripspace %}
+        header_only: {% space %} {%v creation.HeaderOnly %} {% newline %}
+    {% endif %} {% endstripspace %}
+targets:
+  {%s= creation.ProjectName %}:
+
+tests:
+  {%s= creation.ProjectName %}:
+    executable_options:
+      source: test
+      platform: {%s= creation.Platform %}
+      {% if strings.TrimSpace(creation.Toolchain) != "" %}{% stripspace %}
+        toolchain: {% space %} {%s= creation.Toolchain %} {% newline %}
+      {% endif %} {% endstripspace %}
+    target_name: {%s= creation.ProjectName %}
+
+test_dependencies:
+  github.com/wio-pm/simple-tests:
+{% endfunc %}

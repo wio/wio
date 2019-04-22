@@ -1,25 +1,23 @@
 package constants
 
 const (
-	Avr    = "avr"
-	Native = "native"
+	APP = "app"
+	PKG = "pkg"
 )
 
 const (
-	Clion = "clion"
+	DefaultVersion = "0.0.1"
+	AppDefaultTarget = "main"
+	AppDefaultTest = "mainTest"
+	AppDefaultTargetSource = "src"
+	DefaultTestSource = "test"
 )
 
 const (
-	Wio = "wio"
-	App = "app"
-	Pkg = "pkg"
+	STATIC = "static"
+	SHARED = "shared"
 )
 
 const (
-	WioRoot       = ".wio-root"
-	RootToolchain = "toolchain"
-	Security      = "security"
-	RootUpdate    = "update"
-	RootEnv       = "wio.env"
-	RootConfig    = "config.json"
+	WioConfigFile = "wio.yml"
 )
