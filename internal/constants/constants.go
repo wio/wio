@@ -6,11 +6,11 @@ const (
 )
 
 const (
-	DefaultVersion = "0.0.1"
-	AppDefaultTarget = "main"
-	AppDefaultTest = "mainTest"
+	DefaultVersion         = "0.0.1"
+	AppDefaultTarget       = "main"
+	AppDefaultTest         = "mainTest"
 	AppDefaultTargetSource = "src"
-	DefaultTestSource = "test"
+	DefaultTestSource      = "test"
 )
 
 const (
