@@ -14,10 +14,17 @@ func warningHookFunc(projectType string, provideWarning func(warning string)) ma
 
 	unsupportedTagWarning := func(dataVal reflect.Value, desiredType string,
 		tagName string, warnTagName string) reflect.Value {
-		if dataVal.MapIndex(reflect.ValueOf(tagName)).Kind() != reflect.Invalid {
+
+		resetAndWarn := func() {
 			if projectType == desiredType {
 				provideWarning(fmt.Sprintf(warnTagName, tagName))
 				dataVal.SetMapIndex(reflect.ValueOf(tagName), reflect.ValueOf(nil))
+			}
+		}
+
+		if dataVal.Kind() == reflect.Map {
+			if dataVal.MapIndex(reflect.ValueOf(tagName)).Kind() != reflect.Invalid {
+				resetAndWarn()
 			}
 		}
 
@@ -28,21 +35,26 @@ func warningHookFunc(projectType string, provideWarning func(warning string)) ma
 		f reflect.Type,
 		t reflect.Type,
 		data interface{}) (interface{}, error) {
+
 		dataVal := reflect.ValueOf(data)
 
-		if t.ConvertibleTo(reflect.TypeOf(targetImpl{})) {
-			tagName := fmt.Sprintf(warningTpl, projectType, "targets[*].%s")
+		if t.ConvertibleTo(reflect.TypeOf(TargetImpl{})) {
+			targetName := dataVal.MapIndex(reflect.ValueOf("name")).String()
+
+			tagName := fmt.Sprintf(warningTpl, projectType, "targets["+targetName+"].%s")
 			dataVal = unsupportedTagWarning(dataVal, constants.PKG, "executable_options", tagName)
 			dataVal = unsupportedTagWarning(dataVal, constants.APP, "package_options", tagName)
 
 			return dataVal.Interface(), nil
-		} else if t.ConvertibleTo(reflect.TypeOf(projectImpl{})) {
+		} else if t.ConvertibleTo(reflect.TypeOf(ProjectImpl{})) {
 			tagName := fmt.Sprintf(warningTpl, projectType, "project.%s")
 			dataVal = unsupportedTagWarning(dataVal, constants.APP, "package_options", tagName)
 
 			return dataVal.Interface(), nil
-		} else if t.ConvertibleTo(reflect.TypeOf(testImpl{})) {
-			tagName := fmt.Sprintf(warningTpl, projectType, "tests[*].executable_options.%s")
+		} else if t.ConvertibleTo(reflect.TypeOf(TestImpl{})) {
+			testName := dataVal.MapIndex(reflect.ValueOf("name")).String()
+
+			tagName := fmt.Sprintf(warningTpl, projectType, "tests["+testName+"].executable_options.%s")
 			tagValue := dataVal.MapIndex(reflect.ValueOf("executable_options"))
 
 			if tagValue.Kind() == reflect.Interface {
@@ -59,28 +71,37 @@ func warningHookFunc(projectType string, provideWarning func(warning string)) ma
 	}
 }
 
-// splitKeyValToMapFunc is a decode hook function to convert a string to key value pair
-func splitKeyValToMapFunc() mapstructure.DecodeHookFunc {
+// oneLineExpandFunc is a decode hook function to convert a string to key value pair
+func oneLineExpandFunc() mapstructure.DecodeHookFunc {
 	return func(
 		f reflect.Type,
 		t reflect.Type,
 		data interface{}) (interface{}, error) {
 		val := reflect.ValueOf(data)
 
-		if val.Kind() == reflect.String {
-			if t.ConvertibleTo(reflect.TypeOf(argumentImpl{})) || t.ConvertibleTo(reflect.TypeOf(variableImpl{})) {
-				splitVal := stringToStringSlice(val, "=")
-				return map[string]string{
-					"name":  splitVal[0],
-					"value": splitVal[1],
-				}, nil
-			} else if t.ConvertibleTo(reflect.TypeOf(toolchainImpl{})) {
-				splitVal := stringToStringSlice(val, "::")
-				return map[string]string{
-					"name": splitVal[0],
-					"ref":  splitVal[1],
-				}, nil
-			}
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+
+		if t.ConvertibleTo(reflect.TypeOf(DependencyImpl{})) || t.ConvertibleTo(reflect.TypeOf(ToolchainImpl{})) {
+			splitVal := stringToStringSlice(val, "@")
+
+			return map[string]string{
+				"name": splitVal[0],
+				"ref":  splitVal[1],
+			}, nil
+		} else if t.ConvertibleTo(reflect.TypeOf(TargetImpl{})) || t.ConvertibleTo(reflect.TypeOf(TestImpl{})) {
+			return map[string]string{
+				"name": val.String(),
+			}, nil
+
+		} else if t.ConvertibleTo(reflect.TypeOf(ArgumentImpl{})) || t.ConvertibleTo(reflect.TypeOf(VariableImpl{})) {
+			splitVal := stringToStringSlice(val, "=")
+
+			return map[string]string{
+				"name":  splitVal[0],
+				"value": splitVal[1],
+			}, nil
 		}
 
 		return data, nil

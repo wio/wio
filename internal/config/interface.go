@@ -5,23 +5,24 @@ import (
 	"github.com/hashicorp/hil"
 )
 
-type Dependencies map[string]Dependency
-type Tests map[string]Test
-type Targets map[string]Target
-type Scripts []HilString
+type Dependencies []Dependency
+type Tests []Test
+type Targets []Target
+type Scripts map[string]Expression
 type Arguments []Argument
 type Variables []Variable
-type Definitions []HilString
-type Flags []HilString
-type Contributors []HilString
-type Sources []HilString
+type Definitions []Expression
+type Flags []Expression
+type Repositories []Expression
+type Contributors []Expression
+type Sources []Expression
 
-type HilString interface {
-	Get(config *hil.EvalConfig) (string, error)
+type Expression interface {
+	Eval(config *hil.EvalConfig) (string, error)
 }
 
 type Toolchain interface {
-	GetName() string
+	GetName(config *hil.EvalConfig) (string, error)
 	GetRef(config *hil.EvalConfig) (string, error)
 }
 
@@ -45,17 +46,19 @@ type CompileOptions interface {
 }
 
 type PackageOptions interface {
-	IsHeaderOnly() bool
+	IsHeaderOnly(config *hil.EvalConfig) (bool, error)
 	GetPackageType(config *hil.EvalConfig) (string, error)
 }
 
 type Dependency interface {
+	GetName(config *hil.EvalConfig) (string, error)
 	GetRef(config *hil.EvalConfig) (string, error)
 	GetArguments() Arguments
 	GetLinkerOptions() LinkerOptions
 }
 
 type Test interface {
+	GetName(config *hil.EvalConfig) (string, error)
 	GetExecutableOptions() ExecutableOptions
 	GetArguments() Arguments
 	GetTargetName(config *hil.EvalConfig) (string, error)
@@ -65,6 +68,7 @@ type Test interface {
 }
 
 type Target interface {
+	GetName(config *hil.EvalConfig) (string, error)
 	GetExecutableOptions() ExecutableOptions
 	GetPackageOptions() PackageOptions
 	GetArguments() Arguments
@@ -79,16 +83,17 @@ type Argument interface {
 
 type Variable interface {
 	GetName() string
-	GetValue() string
+	GetValue(config *hil.EvalConfig) (string, error)
 }
 
 type Project interface {
 	GetName(config *hil.EvalConfig) (string, error)
 	GetVersion(config *hil.EvalConfig) (*version.Version, error)
 	GetAuthor(config *hil.EvalConfig) (string, error)
+	GetDescription(config *hil.EvalConfig) (string, error)
 	GetContributors() Contributors
 	GetHomepage(config *hil.EvalConfig) (string, error)
-	GetRepository(config *hil.EvalConfig) (string, error)
+	GetRepository() Repositories
 
 	GetCompileOptions() CompileOptions
 	GetPackageOptions() PackageOptions

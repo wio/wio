@@ -1,6 +1,11 @@
 package constants
 
 const (
+	ARG = "arg"
+	VAR = "var"
+)
+
+const (
 	APP = "app"
 	PKG = "pkg"
 )

@@ -1,33 +1,73 @@
 package config
 
 import (
+	"github.com/d5/tengo/script"
 	"github.com/hashicorp/hil"
 	"reflect"
+	"regexp"
 	"strings"
+	"wio/internal/evaluators/tengolang"
 )
 
+var reg = regexp.MustCompile(`(?s)^\s*\$exec\s*{.*}\s*$`)
+var beginReg = regexp.MustCompile(`(?s)^\s*\$exec\s*{`)
+var endReg = regexp.MustCompile(`(?s)}\s*$`)
+
 // applyHilGeneric applies Hil language parser on string and returns an interface
-func applyHilGeneric(val string, config *hil.EvalConfig, def interface{}) (interface{}, error) {
+func applyHilGeneric(val string, config *hil.EvalConfig) (*hil.EvaluationResult, error) {
 	tree, err := hil.Parse(val)
 	if err != nil {
-		return def, err
+		return nil, err
 	}
 
 	result, err := hil.Eval(tree, config)
 	if err != nil {
-		return def, err
+		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 // applyHilString applies Hil language parser on string and returns a string
 func applyHilString(val string, config *hil.EvalConfig) (string, error) {
-	result, err := applyHilGeneric(val, config, "")
-	return result.(string), err
+	result, err := applyHilGeneric(val, config)
+	if err != nil {
+		return "", err
+	}
+	return result.Value.(string), err
 }
 
-// stringToStringSlice convert string reflect value to a slice of string based on the seperator
+// applyEvaluator applies Hil or script execution based on regex matching
+func applyEvaluator(val string, config *hil.EvalConfig) (string, error) {
+	if reg.Match([]byte(val)) {
+		content := endReg.ReplaceAll(beginReg.ReplaceAll([]byte(val), []byte("")), []byte(""))
+
+		// evaluate hil
+		result, err := applyHilString(string(content), config)
+		if err != nil {
+			return "", err
+		}
+
+		s := script.New([]byte(result))
+		s.SetImports(tengolang.GetModuleMap("os", "text", "math", "times", "rand", "json", "enum", "wstrings"))
+
+		_ = s.Add("out", "")
+
+		if c, err := s.Run(); err != nil {
+			return "", err
+		} else {
+			return c.Get("out").String(), nil
+		}
+	} else {
+		result, err := applyHilString(val, config)
+		if err != nil {
+			return "", err
+		}
+		return result, err
+	}
+}
+
+// stringToStringSlice convert string reflect value to a slice of string based on the separator
 func stringToStringSlice(val reflect.Value, sep string) []string {
 	newSlice := strings.Split(val.String(), sep)
 	if len(newSlice) < 2 {
