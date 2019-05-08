@@ -2,25 +2,27 @@ dist: trusty
 language: go
 
 go:
-  - "1.11"
+  - "1.12"
 
 env:
   - GO111MODULE=on
 
 go_import_path: wio
 
-before_install:
-  - source wenv
-  - sudo apt-get update
-  - sudo apt-get install gcc-avr avr-libc avrdude
-  - sudo apt-get install libboost-system-dev libboost-thread-dev libboost-coroutine-dev
-  - go get github.com/magefile/mage
 install:
-  - mage setup
+  - curl -sL https://taskfile.dev/install.sh | sh
+  - export PATH="$PATH:./bin"
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  - go get -u github.com/valyala/quicktemplate/qtc
 
-script:
-  - mage build
-  - mage fmtLint
-  - go env
-  - go test -v ./...
-  - mage test
+jobs:
+  include:
+    - stage: unitTest
+      script:
+        - task travisUnitTest
+        - goveralls -coverprofile=cover.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+    - stage: build
+      script:
+        - task templateGen
+        - task build

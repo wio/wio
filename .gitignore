@@ -1,5 +1,7 @@
 bin/
-.idea/
+/.idea/*
+/.idea/runConfigurations
+.vscode/
 
 # Test binary, build with `go test -c`
 *.test
@@ -50,3 +52,4 @@ vms/
 
 # templates
 *.qtpl.go
+cover.out

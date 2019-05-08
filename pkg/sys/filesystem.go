@@ -2,27 +2,29 @@ package sys
 
 import (
 	"errors"
-	"github.com/spf13/afero"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/dhillondeep/afero"
 )
 
 var fs = afero.NewOsFs()
 
+// SetFileSystem set filesystem used inside the application
 func SetFileSystem(givenFs afero.Fs) {
 	fs = givenFs
 }
 
+// GetFileSystem provides the filesystem being used
 func GetFileSystem() afero.Fs {
 	return fs
 }
 
 // CopyFile copies file from src to destination and if destination file exists, it overrides the file
 // content based on if override is specified
-func CopyFile(source, destination string, override bool) error {
-	if _, err := os.Stat(destination); err == nil && !override {
+func CopyFile(source, destination string, override bool) (err error) {
+	if _, err := fs.Stat(destination); err == nil && !override {
 		return nil
 	}
 
@@ -32,23 +34,28 @@ func CopyFile(source, destination string, override bool) error {
 	}
 	defer srcFile.Close()
 
-	destFile, err := fs.Create(destination) // creates if file doesn't exist
+	destFile, err := fsCreate(destination) // creates if file doesn't exist
 	if err != nil {
 		return err
 	}
 	defer destFile.Close()
 
-	_, err = io.Copy(destFile, srcFile) // check first var for number of bytes copied
+	_, err = ioCopy(destFile, srcFile) // check first var for number of bytes copied
 	if err != nil {
 		return err
 	}
 
-	err = destFile.Sync()
+	err = fileSync(destFile)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// MustCopyFile copies file from src to destination and override if destination file exists
+func MustCopyFile(source, destination string) error {
+	return CopyFile(source, destination, true)
 }
 
 // Copy copies one path to another. The path could be a file or a directory
@@ -59,23 +66,20 @@ func Copy(src string, dst string) error {
 	if !Exists(src) {
 		return errors.New("source path [" + src + "] does not exist")
 	}
-	if err := fs.RemoveAll(dst); err != nil {
+	if err := fsRemoveAll(dst); err != nil {
 		return err
 	}
-	si, err := fs.Stat(src)
-	if err != nil {
-		return err
-	}
+	si, _ := fs.Stat(src)
+
 	if !si.IsDir() {
 		return MustCopyFile(src, dst)
 	}
-	if _, err := fs.Stat(dst); err != nil && !os.IsNotExist(err) {
+
+	if err := fsMkdirAll(dst, si.Mode()); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(dst, si.Mode()); err != nil {
-		return err
-	}
-	entries, err := afero.ReadDir(fs, src)
+
+	entries, err := aferoReadDir(fs, src)
 	if err != nil {
 		return err
 	}
@@ -92,28 +96,8 @@ func Copy(src string, dst string) error {
 	return nil
 }
 
-// MustCopy copies file from src to destination and override if destination file exists
-func MustCopyFile(source, destination string) error {
-	return CopyFile(source, destination, true)
-}
-
-// CopyMultipleFiles copies multiple files from source to destination
-func CopyMultipleFiles(sources []string, destinations []string, overrides []bool) error {
-	if len(sources) != len(destinations) || len(destinations) != len(overrides) {
-		return errors.New("length of sources, destinations, and overrides is not equal")
-	}
-
-	for i := 0; i < len(sources); i++ {
-		if err := CopyFile(sources[i], destinations[i], overrides[i]); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // ReadFile reads the file and provides it's content
-func ReadFile(fileName string) ([]byte, error) {
+func ReadFile(fileName string) (data []byte, err error) {
 	file, err := fs.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -125,7 +109,7 @@ func ReadFile(fileName string) ([]byte, error) {
 
 // WriteFile writes text to a file on normal filesystem
 func WriteFile(fileName string, data []byte) (err error) {
-	f, err := fs.Create(fileName)
+	f, err := fsCreate(fileName)
 	if err != nil {
 		return err
 	}
