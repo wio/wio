@@ -2,23 +2,21 @@ package upgrade
 
 import (
 	"fmt"
+	"github.com/inconshreveable/go-update"
 	"github.com/mholt/archiver"
-	"io"
-	"net/http"
+	"io/ioutil"
 	"os"
-	"strings"
+	"regexp"
+	"runtime"
 	"wio/internal/config/meta"
 	"wio/internal/config/root"
-	"wio/internal/constants"
-	"wio/internal/env"
 	"wio/pkg/log"
-	"wio/pkg/npm/resolve"
 	"wio/pkg/npm/semver"
 	"wio/pkg/util"
 	"wio/pkg/util/sys"
 	"wio/pkg/util/template"
 
-	"github.com/inconshreveable/go-update"
+	"github.com/dhillondeep/go-getrelease"
 	"github.com/urfave/cli"
 )
 
@@ -31,187 +29,150 @@ func (upgrade Upgrade) GetContext() *cli.Context {
 	return upgrade.Context
 }
 
-var currArchMapping = map[string]string{
-	"386":   "32bit",
-	"amd64": "64bit",
-	"arm":   "arm",
-	"arm64": "arm64",
-}
-
-var currOsMapping = map[string]string{
-	"darwin":  "macOS",
-	"windows": "windows",
-	"linux":   "linux",
-}
-
-var formatMapping = map[string]string{
-	"windows": "zip",
-	"linux":   "tar.gz",
-	"darwin":  "tar.gz",
-}
-
-var extensionMapping = map[string]string{
-	"windows": ".exe",
-	"linux":   "",
-	"darwin":  "",
-}
-
-const (
-	currWioReleaseName = "wio{{extension}}"
-	currWioReleaseUrl  = "https://github.com/wio/wio/releases/download/v{{version}}/wio_{{version}}_{{platform}}_{{arch}}.{{format}}"
-)
-
-var preArchMapping = map[string]string{
-	"386":   "i386",
-	"amd64": "x86_64",
-	"arm":   "arm7",
-	"arm64": "arm7",
-}
-
-var preOsMapping = map[string]string{
-	"darwin":  "darwin",
-	"windows": "windows",
-	"linux":   "linux",
-}
-
-const (
-	preWioReleaseName = "wio_{{platform}}_{{arch}}{{extension}}"
-	preWioReleaseUrl  = "https://github.com/wio/wio/releases/download/v{{version}}/wio_{{platform}}_{{arch}}.{{format}}"
-)
-
 // Runs the build command when cli build option is provided
 func (upgrade Upgrade) Execute() error {
 	forceFlag := upgrade.Context.Bool("force")
+	githubClient := getrelease.NewGithubClient(nil)
 
-	var version string
-	var err error
-	info := resolve.NewInfo(root.GetUpdatePath())
+	preSetup := func() (string, error) {
+		cachePath := sys.Path(root.GetUpdatePath(), sys.Cache)
+
+		if err := os.MkdirAll(cachePath, os.ModePerm); err != nil {
+			return "", util.Error("error creating cache folder")
+		}
+		return cachePath, nil
+	}
+
+	releaseAssetName := template.Replace(wioAssetName, map[string]string{
+		"platform": currOsMapping[runtime.GOOS],
+		"arch":     currArchMapping[runtime.GOARCH],
+		"format":   formatMapping[runtime.GOOS],
+	})
+
+	options := []getrelease.Options{
+		getrelease.WithArchive("false"), getrelease.WithChecksum(checksumFile),
+		getrelease.WithProgress(defaultProgressBar),
+	}
+
+	var newVersion string
+	var assetName string
+	var assetPath string
+
+	execName := template.Replace(wioExecName, map[string]string{
+		"extension": extensionMapping[runtime.GOOS],
+	})
+
 	if upgrade.Context.NArg() > 0 {
-		version = upgrade.Context.Args()[0]
-	} else {
-		if version, err = info.GetLatest(constants.Wio); err != nil {
-			return util.Error("no latest version found for wio")
+		checksumFileToUse := checksumFile
+
+		version := upgrade.Context.Args()[0]
+
+		versionToUpgradeSem := semver.Parse(version)
+		if versionToUpgradeSem == nil {
+			return util.Error("wio version %s is invalid", version)
 		}
-	}
 
-	versionToUpgradeSem := semver.Parse(version)
-	if versionToUpgradeSem == nil {
-		return util.Error("wio version %s is invalid", version)
-	}
+		if !forceFlag && versionToUpgradeSem.LT(*semver.Parse(compatibilityLowerBound)) {
+			return util.Error(
+				"for compatibility, wio can only be upgraded to versions >= %s. Use --force flag to override",
+				compatibilityLowerBound)
+		}
 
-	if !forceFlag && versionToUpgradeSem.LT(*semver.Parse("0.7.0")) {
-		return util.Error("wio can only be upgraded/downgraded to versions >= 0.7.0")
-	}
+		if versionToUpgradeSem.LT(*semver.Parse(assetNameChangeVersion)) {
+			checksumFileToUse = preChecksumFile
+			releaseAssetName = template.Replace(preWioAssetName, map[string]string{
+				"platform": preOsMapping[runtime.GOOS],
+				"arch":     preArchMapping[runtime.GOARCH],
+				"format":   formatMapping[runtime.GOOS],
+			})
+			execName = template.Replace(preWioExecName, map[string]string{
+				"platform":  preOsMapping[runtime.GOOS],
+				"arch":      preArchMapping[runtime.GOARCH],
+				"extension": extensionMapping[runtime.GOOS],
+			})
+		}
 
-	version = versionToUpgradeSem.String()
+		tagName := fmt.Sprintf("v%s", versionToUpgradeSem.String())
 
-	wioReleaseName := currWioReleaseName
-	wioReleaseUrl := currWioReleaseUrl
-	osMapping := currOsMapping
-	archMapping := currArchMapping
+		log.Info(log.Cyan, "Downloading the release for version: ")
+		log.Info(log.Green, versionToUpgradeSem.String())
+		log.Infoln(log.Cyan, "")
 
-	if version < "0.9.0" {
-		wioReleaseName = preWioReleaseName
-		wioReleaseUrl = preWioReleaseUrl
-		osMapping = preOsMapping
-		archMapping = preArchMapping
-	}
-
-	releaseName := template.Replace(wioReleaseName, map[string]string{
-		"platform":  strings.ToLower(env.GetOS()),
-		"arch":      strings.ToLower(archMapping[env.GetArch()]),
-		"extension": extensionMapping[env.GetOS()],
-	})
-
-	releaseUrl := template.Replace(wioReleaseUrl, map[string]string{
-		"version":  version,
-		"platform": strings.ToLower(osMapping[env.GetOS()]),
-		"arch":     strings.ToLower(archMapping[env.GetArch()]),
-		"format":   strings.ToLower(formatMapping[env.GetOS()]),
-	})
-
-	if err := os.MkdirAll(sys.Path(root.GetUpdatePath(), sys.Download), os.ModePerm); err != nil {
-		return util.Error("wio@%s error creating cache folder", version)
-	}
-
-	wioTarPath := sys.Path(root.GetUpdatePath(), sys.Download, fmt.Sprintf("%s__%s.%s", constants.Wio, version,
-		formatMapping[env.GetOS()]))
-
-	wioFolderPath := sys.Path(root.GetUpdatePath(), fmt.Sprintf("%s_%s", constants.Wio, version))
-
-	if sys.Exists(wioTarPath) && forceFlag {
-		os.RemoveAll(wioTarPath)
-	}
-
-	if sys.Exists(wioFolderPath) && forceFlag {
-		os.RemoveAll(wioFolderPath)
-	}
-
-	log.Info(log.Cyan, "downloading wio version %s... ", version)
-	if !sys.Exists(wioTarPath) {
-		out, err := os.Create(wioTarPath)
+		path, err := preSetup()
 		if err != nil {
-			log.WriteFailure()
-			return util.Error("wio@%s error creating %s file stream", version, formatMapping[env.GetOS()])
-		}
-		defer out.Close()
-
-		resp, err := http.Get(releaseUrl)
-		if err != nil || resp.StatusCode == 404 {
-			log.WriteFailure()
-			return util.Error("wio@%s version does not exist", version)
-		}
-		defer resp.Body.Close()
-
-		if _, err := io.Copy(out, resp.Body); err != nil {
-			log.WriteFailure()
-			return util.Error("wio@%s error writing data to %s file", version, formatMapping[env.GetOS()])
+			return err
 		}
 
-		log.WriteSuccess()
+		// version specified so use that
+		assetName, err = getrelease.GetTagAsset(githubClient, path, releaseAssetName,
+			"wio", "wio", tagName, append(options, getrelease.WithChecksum(checksumFileToUse))...)
+		if err != nil {
+			return err
+		}
+
+		assetPath = sys.Path(path, assetName)
+		newVersion = versionToUpgradeSem.String()
 	} else {
-		log.Infoln(log.Green, "already exists!")
+		log.Infoln(log.Cyan, "Downloading the latest version")
+
+		path, err := preSetup()
+		if err != nil {
+			return err
+		}
+
+		// no version specified so we gotta pull the latest version
+		assetName, err = getrelease.GetLatestAsset(githubClient, path, releaseAssetName,
+			"wio", "wio", options...)
+		if err != nil {
+			return err
+		}
+
+		assetPath = sys.Path(path, assetName)
+
+		re, err := regexp.Compile(`[0-9].[0-9].[0.9]`)
+		if err != nil {
+			return err
+		}
+		newVersion = re.FindStringSubmatch(assetName)[0]
 	}
 
-	log.Info(log.Cyan, "extracting wio version %s %s file... ", version, formatMapping[env.GetOS()])
+	log.Info(log.Cyan, "Extracting release file: ")
+	log.Infoln(log.Green, assetName)
 
-	if sys.Exists(wioFolderPath) {
-		os.RemoveAll(wioFolderPath)
-	}
-
-	if err := archiver.Unarchive(wioTarPath, wioFolderPath); err != nil {
-		log.WriteFailure()
-		return util.Error("wio@%s error while extracting %s file", version, formatMapping[env.GetOS()])
-	}
-	log.WriteSuccess()
-
-	log.Info(log.Cyan, "Updating ")
-	log.Info(log.Green, "wio@%s ", meta.Version)
-	log.Info(log.Cyan, "-> ")
-	log.Info(log.Green, "wio@%s", version)
-	log.Info(log.Cyan, "... ")
-
-	newWioExec, err := os.Open(sys.Path(wioFolderPath, releaseName))
+	extractionPath, err := ioutil.TempDir(os.TempDir(), assetName)
 	if err != nil {
-		log.WriteFailure()
-		return util.Error("wio@%s executable not downloaded or corrupted", version)
+		return err
+	}
+	defer os.RemoveAll(extractionPath)
+
+	if err := archiver.Unarchive(assetPath, extractionPath); err != nil {
+		return err
+	}
+
+	log.Info(log.Cyan, "Updating wio: ")
+	log.Info(log.Green, meta.Version)
+	log.Info(log.Cyan, " => ")
+	log.Infoln(log.Green, newVersion)
+
+	newWioExec, err := os.Open(sys.Path(extractionPath, execName))
+	if err != nil {
+		return util.Error("release asset %s not downloaded or corrupted", assetName)
 	}
 
 	if err = update.Apply(newWioExec, update.Options{}); err != nil {
-		log.WriteFailure()
-		return util.Error("failed to upgrade wio to version %s", version)
+		return util.Error("failed to upgrade wio version to %s", newVersion)
 	} else {
 		wioRootConfig := &root.WioRootConfig{}
 		if err := sys.NormalIO.ParseJson(root.GetConfigFilePath(), wioRootConfig); err != nil {
-			return util.Error("wio upgraded to %s but an error occurred and it's not complete", version)
+			return util.Error("wio upgraded to %s but, an error occurred and it's not complete", newVersion)
 		}
 		wioRootConfig.Updated = true
 		if err := sys.NormalIO.WriteJson(root.GetConfigFilePath(), wioRootConfig); err != nil {
-			return util.Error("wio upgraded to %s but an error occurred and it's not complete", version)
+			return util.Error("wio upgraded to %s but, an error occurred and it's not complete", newVersion)
 		}
 	}
 
-	log.WriteSuccess()
+	log.Infoln(log.Green, "|>Done")
 
 	return nil
 }

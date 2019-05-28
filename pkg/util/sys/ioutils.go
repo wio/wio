@@ -25,7 +25,7 @@ const (
 	Modules    = "packages"
 	Vendor     = "vendor"
 	Custom     = "custom"
-	Download   = "cache"
+	Cache      = "cache"
 	TargetDir  = "targets"
 	BinDir     = "bin"
 	IdeaFolder = ".idea"
