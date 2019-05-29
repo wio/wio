@@ -40,7 +40,7 @@ func (i *Info) install(name, ver string, data *npm.Version) error {
 	}
 
 	file := name + "__" + ver
-	tar := sys.Path(i.dir, sys.WioFolder, sys.Download, file+".tgz")
+	tar := sys.Path(i.dir, sys.WioFolder, sys.Cache, file+".tgz")
 	if !sys.Exists(tar) {
 		url := data.Dist.Tarball
 		total, err := contentSize(url)
